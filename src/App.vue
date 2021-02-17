@@ -1,27 +1,49 @@
 <template>
   <div id="app">
-    <ReccSys />
+    <div id="nav">
+      <router-link to="/">Home</router-link> |
+      <router-link to="/rules">Rules</router-link> | 
+      <router-link to="/rec-sys">Recommender System</router-link>
+    </div>
+    <transition name="slide-fade" mode="out-in">
+    <router-view/>
+    </transition>
   </div>
 </template>
 
-<script>
-import ReccSys from './components/ReccSys.vue'
-
-export default {
-  name: 'App',
-  components: {
-    ReccSys
-  }
-}
-</script>
-
 <style>
+.slide-fade-enter-active, .slide-fade-leave-active  {
+ transition-duration: 0.3s;
+  transition-property: height, opacity, transform;
+  overflow: hidden;
+}
+.slide-fade-enter
+/* .slide-fade-leave-active below version 2.1.8 */ {
+transform: translateY(100%);
+}
+.slide-fade-leave-to{
+opacity: 0;
+  transform: translateY(100%);
+}
+
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
+}
+
+#nav {
+  padding: 30px;
+}
+
+#nav a {
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+#nav a.router-link-exact-active {
+  color: #42b983;
 }
 </style>
