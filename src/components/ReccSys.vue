@@ -225,7 +225,7 @@ export default {
       }
       let prediction = numerator / denominator;
       console.log({IBPrediction: prediction});
-      return parseFloat(prediction).toFixed(2);
+      return +parseFloat(prediction).toFixed(2);
     },
     userBasedPrediction: function() {
       let numerator = 0;
@@ -238,7 +238,7 @@ export default {
       let prediction = this.averages.get(this.personList[0]);
       prediction += numerator / denominator;
       console.log({UBPrediction: prediction});
-      return parseFloat(prediction).toFixed(2);
+      return +parseFloat(prediction).toFixed(2);
     },
     neighbourUsersUB: function() {
       let persons = this.neighbours_mapUB.keys();

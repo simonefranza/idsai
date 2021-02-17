@@ -1,6 +1,6 @@
 <template>
   <div class="rules">
-    <RulesComp />
+    <InfoRetComp />
   </div>
 </template>
 
@@ -10,7 +10,7 @@ import InfoRetComp from '@/components/InfoRetComp.vue'
 export default {
   name: 'About',
   components: {
-    RulesComp
+    InfoRetComp
   }
 }
 </script>

@@ -1,5 +1,6 @@
 <template>
   <div class="about">
+
     <ReccSys />
   </div>
 </template>

@@ -2,7 +2,7 @@
   <div id="app">
     <div id="nav">
       <router-link to="/">Home</router-link> |
-      <router-link to="/rules">Rules</router-link> | 
+      <router-link to="/info-ret">Information Retrieval</router-link> | 
       <router-link to="/rec-sys">Recommender System</router-link>
     </div>
     <transition name="slide-fade" mode="out-in">
