@@ -1,6 +1,7 @@
 <template>
   <div class="infoRetComp">
     <div class="row">
+      <div class="col"></div>
       <div class="col-3">
         <b-table striped hover :items="documents" :fields="fields" foot-clone>
           <template #cell(modify)="row">
@@ -30,53 +31,91 @@
           </template>
         </b-table>
       </div>
-      <div class="col-1"></div>
-      <div class="col-2">
-        <b-table striped hover :items="printableDict" v-if="showDict"></b-table>
-      </div>
-      <div class="col-1"></div>
-      <div class="col-1">
-        <b-table striped hover :items="printableIdf" v-if="showIdf"></b-table>
-      </div>
-      <div class="col-1"></div>
-      <div class="col">
-        <b-table striped hover :items="printableTf" v-if="showTf"></b-table>
-      </div>
-      <div class="col-1"></div>
-    </div>
-    <div class="row">
-      <div class="col-1"></div>
-      <div class="col-2">
-      </div>
-      <div class="col-1"></div>
-      <div class="col-2">
-        <b-button variant="outline-primary" v-on:click = "showDict = !showDict">Show dictionary</b-button>
-      </div>
-      <div class="col-1"></div>
-      <div class="col-1">
-        <b-button variant="outline-primary" v-on:click = "showIdf = !showIdf">Show idf</b-button>
-      </div>
-      <div class="col-1"></div>
-      <div class="col">
-        <b-button variant="outline-primary" v-on:click = "showTf = !showTf">Show tf</b-button>
-      </div>
-      <div class="col-1"></div>
-    </div>
-    <br/>
-    <div class="row">
-      <div class="col"></div>
-      <div class="col-6">
+      <div class="col-4">
         <b-form-input id="queryForm" v-model="query" placeholder="Input query" ></b-form-input>
       </div>
+      <div class="col-3">
+
+        <b-card title="Control Panel" bg-variant="light" >
+          <b-card-text>
+          <div class="row">
+            <div class="col-6 panelSwitches">
+              <b-form-group v-slot="{ ariaDescribedby }" >
+                <b-form-checkbox-group :aria-describedby="ariaDescribedby" v-model="selectedSettings" :options="settings" size="lg" switches stacked>
+                </b-form-checkbox-group>
+              </b-form-group>
+            </div>
+            <div class="col-6 panelSwitches">
+              <b-form-group v-slot="{ ariaDescribedby }" >
+                <b-form-checkbox-group :aria-describedby="ariaDescribedby" v-model="selectedQuerySett" :options="querySettings" size="lg" switches stacked>
+                </b-form-checkbox-group>
+              </b-form-group>
+            </div>
+          </div>
+          <div>
+            Ignored words (comma separated)
+          </div>
+          <div>
+            <b-form-input v-model="ignoredTermsInput" placeholder="Ignored words comma separated"></b-form-input>
+
+          </div>
+          </b-card-text>
+        </b-card>
+      </div>
+      <div class="col"></div>
+    </div>
+
+    <div class="row" v-if="selectedSettings.length">
+      <div class="col"></div>
+      <div class="col-2" v-if="selectedSettings.includes('dict')">
+        <b-table striped hover :items="printableDict"></b-table>
+      </div>
+      <div class="col-1" v-if="selectedSettings.includes('idf')">
+        <b-table striped hover :items="printableIdf">
+          <template #head()="data">
+            <span>{{ data.label.toLowerCase() }}</span>
+          </template>
+        </b-table>
+      </div>
+      <div class="col" v-if="selectedSettings.includes('tf')">
+        <b-table striped hover :items="printableTf">
+          <template #head()="data">
+            <span>{{ data.label.toLowerCase().substring(0,1)}}<sub>{{data.label.substring(1,2)}}</sub></span>
+          </template>
+        </b-table>
+      </div>
+      <div class="col" v-if="selectedSettings.includes('tfidf')">
+        <b-table striped hover :items="printableTfIdf">
+          <template #head()="data">
+            <span>{{ data.label.toLowerCase().substring(0,5)}}<sub>{{data.label.substring(5,6)}}</sub></span>
+          </template>
+        </b-table>
+      </div>
       <div class="col"></div>
     </div>
     <br/>
-    <div class="row">
+    <br/>
+    <div class="row" v-if="selectedQuerySett.length">
       <div class="col"></div>
-      <div class="col-2">
-        <b-table striped hover :items="printableQueryTf"></b-table>
+      <div class="col" v-if="selectedQuerySett.includes('querytf')">
+        <b-table striped hover :items="printableQueryTf">
+          <template #head()="">
+            <span>Query tf</span>
+          </template>
+        </b-table>
       </div>
-      <div class="col"></div>
+      <div class="col" v-if="selectedQuerySett.includes('querytfidf')">
+        <b-table striped hover :items="printableQueryTfIdf">
+          <template #head()="">
+            <span>Query tfidf</span>
+          </template>
+        </b-table>
+      </div>
+      <div class="col" v-if="selectedQuerySett.includes('ranking')">
+        <b-table striped hover :items="ranking"></b-table>
+      </div>
+      <div class="col">
+      </div>
     </div>
   </div>
 </template>
@@ -90,17 +129,59 @@ export default {
       docs :  ["I love the sun!", "I hate sun!", "I love rain."],
       fields : ["id", "document", "modify"],
       ignored_terms : ["the", "a"],
-      showDict : false,
-      showIdf : false,
-      showTf : false,
       animated: false,
       newDoc : "",
       showTooltip : false,
-      query : ""
+      query : "",
+      tfPrecision : 4,
+      tfIdfPrecision : 4,
+      idfPrecision : 4,
+      simPrecision : 4,
+      selectedSettings : [],
+      selectedQuerySett : [],
+      allDocSett : ['dict', 'idf', 'tf', 'tfidf'],
+      allQuerySett : ['querytf', 'querytfidf', 'ranking'],
+      allDocSelected : false,
+      allQuerySelected : false,
+      settings : [
+        { text: 'Dictionary', value: 'dict' },
+        { text: 'idf', value: 'idf' },
+        { text: 'tf', value: 'tf'},
+        { text: 'tfidf', value: 'tfidf' },
+        ],
+      querySettings : [
+        { text: 'Query tf', value: 'querytf'},
+        { text: 'Query tfidf', value: 'querytfidf'},
+        { text: 'Ranking', value: 'ranking'},
+        { text: 'Toggle all', value: 'toggleAll'},
+      ]
     }
   },
   computed : 
   {
+    ignoredTermsInput: {
+      get: function()
+      {
+        let str = "";
+        this.ignored_terms.forEach(term => str += term + ',');
+        return str.slice(0, -1);
+      },
+      set: function(newValue)
+      {
+        let temp = [];
+        let tokens = newValue.split(",");
+        tokens.forEach(word => {
+          word = word.trim();
+          if(!word || !word.match(/^[A-Za-z]+$/))
+            return;
+
+          if(!temp.includes(word.toLowerCase()))
+            temp.push(word.toLowerCase())
+        });
+        this.ignored_terms.splice(0, this.ignored_terms.length, ...temp);
+      }
+    },
+
     documents: function() {
       let docList = [];
       this.docs.forEach((doc, index) => docList.push({id: index, document: doc}));
@@ -159,7 +240,7 @@ export default {
         let temp_info = {};
         this.norm_tf.forEach((t_i, doc) => {
           let str = "t" + doc['id'];
-          temp_info[str] = +parseFloat(t_i.get(token)).toFixed(2);
+          temp_info[str] = +parseFloat(t_i.get(token)).toFixed(this.tfPrecision);
         });
         printableTf.push(temp_info);
       });
@@ -176,7 +257,7 @@ export default {
     printableIdf: function() {
       let printableIdf = [];
       this.idf.forEach((idf, ) => 
-        printableIdf.push({idf : +parseFloat(idf).toFixed(2)}));
+        printableIdf.push({idf : +parseFloat(idf).toFixed(this.idfPrecision)}));
       return printableIdf;
     },
 
@@ -198,9 +279,74 @@ export default {
     printableQueryTf: function() {
       let printableQueryTf = [];
       this.dictionary.forEach((_,token) => {
-        printableQueryTf.push({query_tf : +parseFloat(this.query_tf.get(token)).toFixed(2)});
+        printableQueryTf.push({query_tf : +parseFloat(this.query_tf.get(token)).toFixed(this.tfPrecision)});
       });
       return printableQueryTf;
+    },
+
+    docsTfIdf: function() {
+      let tfIdf = new Map();
+      this.norm_tf.forEach((t_i, doc) => {
+        let temp_tdIdf = new Map();
+        t_i.forEach((t_i_val, token) => {
+          temp_tdIdf.set(token, this.idf.get(token) * t_i_val);
+        });
+        tfIdf.set(doc, temp_tdIdf);
+      });
+      return tfIdf;
+    },
+
+    printableTfIdf: function() {
+      let printableTfIdf = [];
+      this.dictionary.forEach((_, token) => {
+        let temp_info = {};
+        this.docsTfIdf.forEach((tfidf, doc) => {
+          let str = "tfidf" + doc['id'];
+          temp_info[str] = +parseFloat(tfidf.get(token)).toFixed(this.tfIdfPrecision);
+        });
+        printableTfIdf.push(temp_info);
+      });
+      return printableTfIdf;
+    },
+
+    queryTfIdf: function() {
+      let queryTfIdf = new Map();
+      this.idf.forEach((idf_val, token) => {
+        queryTfIdf.set(token, this.query_tf.get(token) * idf_val);
+      });
+      return queryTfIdf;
+    },
+
+    printableQueryTfIdf: function() {
+      let printableQueryTfIdf = [];
+      this.dictionary.forEach((_, token) =>
+        printableQueryTfIdf.push({query_TfIdf : +parseFloat(this.queryTfIdf.get(token)).toFixed(this.tfIdfPrecision)}));
+      return printableQueryTfIdf;
+    },
+
+    sim: function() {
+      let similarities = new Map();
+      this.docsTfIdf.forEach((idf, doc) => {
+        let vecA = [];
+        let vecB = [];
+        this.dictionary.forEach((_, token) => {
+          vecA.push(idf.get(token));
+          vecB.push(this.queryTfIdf.get(token));});
+        let dotMult = this.dotMult(vecA, vecB);
+        let lenA = this.dotMult(vecA, vecA);
+        let lenB = this.dotMult(vecB, vecB);
+
+        similarities.set(doc, (lenA === 0 || lenB === 0) ? 0 : dotMult / Math.sqrt(lenA * lenB));
+      });
+      return similarities;
+    },
+
+    ranking: function() {
+      let ranking = [];
+      this.sim.forEach((sim, doc) =>
+        ranking.push({document: doc.document, sim: +parseFloat(sim).toFixed(this.simPrecision)}));
+      ranking.sort((a, b) => a.sim > b.sim ? -1 : 1);
+      return ranking;
     }
   },
 
@@ -209,21 +355,35 @@ export default {
     {
       let map = new Map();
       tokens.forEach(token => {
-        if(this.ignored_terms.includes(token))
-          return;
-        map.set(token, map.has(token) ? map.get(token) + 1: 1);
+        for(let ignored of this.ignored_terms)
+        {
+          if(!ignored.toLowerCase().localeCompare(token.toLowerCase()))
+            return;
+        }
+        map.set(token.toLowerCase(), map.has(token.toLowerCase()) ? map.get(token.toLowerCase()) + 1: 1);
       });
       return map;
     },
-    removeDoc(index)
+
+      removeDoc(index)
     {
       this.docs.splice(index, 1);
     },
-    addDoc()
+
+      addDoc()
     {
       let str = this.newDoc.trim();
+      if(!str)
+      {
+        const self = this;
+        self.animated = true;
+        setTimeout(() => {self.animated = false}, 2000);
+        return;
+      }
       //TODO add even if same?
-      if(!str || this.docs.includes(str))
+      let docPresent = false;
+      this.docs.forEach(doc => docPresent = doc.toLowerCase().localeCompare(str.toLowerCase()) ? docPresent : true);
+      if(docPresent)
       {
         this.showTooltip = true;
         const self = this;
@@ -234,7 +394,85 @@ export default {
 
       this.docs.push(str);
       this.newDoc = "";
+    },
+
+      dotMult(vecA, vecB) {
+        let value = 0;
+        vecA.forEach((val, index) => value += val * vecB[index]);
+        return value;
+      }
+
+
+
+  },
+  watch: {
+    selectedSettings(newVal)
+    {
+      let temp = [...newVal];
+      temp.sort();
+      this.allDocSett.sort();
+      if(this.allDocSett.length !== temp.length)
+      {
+        this.allDocSelected = false;
+      }
+      else
+      {
+        let isEqual = true;
+        this.allDocSett.forEach((word, idx) => {
+          isEqual = temp[idx].localeCompare(word) ? false : isEqual;});
+        this.allDocSelected = isEqual;
+      }
+
+      if(this.allDocSelected && this.allQuerySelected && !this.selectedQuerySett.includes("toggleAll"))
+      {
+        this.selectedQuerySett.push("toggleAll");
+      }
+      else if(this.selectedQuerySett.includes("toggleAll") && !(this.allDocSelected && this.allQuerySelected)) 
+      {
+        let id = this.selectedQuerySett.indexOf("toggleAll");
+        this.selectedQuerySett.splice(id, 1);
+      }
+
+    },
+
+      selectedQuerySett(newVal, oldVal)
+    {
+      if(newVal.includes("toggleAll") && !oldVal.includes("toggleAll"))
+      {
+        this.selectedSettings = this.allDocSett.slice();
+        this.selectedQuerySett.push(...this.allQuerySett);
+        this.allDocSelected = true;
+        this.allQuerySelected = true;
+        return;
+      }
+      else if(oldVal.includes("toggleAll") && !newVal.includes("toggleAll"))
+      {
+        this.selectedSettings.splice(0, this.selectedSettings.length);
+        this.selectedQuerySett.splice(0, this.selectedQuerySett.length);
+        this.allDocSelected = false;
+        this.allQuerySelected = false;
+        return;
+      }
+      let temp = [...newVal];
+      temp.sort();
+      this.allQuerySett.sort();
+      let isEqual = true;
+      this.allQuerySett.forEach(word => {
+        isEqual = temp.includes(word) ? isEqual : false;});
+      this.allQuerySelected = isEqual;
+
+      if(this.allDocSelected && this.allQuerySelected && !this.selectedQuerySett.includes("toggleAll"))
+      {
+        this.selectedQuerySett.push("toggleAll");
+      }
+      else if(this.selectedQuerySett.includes("toggleAll") && !(this.allDocSelected && this.allQuerySelected)) {
+        let id = this.selectedQuerySett.indexOf("toggleAll");
+        this.selectedQuerySett.splice(id, 1);
+
+      }
     }
+
+
   }
 }
 
@@ -259,5 +497,12 @@ export default {
   40%, 60% {
     transform: translate3d(4px, 0, 0);
   }
+}
+.panelSwitches {
+  text-align : left;
+}
+.infoRetComp {
+  width: 90%;
+  margin: auto;
 }
 </style>
