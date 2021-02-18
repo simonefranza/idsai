@@ -5,12 +5,25 @@
       <div class="col-3">
         <b-table striped hover :items="documents" :fields="fields" foot-clone>
           <template #cell(modify)="row">
-            <b-button size="sm" @click="row.toggleDetails" class="mr-2" variant="primary">
+            <b-button size="sm" @click="startEditLine(row.index)" class="mr-2" variant="primary" v-if="row.index !== editLineIndex">
               <b-icon icon="pencil" aria-hidden="true"></b-icon>
             </b-button>
-            <b-button size="sm" @click="removeDoc(row.index)" class="mr-2" variant="danger">
+            <b-button size="sm" @click="finishEditLine(row.index)" class="mr-2" variant="success" v-else>
+              <b-icon icon="check" aria-hidden="true"></b-icon>
+            </b-button>
+            <b-button size="sm" @click="removeDoc(row.index)" class="mr-2" variant="danger" v-if="row.index !== editLineIndex">
               <b-icon icon="trash" aria-hidden="true"></b-icon>
             </b-button>
+            <b-button size="sm" @click="cancelEdit" class="mr-2" variant="danger" v-else>
+              <b-icon icon="x" aria-hidden="true"></b-icon>
+            </b-button>
+          </template>
+
+          <template #cell(document)="row">
+            <div v-if="row.index !== editLineIndex">{{ row.value }}</div>
+            <div v-else>
+              <b-form-input v-model="tempDoc" placeholder="Type or cancel" :class="{'shake' : animatedEditField}"></b-form-input>
+            </div>
           </template>
 
           <template #foot(id)="">
@@ -18,7 +31,7 @@
           </template>
 
           <template #foot(document)="">
-            <b-form-input id="newDocForm" v-model="newDoc" placeholder="New document" :class="{'shake' : animated}"></b-form-input>
+            <b-form-input id="newDocForm" v-model="newDoc" placeholder="New document" :class="{'shake' : animatedNewField}"></b-form-input>
             <b-tooltip target="newDocForm" placement="bottom" :show.sync="showTooltip" triggers="manual">
               This document is already present, please choose something else!
             </b-tooltip>
@@ -129,7 +142,8 @@ export default {
       docs :  ["I love the sun!", "I hate sun!", "I love rain."],
       fields : ["id", "document", "modify"],
       ignored_terms : ["the", "a"],
-      animated: false,
+      animatedNewField: false,
+      animatedEditField: false,
       newDoc : "",
       showTooltip : false,
       query : "",
@@ -154,7 +168,9 @@ export default {
         { text: 'Query tfidf', value: 'querytfidf'},
         { text: 'Ranking', value: 'ranking'},
         { text: 'Toggle all', value: 'toggleAll'},
-      ]
+      ],
+      editLineIndex : -1,
+      tempDoc : ""
     }
   },
   computed : 
@@ -376,8 +392,8 @@ export default {
       if(!str)
       {
         const self = this;
-        self.animated = true;
-        setTimeout(() => {self.animated = false}, 2000);
+        self.animatedNewField = true;
+        setTimeout(() => {self.animatedNewField = false}, 2000);
         return;
       }
       //TODO add even if same?
@@ -387,8 +403,8 @@ export default {
       {
         this.showTooltip = true;
         const self = this;
-        self.animated = true;
-        setTimeout(() => {self.animated = false; this.showTooltip = false}, 2000);
+        self.animatedNewField = true;
+        setTimeout(() => {self.animatedNewField = false; this.showTooltip = false}, 2000);
         return;
       }
 
@@ -400,7 +416,44 @@ export default {
         let value = 0;
         vecA.forEach((val, index) => value += val * vecB[index]);
         return value;
+      },
+
+      startEditLine(index)
+    {
+      this.editLineIndex = index;
+      this.tempDoc = this.docs[index];
+
+    },
+      finishEditLine(index)
+    {
+      let str = this.tempDoc.trim();
+      if(!str)
+      {
+        const self = this;
+        self.animatedEditField = true;
+        setTimeout(() => {self.animatedEditField = false}, 2000);
+        return;
       }
+      //TODO add even if same?
+      let docPresent = false;
+      this.docs.forEach(doc => docPresent = doc.toLowerCase().localeCompare(str.toLowerCase()) ? docPresent : true);
+      if(docPresent && this.docs.indexOf(str) != index)
+      {
+        const self = this;
+        self.animatedEditField = true;
+        setTimeout(() => {self.animatedEditField = false}, 2000);
+        return;
+      }
+      this.editLineIndex = -1;
+      this.docs.splice(index, 1, str);
+      this.tempDoc = '';
+    },
+      cancelEdit()
+    {
+      this.editLineIndex = -1;
+      this.tempDoc = '';
+    }
+
 
 
 
@@ -471,7 +524,6 @@ export default {
 
       }
     }
-
 
   }
 }
