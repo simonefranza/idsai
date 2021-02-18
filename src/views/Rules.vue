@@ -5,10 +5,10 @@
 </template>
 
 <script>
-import InfoRetComp from '@/components/InfoRetComp.vue'
+import RulesComp from '@/components/RulesComp.vue'
 
 export default {
-  name: 'About',
+  name: 'Rules',
   components: {
     RulesComp
   }

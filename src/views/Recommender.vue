@@ -1,5 +1,5 @@
 <template>
-  <div class="about">
+  <div class="RecSys">
 
     <ReccSys />
   </div>
@@ -10,7 +10,7 @@
 import ReccSys from '@/components/ReccSys.vue'
 
 export default {
-  name: 'About',
+  name: 'RecSys',
   components: {
     ReccSys
   }

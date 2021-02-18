@@ -11,6 +11,11 @@ const routes = [
     component: Home
   },
   {
+    path: '/rules',
+    name: 'Rules',
+    component: () => import(/* webpackChunkName: "info-ret" */ '../views/Rules.vue')
+  },
+  {
     path: '/info-ret',
     name: 'InfoRet',
     component: () => import(/* webpackChunkName: "info-ret" */ '../views/InfoRet.vue')
