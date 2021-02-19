@@ -3,9 +3,9 @@
     <div id="pageContainer" v-bind:class="!darkTheme ? 'page-light' : 'page-dark'">
       <div v-bind:id="!darkTheme ? 'nav' : 'darkNav'" v-bind:class="!darkTheme ? 'light-theme' : 'dark-theme'">
         <router-link to="/">Home</router-link> |
-        <router-link to="/rules">Rules</router-link> | 
-        <router-link to="/info-ret">Information Retrieval</router-link> | 
-        <router-link to="/rec-sys">Recommender System</router-link>
+        <router-link v-bind:dark-theme="darkTheme" to="/rules">Rules</router-link> | 
+        <router-link v-bind:dark-theme="darkTheme" to="/info-ret">Information Retrieval</router-link> | 
+        <router-link v-bind:dark-theme="darkTheme" to="/rec-sys">Recommender System</router-link>
         <div class="dark-light-switch">
           <b-input-group>
             <template #prepend>
@@ -20,7 +20,7 @@
         </div>
       </div>
       <transition name="slide-fade" mode="out-in">
-      <router-view class="router-view" v-bind:class="!darkTheme ? 'rv-light' : 'rv-dark'" />
+      <router-view class="router-view" v-bind:dark-theme="darkTheme" v-bind:class="!darkTheme ? 'rv-light' : 'rv-dark'" />
       </transition>
       <Footer v-bind:dark-theme="darkTheme" />
     </div>
@@ -156,7 +156,6 @@ opacity: 0;
 }
 
 .router-view{
-  width: 100%;
   height: 100%;
   margin: 20px;
 }
@@ -167,6 +166,10 @@ opacity: 0;
 
 .rv-dark, .page-dark {
   background-color: #222;
+}
+
+.dark-input-field {
+  background-color: #121212 !important;
 }
 
 

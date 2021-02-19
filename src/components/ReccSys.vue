@@ -1,6 +1,6 @@
 <template>
   <div class="recc-sys">
-    <b-table striped hover :items="finalTable" ></b-table>
+    <b-table striped hover :items="finalTable" v-bind:dark="darkTheme" ></b-table>
     
     <div class="row">
       <div class="col">
@@ -46,6 +46,12 @@
 import Book from '../data/book.js'
 import Person from '../data/person.js'
 export default {
+  props: {
+    darkTheme: {
+      type: Boolean,
+      required: true
+    }
+  },
   data() {
     return {
       names: ["Emma", "Franz", "Paula", "Sebastian", "Hermine", "Cristoph"],

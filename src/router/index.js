@@ -13,7 +13,7 @@ const routes = [
   {
     path: '/rules',
     name: 'Rules',
-    component: () => import(/* webpackChunkName: "info-ret" */ '../views/Rules.vue')
+    component: () => import(/* webpackChunkName: "rules" */ '../views/Rules.vue')
   },
   {
     path: '/info-ret',
@@ -35,13 +35,5 @@ const router = new VueRouter({
   base: process.env.BASE_URL,
   routes
 })
-
-//// Taken from https://blog.francium.tech/vue-lazy-routes-loading-chunk-failed-9ee407bbd58
-//// In case chunk was cached
-//router.onError(error =>{    
-//    if (/loading chunk \d* failed./i.test(error.message) && navigator.onLine) {
-//        window.location.reload()
-//    }
-//});
 
 export default router

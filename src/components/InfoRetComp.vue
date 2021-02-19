@@ -3,7 +3,7 @@
     <div class="row">
       <div class="col"></div>
       <div class="col-3">
-        <b-table striped hover :items="documents" :fields="fields" foot-clone>
+        <b-table striped hover :items="documents" :fields="fields" v-bind:dark="darkTheme" foot-clone>
           <template #cell(modify)="row">
             <b-button size="sm" @click="startEditLine(row.index)" class="mr-2" variant="primary" v-if="row.index !== editLineIndex">
               <b-icon icon="pencil" aria-hidden="true"></b-icon>
@@ -22,7 +22,7 @@
           <template #cell(document)="row">
             <div v-if="row.index !== editLineIndex">{{ row.value }}</div>
             <div v-else>
-              <b-form-input v-model="tempDoc" placeholder="Type or cancel" :class="{'shake' : animatedEditField}"></b-form-input>
+              <b-form-input v-model="tempDoc" placeholder="Type or cancel" :class="{'shake' : animatedEditField, 'dark-input-field' : darkTheme}"></b-form-input>
             </div>
           </template>
 
@@ -45,11 +45,11 @@
         </b-table>
       </div>
       <div class="col-4">
-        <b-form-input id="queryForm" v-model="query" placeholder="Input query" ></b-form-input>
+        <b-form-input id="queryForm" v-model="query" placeholder="Input query" bg-variant="dark"></b-form-input>
       </div>
       <div class="col-3">
 
-        <b-card title="Control Panel" bg-variant="light" >
+        <b-card title="Control Panel" v-bind:bg-variant="!darkTheme ? 'light' : 'dark'" v-bind:text-variant="!darkTheme ? '' : 'white'">
           <b-card-text>
           <div class="row">
             <div class="col-6 panelSwitches">
@@ -81,24 +81,24 @@
     <div class="row" v-if="selectedSettings.length">
       <div class="col"></div>
       <div class="col-2" v-if="selectedSettings.includes('dict')">
-        <b-table striped hover :items="printableDict"></b-table>
+        <b-table striped hover :items="printableDict" v-bind:dark="darkTheme"></b-table>
       </div>
       <div class="col-1" v-if="selectedSettings.includes('idf')">
-        <b-table striped hover :items="printableIdf">
+        <b-table striped hover :items="printableIdf" v-bind:dark="darkTheme">
           <template #head()="data">
             <span>{{ data.label.toLowerCase() }}</span>
           </template>
         </b-table>
       </div>
       <div class="col" v-if="selectedSettings.includes('tf')">
-        <b-table striped hover :items="printableTf">
+        <b-table striped hover :items="printableTf" v-bind:dark="darkTheme">
           <template #head()="data">
             <span>{{ data.label.toLowerCase().substring(0,1)}}<sub>{{data.label.substring(1,2)}}</sub></span>
           </template>
         </b-table>
       </div>
       <div class="col" v-if="selectedSettings.includes('tfidf')">
-        <b-table striped hover :items="printableTfIdf">
+        <b-table striped hover :items="printableTfIdf" v-bind:dark="darkTheme">
           <template #head()="data">
             <span>{{ data.label.toLowerCase().substring(0,5)}}<sub>{{data.label.substring(5,6)}}</sub></span>
           </template>
@@ -111,21 +111,21 @@
     <div class="row" v-if="selectedQuerySett.length">
       <div class="col"></div>
       <div class="col" v-if="selectedQuerySett.includes('querytf')">
-        <b-table striped hover :items="printableQueryTf">
+        <b-table striped hover :items="printableQueryTf" v-bind:dark="darkTheme">
           <template #head()="">
             <span>Query tf</span>
           </template>
         </b-table>
       </div>
       <div class="col" v-if="selectedQuerySett.includes('querytfidf')">
-        <b-table striped hover :items="printableQueryTfIdf">
+        <b-table striped hover :items="printableQueryTfIdf" v-bind:dark="darkTheme">
           <template #head()="">
             <span>Query tfidf</span>
           </template>
         </b-table>
       </div>
       <div class="col" v-if="selectedQuerySett.includes('ranking')">
-        <b-table striped hover :items="ranking"></b-table>
+        <b-table striped hover :items="ranking" v-bind:dark="darkTheme"></b-table>
       </div>
       <div class="col">
       </div>
@@ -135,6 +135,12 @@
 
 <script>
 export default {
+  props: {
+    darkTheme: {
+      type: Boolean,
+      required: true
+    }
+  },
   data() 
   {
     return {
