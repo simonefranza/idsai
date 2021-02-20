@@ -5,7 +5,8 @@
         <router-link to="/">Home</router-link> |
         <router-link v-bind:dark-theme="darkTheme" to="/rules">Rules</router-link> | 
         <router-link v-bind:dark-theme="darkTheme" to="/info-ret">Information Retrieval</router-link> | 
-        <router-link v-bind:dark-theme="darkTheme" to="/rec-sys">Recommender System</router-link>
+        <router-link v-bind:dark-theme="darkTheme" to="/rec-sys">Recommender System</router-link> |
+        <router-link v-bind:dark-theme="darkTheme" to="/word-net">Word Net</router-link>
         <div class="dark-light-switch">
           <b-input-group>
             <template #prepend>

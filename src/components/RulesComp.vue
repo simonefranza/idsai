@@ -1,11 +1,14 @@
 <template>
   <div class="rulesComp">
-    HI
+
+    HI 
 
   </div>
 </template>
 
 <script>
+
+
 export default {
   data() {
     return {

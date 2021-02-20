@@ -23,11 +23,14 @@ const routes = [
   {
     path: '/rec-sys',
     name: 'Recommender System',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
     component: () => import(/* webpackChunkName: "rec-sys" */ '../views/Recommender.vue')
+  },
+  {
+    path: '/word-net',
+    name: 'Word Net',
+    component: () => import(/* webpackChunkName: "word-net" */ '../views/WordNet.vue')
   }
+
 ]
 
 const router = new VueRouter({
