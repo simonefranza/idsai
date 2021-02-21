@@ -1,169 +1,175 @@
 <template>
   <div class="wordNetComp">
 
-    <b-form-input v-model="searched" placeholder="Input something"></b-form-input>
-    <div v-if="nounFound !== ''">Noun:<br/>
-      <div v-for="data in nounFound" :key="data.synset_offset">
-        {{data.words}} 
-      </div>
-    </div>
-    <div v-if="verbFound !== ''">Verb:<br/>
-      <div v-for="data in verbFound" :key="data.synset_offset">
-        {{data.words}} 
-      </div>
-    </div>
+    <b-spinner type="grow" label="Loading..." v-if="!loaded" :variant="darkTheme ? 'light' : 'dark'"></b-spinner>
+    <div v-else>
+      <b-form-input :class="{'darkInputForm' : darkTheme}" v-model="searched" placeholder="Input something"></b-form-input>
+      <DictEntry entryType="Noun" :data="nounFound" />
+      <DictEntry entryType="Verb" :data="verbFound" />
+      <DictEntry entryType="Adjective" :data="adjFound" />
+      <DictEntry entryType="Adverb" :data="advFound" />
 
-    <footer>
-      Princeton University "About WordNet." 
-      <a href="https://wordnet.princeton.edu">WordNet</a>. 
-      Princeton University. 2010.
-    </footer>
+      <footer :id="darkTheme? 'darkFooter' : 'lightFooter'">
+        Princeton University "About WordNet." 
+        <a href="https://wordnet.princeton.edu">WordNet</a>. 
+        Princeton University. 2010.
+      </footer>
+    </div>
   </div>
 </template>
 
 <script>
-
-import nounIndex from '!raw-loader!./../data/dict/index.noun';
-import verbIndex from '!raw-loader!./../data/dict/index.verb';
-import adjIndex from '!raw-loader!./../data/dict/index.adj';
-import advIndex from '!raw-loader!./../data/dict/index.adv';
-
-import nounData from '!raw-loader!./../data/dict/data.noun';
-import verbData from '!raw-loader!./../data/dict/data.verb';
-import adjData from '!raw-loader!./../data/dict/data.adj';
-import advData from '!raw-loader!./../data/dict/data.adv';
-
-import nounExc from '!raw-loader!./../data/dict/noun.exc';
-import verbExc from '!raw-loader!./../data/dict/verb.exc';
-import adjExc from '!raw-loader!./../data/dict/adj.exc';
-import advExc from '!raw-loader!./../data/dict/adv.exc';
-
-import adjAll from '!raw-loader!./../data/dict/dbfiles/adj.all';
-import adjPert from '!raw-loader!./../data/dict/dbfiles/adj.pert';
-import advAll from '!raw-loader!./../data/dict/dbfiles/adv.all';
-import nounTops from '!raw-loader!./../data/dict/dbfiles/noun.Tops';
-import nounAct from '!raw-loader!./../data/dict/dbfiles/noun.act';
-import nounAnimal from '!raw-loader!./../data/dict/dbfiles/noun.animal';
-import nounArtifact from '!raw-loader!./../data/dict/dbfiles/noun.artifact';
-import nounAttribute from '!raw-loader!./../data/dict/dbfiles/noun.attribute';
-import nounBody from '!raw-loader!./../data/dict/dbfiles/noun.body';
-import nounCognition from '!raw-loader!./../data/dict/dbfiles/noun.cognition';
-import nounCommuncation from '!raw-loader!./../data/dict/dbfiles/noun.communication';
-import nounEvent from '!raw-loader!./../data/dict/dbfiles/noun.event';
-import nounFeeling from '!raw-loader!./../data/dict/dbfiles/noun.feeling';
-import nounFood from '!raw-loader!./../data/dict/dbfiles/noun.food';
-import nounGroup from '!raw-loader!./../data/dict/dbfiles/noun.group';
-import nounLocation from '!raw-loader!./../data/dict/dbfiles/noun.location';
-import nounMotive from '!raw-loader!./../data/dict/dbfiles/noun.motive';
-import nounObject from '!raw-loader!./../data/dict/dbfiles/noun.object';
-import nounPerson from '!raw-loader!./../data/dict/dbfiles/noun.person';
-import nounPhenomenon from '!raw-loader!./../data/dict/dbfiles/noun.phenomenon';
-import nounPlant from '!raw-loader!./../data/dict/dbfiles/noun.plant';
-import nounPossession from '!raw-loader!./../data/dict/dbfiles/noun.possession';
-import nounProcess from '!raw-loader!./../data/dict/dbfiles/noun.process';
-import nounQuantity from '!raw-loader!./../data/dict/dbfiles/noun.quantity';
-import nounRelation from '!raw-loader!./../data/dict/dbfiles/noun.relation';
-import nounShape from '!raw-loader!./../data/dict/dbfiles/noun.shape';
-import nounState from '!raw-loader!./../data/dict/dbfiles/noun.state';
-import nounSubstance from '!raw-loader!./../data/dict/dbfiles/noun.substance';
-import nounTime from '!raw-loader!./../data/dict/dbfiles/noun.time';
-import verbBody from '!raw-loader!./../data/dict/dbfiles/verb.body';
-import verbChange from '!raw-loader!./../data/dict/dbfiles/verb.change';
-import verbCognition from '!raw-loader!./../data/dict/dbfiles/verb.cognition';
-import verbCommunication from '!raw-loader!./../data/dict/dbfiles/verb.communication';
-import verbCompetition from '!raw-loader!./../data/dict/dbfiles/verb.competition';
-import verbConsumption from '!raw-loader!./../data/dict/dbfiles/verb.consumption';
-import verbContact from '!raw-loader!./../data/dict/dbfiles/verb.contact';
-import verbCreation from '!raw-loader!./../data/dict/dbfiles/verb.creation';
-import verbEmotion from '!raw-loader!./../data/dict/dbfiles/verb.emotion';
-import verbMotion from '!raw-loader!./../data/dict/dbfiles/verb.motion';
-import verbPerception from '!raw-loader!./../data/dict/dbfiles/verb.perception';
-import verbPossession from '!raw-loader!./../data/dict/dbfiles/verb.possession';
-import verbSocial from '!raw-loader!./../data/dict/dbfiles/verb.social';
-import verbStative from '!raw-loader!./../data/dict/dbfiles/verb.stative';
-import verbWeather from '!raw-loader!./../data/dict/dbfiles/verb.weather';
-import adjPpl from '!raw-loader!./../data/dict/dbfiles/adj.ppl';
+import DictEntry from "./DictEntry";
 
 export default {
+  props: {
+    darkTheme: {
+      type: Boolean,
+      required: true
+    }
+  },
+  components: {
+    DictEntry
+  },
   data() {
     return {
       searched: '',
-      poss: ['n', 'v', 'a', 'r']
+      poss: ['n', 'v', 'a', 'r'],
+      loaded : false,
 
+      nounIndex : '',
+      verbIndex : '',
+      adjIndex : '',
+      advIndex : '',
+      
+      verbData : '',
+      adjData : '',
+      advData : '',
+
+      nounExc : '',
+      verbExc : '',
+      adjExc : '',
+      advExc : '',
+
+      adjPert : '',
+      advAll : '',
+      nounTops : '',
+      nounAct : '',
+      nounAnimal : '',
+      nounArtifact : '',
+      nounAttribute : '',
+      nounBody : '',
+      nounCognition : '',
+      nounCommuncation : '',
+      nounEvent : '',
+      nounFeeling : '',
+      nounFood : '',
+      nounGroup : '',
+      nounLocation : '',
+      nounMotive : '',
+      nounObject : '',
+      nounPerson : '',
+      nounPhenomenon : '',
+      nounPlant : '',
+      nounPossession : '',
+      nounProcess : '',
+      nounQuantity : '',
+      nounRelation : '',
+      nounShape : '',
+      nounState : '',
+      nounSubstance : '',
+      nounTime : '',
+      verbBody : '',
+      verbChange : '',
+      verbCognition : '',
+      verbCommunication : '',
+      verbCompetition : '',
+      verbConsumption : '',
+      verbContact : '',
+      verbCreation : '',
+      verbEmotion : '',
+      verbMotion : '',
+      verbPerception : '',
+      verbPossession : '',
+      verbSocial : '',
+      verbStative : '',
+      verbWeather : '',
+      adjPpl : '',
     }
   },
   computed: {
     posIndex : function() {
       let map = new Map();
-      map.set('n', nounIndex);
-      map.set('v', verbIndex);
-      map.set('a', adjIndex);
-      map.set('r', advIndex);
+      map.set('n', this.nounIndex);
+      map.set('v', this.verbIndex);
+      map.set('a', this.adjIndex);
+      map.set('r', this.advIndex);
+      this.testing;
       return map;
     },
     posData: function() {
       let map = new Map();
-      map.set('n', nounData);
-      map.set('v', verbData);
-      map.set('a', adjData);
-      map.set('r', advData);
+      map.set('n', this.nounData);
+      map.set('v', this.verbData);
+      map.set('a', this.adjData);
+      map.set('r', this.advData);
       return map;
     },
     excFiles: function() {
       let map = new Map();
-      map.set('n', nounExc);
-      map.set('v', verbExc);
-      map.set('a', adjExc);
-      map.set('r', advExc);
+      map.set('n', this.nounExc);
+      map.set('v', this.verbExc);
+      map.set('a', this.adjExc);
+      map.set('r', this.advExc);
       return map;
     },
     lexicographerFiles: function() {
       let map = new Map();
-      map.set(0, adjAll);
-      map.set(1, adjPert);
-      map.set(2, advAll);
-      map.set(3, nounTops);
-      map.set(4, nounAct);
-      map.set(5, nounAnimal);
-      map.set(6, nounArtifact);
-      map.set(7, nounAttribute);
-      map.set(8, nounBody);
-      map.set(9, nounCognition);
-      map.set(10, nounCommuncation);
-      map.set(11, nounEvent);
-      map.set(12, nounFeeling);
-      map.set(13, nounFood);
-      map.set(14, nounGroup);
-      map.set(15, nounLocation);
-      map.set(16, nounMotive);
-      map.set(17, nounObject);
-      map.set(18, nounPerson);
-      map.set(19, nounPhenomenon);
-      map.set(20, nounPlant);
-      map.set(21, nounPossession);
-      map.set(22, nounProcess);
-      map.set(23, nounQuantity);
-      map.set(24, nounRelation);
-      map.set(25, nounShape);
-      map.set(26, nounState);
-      map.set(27, nounSubstance);
-      map.set(28, nounTime);
-      map.set(29, verbBody);
-      map.set(30, verbChange);
-      map.set(31, verbCognition);
-      map.set(32, verbCommunication);
-      map.set(33, verbCompetition);
-      map.set(34, verbConsumption);
-      map.set(35, verbContact);
-      map.set(36, verbCreation);
-      map.set(37, verbEmotion);
-      map.set(38, verbMotion);
-      map.set(39, verbPerception);
-      map.set(40, verbPossession);
-      map.set(41, verbSocial);
-      map.set(42, verbStative);
-      map.set(43, verbWeather);
-      map.set(44, adjPpl);
+      map.set(0, this.adjAll);
+      map.set(1, this.adjPert);
+      map.set(2, this.advAll);
+      map.set(3, this.nounTops);
+      map.set(4, this.nounAct);
+      map.set(5, this.nounAnimal);
+      map.set(6, this.nounArtifact);
+      map.set(7, this.nounAttribute);
+      map.set(8, this.nounBody);
+      map.set(9, this.nounCognition);
+      map.set(10, this.nounCommuncation);
+      map.set(11, this.nounEvent);
+      map.set(12, this.nounFeeling);
+      map.set(13, this.nounFood);
+      map.set(14, this.nounGroup);
+      map.set(15, this.nounLocation);
+      map.set(16, this.nounMotive);
+      map.set(17, this.nounObject);
+      map.set(18, this.nounPerson);
+      map.set(19, this.nounPhenomenon);
+      map.set(20, this.nounPlant);
+      map.set(21, this.nounPossession);
+      map.set(22, this.nounProcess);
+      map.set(23, this.nounQuantity);
+      map.set(24, this.nounRelation);
+      map.set(25, this.nounShape);
+      map.set(26, this.nounState);
+      map.set(27, this.nounSubstance);
+      map.set(28, this.nounTime);
+      map.set(29, this.verbBody);
+      map.set(30, this.verbChange);
+      map.set(31, this.verbCognition);
+      map.set(32, this.verbCommunication);
+      map.set(33, this.verbCompetition);
+      map.set(34, this.verbConsumption);
+      map.set(35, this.verbContact);
+      map.set(36, this.verbCreation);
+      map.set(37, this.verbEmotion);
+      map.set(38, this.verbMotion);
+      map.set(39, this.verbPerception);
+      map.set(40, this.verbPossession);
+      map.set(41, this.verbSocial);
+      map.set(42, this.verbStative);
+      map.set(43, this.verbWeather);
+      map.set(44, this.adjPpl);
       return map;
     },
     wnCont: function() {
@@ -185,9 +191,12 @@ export default {
           if(excWord == -1)
             return '';
           res = this.binSearch(excWord, this.posIndex.get(part));
+          if(res == -1)
+            return '';
+          word = excWord;
         }
+        console.log(res);
         let split = res.split(' ');
-        console.log(split);
         let lemma = split[0];
         let pos = split[1];
         let synset_cnt = parseInt(split[2]);
@@ -204,7 +213,7 @@ export default {
         {
           synset_offset.push(parseInt(split[6 + p_cnt + i]));
 
-          dataFile.set(pos+synset_offset[i], this.parseDataline(pos, synset_offset[i]));
+          dataFile.set(pos+synset_offset[i], this.parseDataline(pos, synset_offset[i], word));
         }
         indexFile.push({lemma: lemma, pos: pos, synset_cnt: synset_cnt, p_cnt: p_cnt,
           ptr_symbol: [...ptr_symbol], tagsense_cnt: tagsense_cnt, synset_offset: [...synset_offset]});
@@ -244,6 +253,36 @@ export default {
           arr.push(data.get(noun.pos + off)))});
 
       return arr;
+    },
+    adjFound: function() {
+      const {index, data} = this.wnCont;
+      if(!index)
+        return '';
+
+      let arr = [];
+      let nouns = index.filter(el => !el.pos.localeCompare('a'));
+      if(nouns.length === 0 || nouns[0].synset_cnt === 0)
+        return '';
+      nouns.forEach(noun => {
+        noun.synset_offset.forEach(off =>
+          arr.push(data.get(noun.pos + off)))});
+
+      return arr;
+    },
+    advFound: function() {
+      const {index, data} = this.wnCont;
+      if(!index)
+        return '';
+
+      let arr = [];
+      let nouns = index.filter(el => !el.pos.localeCompare('r'));
+      if(nouns.length === 0 || nouns[0].synset_cnt === 0)
+        return '';
+      nouns.forEach(noun => {
+        noun.synset_offset.forEach(off =>
+          arr.push(data.get(noun.pos + off)))});
+
+      return arr;
     }
   },
   methods: {
@@ -269,7 +308,7 @@ export default {
       }
       return -1;
     },
-    parseDataline: function(pos, offset) {
+    parseDataline: function(pos, offset, searchedWord) {
       let data = {};
       let newlineId = this.posData.get(pos).indexOf('\n', offset);
       let line = this.posData.get(pos).slice(offset, newlineId);
@@ -295,7 +334,7 @@ export default {
           pos: split[7 + 2 * w_cnt + 4 * i], source: src, target: trgt});
       }
       data = {synset_offset: synset_offset, lex_filenum: lex_filenum, ss_type: ss_type,
-        w_cnt: w_cnt, words: [...words], p_cnt: p_cnt, ptrs: [...ptrs]};
+        w_cnt: w_cnt, words: [...words], p_cnt: p_cnt, ptrs: [...ptrs], keyWord: searchedWord};
       //if no | then there are frames
       if(split[5 + 2 * w_cnt + 4 * p_cnt].localeCompare('|'))
       {
@@ -310,7 +349,17 @@ export default {
         data['frames'] = frames;
       }
       let glossIdx = line.indexOf('|');
-      data['gloss'] = line.slice(glossIdx + 2, -1).trim();
+      let glossSplit = line.slice(glossIdx + 2, -1).trim().split(';');
+      let glosses = [];
+      let examples = [];
+      glossSplit.forEach(gloss => {
+        if(gloss.includes('"'))
+          examples.push(gloss);
+        else
+          glosses.push(gloss);
+      });
+      data['gloss'] = [...glosses];
+      data['example'] = [...examples];
       return data;
     },
     findBaseWord: function(pos, word) {
@@ -319,7 +368,157 @@ export default {
         return -1;
       return line.split(' ')[1];
     }
+  },
+  async created() {
+    if(this.nounIndex)
+      return;
+    let response;
+    response = await import('./../data/dict/index.noun.json');
+    this.nounIndex = response.default.data;
+    response = await import('./../data/dict/index.verb.json');
+    this.verbIndex = response.default.data;
+    response = await import('./../data/dict/index.adj.json');
+    this.adjIndex = response.default.data;
+    response = await import('./../data/dict/index.adv.json');
+    this.advIndex = response.default.data;
+
+    response = await import('./../data/dict/data.noun.json');
+    this.nounData = response.default.data;
+    response = await import('./../data/dict/data.verb.json');
+    this.verbData = response.default.data;
+    response = await import('./../data/dict/data.adj.json');
+    this.adjData = response.default.data;
+    response = await import('./../data/dict/data.adv.json');
+    this.advData = response.default.data;
+
+    response = await import('./../data/dict/noun.exc.json');
+    this.import = response.default.data;
+    response = await import('./../data/dict/verb.exc.json');
+    this.verbExc = response.default.data;
+    response = await import('./../data/dict/adj.exc.json');
+    this.adjExc = response.default.data;
+    response = await import('./../data/dict/adv.exc.json');
+    this.advExc = response.default.data;
+
+    response = await import('./../data/dict/dbfiles/adj.all.json');
+    this.adjAll = response.default.data;
+    response = await import('./../data/dict/dbfiles/adj.pert.json');
+    this.adjPert = response.default.data;
+    response = await import('./../data/dict/dbfiles/adv.all.json');
+    this.advAll = response.default.data;
+    response = await import('./../data/dict/dbfiles/noun.Tops.json');
+    this.nounTops = response.default.data;
+    response = await import('./../data/dict/dbfiles/noun.act.json');
+    this.nounAct = response.default.data;
+    response = await import('./../data/dict/dbfiles/noun.animal.json');
+    this.nounAnimal = response.default.data;
+    response = await import('./../data/dict/dbfiles/noun.artifact.json');
+    this.nounArtifact = response.default.data;
+    response = await import('./../data/dict/dbfiles/noun.attribute.json');
+    this.nounAttribute = response.default.data;
+    response = await import('./../data/dict/dbfiles/noun.body.json');
+    this.nounBody = response.default.data;
+    response = await import('./../data/dict/dbfiles/noun.cognition.json');
+    this.nounCognition = response.default.data;
+    response = await import('./../data/dict/dbfiles/noun.communication.json');
+    this.nounCommuncation = response.default.data;
+    response = await import('./../data/dict/dbfiles/noun.event.json');
+    this.nounEvent = response.default.data;
+    response = await import('./../data/dict/dbfiles/noun.feeling.json');
+    this.nounFeeling = response.default.data;
+    response = await import('./../data/dict/dbfiles/noun.food.json');
+    this.nounFood = response.default.data;
+    response = await import('./../data/dict/dbfiles/noun.group.json');
+    this.nounGroup = response.default.data;
+    response = await import('./../data/dict/dbfiles/noun.location.json');
+    this.nounLocation = response.default.data;
+    response = await import('./../data/dict/dbfiles/noun.motive.json');
+    this.nounMotive = response.default.data;
+    response = await import('./../data/dict/dbfiles/noun.object.json');
+    this.nounObject = response.default.data;
+    response = await import('./../data/dict/dbfiles/noun.person.json');
+    this.nounPerson = response.default.data;
+    response = await import('./../data/dict/dbfiles/noun.phenomenon.json');
+    this.nounPhenomenon = response.default.data;
+    response = await import('./../data/dict/dbfiles/noun.plant.json');
+    this.nounPlant = response.default.data;
+    response = await import('./../data/dict/dbfiles/noun.possession.json');
+    this.nounPossession = response.default.data;
+    response = await import('./../data/dict/dbfiles/noun.process.json');
+    this.nounProcess = response.default.data;
+    response = await import('./../data/dict/dbfiles/noun.quantity.json');
+    this.nounQuantity = response.default.data;
+    response = await import('./../data/dict/dbfiles/noun.relation.json');
+    this.nounRelation = response.default.data;
+    response = await import('./../data/dict/dbfiles/noun.shape.json');
+    this.nounShape = response.default.data;
+    response = await import('./../data/dict/dbfiles/noun.state.json');
+    this.nounState = response.default.data;
+    response = await import('./../data/dict/dbfiles/noun.substance.json');
+    this.nounSubstance = response.default.data;
+    response = await import('./../data/dict/dbfiles/noun.time.json');
+    this.nounTime = response.default.data;
+    response = await import('./../data/dict/dbfiles/verb.body.json');
+    this.verbBody = response.default.data;
+    response = await import('./../data/dict/dbfiles/verb.change.json');
+    this.verbChange = response.default.data;
+    response = await import('./../data/dict/dbfiles/verb.cognition.json');
+    this.verbCognition = response.default.data;
+    response = await import('./../data/dict/dbfiles/verb.communication.json');
+    this.verbCommunication = response.default.data;
+    response = await import('./../data/dict/dbfiles/verb.competition.json');
+    this.verbCompetition = response.default.data;
+    response = await import('./../data/dict/dbfiles/verb.consumption.json');
+    this.verbConsumption = response.default.data;
+    response = await import('./../data/dict/dbfiles/verb.contact.json');
+    this.verbContact = response.default.data;
+    response = await import('./../data/dict/dbfiles/verb.creation.json');
+    this.verbCreation = response.default.data;
+    response = await import('./../data/dict/dbfiles/verb.emotion.json');
+    this.verbEmotion = response.default.data;
+    response = await import('./../data/dict/dbfiles/verb.motion.json');
+    this.verbMotion = response.default.data;
+    response = await import('./../data/dict/dbfiles/verb.perception.json');
+    this.verbPerception = response.default.data;
+    response = await import('./../data/dict/dbfiles/verb.possession.json');
+    this.verbPossession = response.default.data;
+    response = await import('./../data/dict/dbfiles/verb.social.json');
+    this.verbSocial = response.default.data;
+    response = await import('./../data/dict/dbfiles/verb.stative.json');
+    this.verbStative = response.default.data;
+    response = await import('./../data/dict/dbfiles/verb.weather.json');
+    this.verbWeather = response.default.data;
+    response = await import('./../data/dict/dbfiles/adj.ppl.json');
+    this.adjPpl = response.default.data;
+    this.loaded = true;
   }
 
 }
 </script>
+
+<style scoped>
+footer {
+    padding: 10px;
+}
+
+#lightFooter a {
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+#darkFooter a {
+  font-weight: bold;
+  color: #f8f1f1;
+}
+
+.darkInputForm {
+  background-color: #303131;
+  border: 1px solid #111;
+  color: #f8f1f1;
+}
+
+.darkInputForm::placeholder {
+  color: #888;
+}
+
+</style>

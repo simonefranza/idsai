@@ -22,7 +22,7 @@
           <template #cell(document)="row">
             <div v-if="row.index !== editLineIndex">{{ row.value }}</div>
             <div v-else>
-              <b-form-input v-model="tempDoc" placeholder="Type or cancel" :class="{'shake' : animatedEditField, 'dark-input-field' : darkTheme}"></b-form-input>
+              <b-form-input :class="{'shake' : animatedEditField, 'darkInputForm' : darkTheme}" v-model="tempDoc" placeholder="Type or cancel" ></b-form-input>
             </div>
           </template>
 
@@ -31,7 +31,7 @@
           </template>
 
           <template #foot(document)="">
-            <b-form-input id="newDocForm" v-model="newDoc" placeholder="New document" :class="{'shake' : animatedNewField}"></b-form-input>
+            <b-form-input id="newDocForm" v-model="newDoc" placeholder="New document" :class="{'shake' : animatedNewField, 'darkInputForm' : darkTheme}"></b-form-input>
             <b-tooltip target="newDocForm" placement="bottom" :show.sync="showTooltip" triggers="manual">
               This document is already present, please choose something else!
             </b-tooltip>
@@ -45,7 +45,7 @@
         </b-table>
       </div>
       <div class="col-4">
-        <b-form-input id="queryForm" v-model="query" placeholder="Input query" bg-variant="dark"></b-form-input>
+        <b-form-input :class="{'darkInputForm' : darkTheme}" id="queryForm" v-model="query" placeholder="Input query" bg-variant="dark"></b-form-input>
       </div>
       <div class="col-3">
 
@@ -69,7 +69,7 @@
             Ignored words (comma separated)
           </div>
           <div>
-            <b-form-input v-model="ignoredTermsInput" placeholder="Ignored words comma separated"></b-form-input>
+            <b-form-input :class="{'darkInputForm' : darkTheme}" v-model="ignoredTermsInput" placeholder="Ignored words comma separated"></b-form-input>
 
           </div>
           </b-card-text>
@@ -537,7 +537,7 @@ export default {
 //Taken from https://stackoverflow.com/questions/59855732/vuelidate-shaking-the-incorrect-input-field
 </script>
 
-<style>
+<style scoped>
 .shake {
   animation: shake 0.82s cubic-bezier(.36,.07,.19,.97) both;
   transform: translate3d(0, 0, 0);
@@ -563,4 +563,14 @@ export default {
   width: 90%;
   margin: auto;
 }
+.darkInputForm {
+  background-color: #303131;
+  border: 1px solid #111;
+  color: #f8f1f1;
+}
+
+.darkInputForm::placeholder {
+  color: #888;
+}
+
 </style>

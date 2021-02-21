@@ -1,44 +1,44 @@
 <template>
   <div class="recc-sys">
-    <b-table striped hover :items="finalTable" v-bind:dark="darkTheme" ></b-table>
-    
     <div class="row">
+      <div class="col-1"></div>
       <div class="col">
+        <b-table striped hover :items="finalTable" v-bind:dark="darkTheme" ></b-table>
       </div>
-      <div class="col-2">
-        User-based neighbours choice precision
-      </div>
-      <div class="col-8">
-        <b-input-group prepend="-1" append="1" class="mt-3">
-          <b-form-input v-b-tooltip.hover :title="neighbour_precisionUB" id="range-1" 
-              v-model="neighbour_precisionUB" type="range" min="-1" max="1" step="0.01"></b-form-input>
-        </b-input-group>
-      </div>
-      <div class="col">
-      </div>
-    </div>
-    <div class="row">
-      <div class="col">
-      </div>
-      <div class="col-2">
-        Item-based neighbours choice precision
-      </div>
-      <div class="col-8">
-        <b-input-group prepend="-1" append="1" class="mt-3">
-          <b-form-input v-b-tooltip.hover :title="neighbour_precisionIB" id="range-1" 
-              v-model="neighbour_precisionIB" type="range" min="-1" max="1" step="0.01"></b-form-input>
-        </b-input-group>
-      </div>
-      <div class="col">
-      </div>
-    </div>
+      <div class="col-3">
 
-    <b-button variant="outline-primary" v-on:click = "showCF = !showCF">See results of collaborative filtering</b-button>
-    <p v-if="isUBPossible && showCF">User-based collaborative filtering result (based on: {{ neighbourUsersUB }}): {{ userBasedPrediction }}</p>
-    <p v-else-if="!isUBPossible && showCF">No users are similar enough, try changing the position of the slider</p>
+        <b-card title="Control Panel" v-bind:bg-variant="!darkTheme ? 'light' : 'dark'" v-bind:text-variant="!darkTheme ? '' : 'white'">
+          <b-card-text class="ctrlPanel">
+            <p>
+              User-based neighbours choice precision
+            </p>
+                <b-input-group prepend="-1" append="1" class="mt-3">
+                  <b-form-input v-b-tooltip.hover :title="neighbour_precisionUB" id="range-1" 
+                                                                                 v-model="neighbour_precisionUB" type="range" min="-1" max="1" step="0.01"></b-form-input>
+                </b-input-group>
+              <p>
+                Item-based neighbours choice precision
+              </p>
+                <b-input-group prepend="-1" append="1" class="mt-3">
+                  <b-form-input v-b-tooltip.hover :title="neighbour_precisionIB" id="range-1" 
+                                                                                 v-model="neighbour_precisionIB" type="range" min="-1" max="1" step="0.01"></b-form-input>
+                </b-input-group>
+                <b-form-group v-slot="{ ariaDescribedby }" >
+                  <b-form-checkbox-group :aria-describedby="ariaDescribedby" v-model="selectedSettings" :options="settings" size="lg" switches stacked>
+                  </b-form-checkbox-group>
+                </b-form-group>
 
-    <p v-if="isIBPossible && showCF">Item-based collaborative filtering result (based on: {{ neighbourUsersIB }}): {{ itemBasedPrediciton }}</p>
-    <p v-else-if="!isIBPossible && showCF">No items are similar enough, try changing the position of the slider</p>
+          </b-card-text>
+        </b-card>
+      </div>
+
+      <div class="col-1"></div>
+    </div>
+    <p v-if="isUBPossible && selectedSettings.includes('ubcf')">User-based collaborative filtering result (based on: {{ neighbourUsersUB }}): {{ userBasedPrediction }}</p>
+    <p v-else-if="!isUBPossible && selectedSettings.includes('ubcf')">No users are similar enough, try changing the position of the slider</p>
+
+    <p v-if="isIBPossible && selectedSettings.includes('ibcf')">Item-based collaborative filtering result (based on: {{ neighbourUsersIB }}): {{ itemBasedPrediciton }}</p>
+    <p v-else-if="!isIBPossible && selectedSettings.includes('ibcf')">No items are similar enough, try changing the position of the slider</p>
   </div>
 </template>
 
@@ -60,6 +60,12 @@ export default {
       neighbour_precisionUB: '0.5',
       neighbour_precisionIB: '0.5',
       showCF : false,
+      selectedSettings : [],
+      allSett : ['ubcf', 'ibcf'],
+      settings : [
+        { text: 'User-based CF', value: 'ubcf' },
+        { text: 'Item-based CF', value: 'ibcf' },
+        ],
     }
   },
   computed: {
@@ -276,4 +282,8 @@ export default {
 
 <style  scoped>
 .tooltip { top: 0; }
+
+.ctrlPanel {
+  text-align:left;
+}
 </style>

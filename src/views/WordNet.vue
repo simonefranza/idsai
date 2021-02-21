@@ -1,6 +1,6 @@
 <template>
   <div class="wordNet">
-    <WordNetComp />
+    <WordNetComp :dark-theme="darkTheme"/>
   </div>
 </template>
 
@@ -9,6 +9,12 @@ import WordNetComp from '@/components/WordNetComp.vue'
 
 export default {
   name: 'WordNet',
+  props: {
+    darkTheme: {
+      type: Boolean,
+      required: true
+    }
+  },
   components: {
     WordNetComp 
   }

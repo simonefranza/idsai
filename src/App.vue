@@ -2,13 +2,16 @@
   <div v-bind:id="!darkTheme ? 'app' : 'darkApp'">
     <div id="pageContainer" v-bind:class="!darkTheme ? 'page-light' : 'page-dark'">
       <div v-bind:id="!darkTheme ? 'nav' : 'darkNav'" v-bind:class="!darkTheme ? 'light-theme' : 'dark-theme'">
-        <router-link to="/">Home</router-link> |
-        <router-link v-bind:dark-theme="darkTheme" to="/rules">Rules</router-link> | 
-        <router-link v-bind:dark-theme="darkTheme" to="/info-ret">Information Retrieval</router-link> | 
-        <router-link v-bind:dark-theme="darkTheme" to="/rec-sys">Recommender System</router-link> |
-        <router-link v-bind:dark-theme="darkTheme" to="/word-net">Word Net</router-link>
-        <div class="dark-light-switch">
-          <b-input-group>
+        <div class="menuDiv"/>
+        <div id="menu" class="menuDiv">
+          <router-link to="/">Home</router-link> |
+          <router-link v-bind:dark-theme="darkTheme" to="/rules">Rules</router-link> | 
+          <router-link v-bind:dark-theme="darkTheme" to="/info-ret">Information Retrieval</router-link> | 
+          <router-link v-bind:dark-theme="darkTheme" to="/rec-sys">Recommender System</router-link> |
+          <router-link v-bind:dark-theme="darkTheme" to="/word-net">Word Net</router-link>
+        </div>
+        <div class="dark-light-switch menuDiv">
+          <b-input-group class="inputGroup">
             <template #prepend>
             <b-icon icon="sun" aria-hidden="true" class="nav-icon">  </b-icon>
             </template>
@@ -104,8 +107,14 @@ opacity: 0;
 
 #nav, #darkNav {
   padding: 30px;
+  display: flex;
 }
 
+.menuDiv{
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
 #nav a {
   font-weight: bold;
   color: #2c3e50;
@@ -142,18 +151,14 @@ opacity: 0;
 }
 
 .dark-light-switch {
-  float: right;
-  vertical-align: middle;
+  justify-content: flex-end;
 }
 
 .nav-icon {
   bottom: 0;
   top: 0;
   margin: auto;
-}
-
-.input-group-prepend{
-  margin-right: 10px !important;
+  margin-right: 10px;
 }
 
 .router-view{
@@ -169,11 +174,14 @@ opacity: 0;
   background-color: #222;
 }
 
-.dark-input-field {
-  background-color: #121212 !important;
+
+#menu {
+  display: block;
 }
 
-
+.inputGroup {
+  width: auto !important;
+}
 
 
 </style>
