@@ -1,6 +1,6 @@
 <template>
   <div class="rules">
-    <InfoRetComp v-bind:dark-theme='darkTheme'/>
+    <InfoRetComp :darkTheme='darkTheme'/>
   </div>
 </template>
 
