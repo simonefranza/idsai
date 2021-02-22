@@ -13,13 +13,13 @@
               <span>User-based precision</span>
               <span>[{{neighbour_precisionUB}}]</span>
               <input type="range" min="-1.0" max="1.0" value="0.5" step="0.01" 
-                                                                   v-model="neighbour_precisionUB" :class="{'darkSlider' : darkTheme}" id="range-1" v-b-tooltip.hover :title="neighbour_precisionUB"/>
+                                                                   v-model="neighbour_precisionUB" :class="['slider', darkTheme? 'darkSlider' : 'lightSlider']" id="range-1" v-b-tooltip.hover :title="neighbour_precisionUB"/>
             </div>
             <div class="precDiv">
               <span>Item-based precision</span>
               <span>[{{neighbour_precisionIB}}]</span>
               <input type="range" min="-1.0" max="1.0" value="0.5" step="0.01" 
-                                                                   v-model="neighbour_precisionIB" :class="{'darkSlider' : darkTheme}" id="range-1" v-b-tooltip.hover :title="neighbour_precisionIB"/>
+                                                                   v-model="neighbour_precisionIB" :class="['slider', darkTheme? 'darkSlider' : 'lightSlider']" id="range-1" v-b-tooltip.hover :title="neighbour_precisionIB"/>
             </div>
             <SwitchGroup :darkTheme="darkTheme" :settings="settings" v-model="selectedSettings"/>
           </b-card-text>
@@ -287,22 +287,75 @@ export default {
   text-align:left;
 }
 
+.slider {
+  height:8px;
+  width: 33%;
+  border-radius:25px;
+}
+
+
 .darkSlider, .darkSlider:focus {
   -webkit-appearance: none;
-  height:8px;
-  background: #303131;
-  border-radius:25px;
-  border:1px solid #111;
+  -moz-appearance: none;
   outline:none;
+  border:1px solid #111;
+  background: #303131;
 }
-.darkSlider::-webkit-slider-thumb {
+.lightSlider, .lightSlider:focus {
   -webkit-appearance: none;
+  -moz-appearance: none;
+  outline:none;
+  border:1px solid #9a9b9b;
+  background: #fff;
+}
+
+.darkSlider::-moz-range-thumb {
+  -webkit-appearance: none;
+  -moz-appearance: none;
   appearance: none;
   width: 16px;
   height: 16px;
   border-radius:100%;
   background: #f5d782;
   cursor: pointer;
+  border: 0 solid transparent;
+}
+
+.darkSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius:100%;
+  background: #f5d782;
+  cursor: pointer;
+  border: 0 solid transparent;
+
+}
+
+.lightSlider::-moz-range-thumb {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius:100%;
+  background: #999;
+  cursor: pointer;
+  border: 0 solid transparent;
+}
+
+.lightSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius:100%;
+  background: #999;
+  cursor: pointer;
+  border: 0 solid transparent;
 }
 
 .precDiv {
