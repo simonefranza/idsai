@@ -2,7 +2,7 @@
   <div v-bind:id="!darkTheme ? 'app' : 'darkApp'">
     <div id="pageContainer" v-bind:class="!darkTheme ? 'page-light' : 'page-dark'">
       <div v-bind:id="!darkTheme ? 'nav' : 'darkNav'" v-bind:class="!darkTheme ? 'light-theme' : 'dark-theme'">
-        <div class="menuDiv"/>
+        <div class="menuDiv"></div>
         <div id="menu" class="menuDiv">
           <router-link to="/">Home</router-link> |
           <router-link v-bind:dark-theme="darkTheme" to="/rules">Rules</router-link> | 
@@ -11,16 +11,9 @@
           <router-link v-bind:dark-theme="darkTheme" to="/word-net">Word Net</router-link>
         </div>
         <div class="dark-light-switch menuDiv">
-          <b-input-group class="inputGroup">
-            <template #prepend>
-            <b-icon icon="sun" aria-hidden="true" class="nav-icon">  </b-icon>
-            </template>
-             <b-form-checkbox v-model="darkTheme" name="check-button" class="dark-light-switch" switch >
-             </b-form-checkbox>
-             <template #append>
-               <b-icon icon="moon" aria-hidden="true" class="nav-icon"></b-icon>
-             </template>
-          </b-input-group>
+          <b-icon icon="sun" aria-hidden="true" class="nav-icon">  </b-icon>
+          <ToggleSwitch :darkTheme="darkTheme" v-model="darkTheme" />
+          <b-icon icon="moon" aria-hidden="true" class="nav-icon"></b-icon>
         </div>
       </div>
       <transition name="slide-fade" mode="out-in">
@@ -33,6 +26,7 @@
 
 <script>
 import Footer from '@/components/Footer.vue'
+import ToggleSwitch from '@/components/ToggleSwitch.vue'
 
 export default {
   data() {
@@ -47,7 +41,6 @@ export default {
         {
           return this.tempDarkTheme;
         }
-        console.log(document.cookie);
         let cookies = document.cookie.split(";");
         let map = new Map();
         cookies.forEach(pair => {
@@ -64,7 +57,8 @@ export default {
 
   },
   components: {
-    Footer
+    Footer,
+    ToggleSwitch
   },
 }
 </script>
@@ -108,6 +102,7 @@ opacity: 0;
 #nav, #darkNav {
   padding: 30px;
   display: flex;
+  align-items:center;
 }
 
 .menuDiv{
@@ -157,8 +152,7 @@ opacity: 0;
 .nav-icon {
   bottom: 0;
   top: 0;
-  margin: auto;
-  margin-right: 10px;
+  margin: 10px;
 }
 
 .router-view{
@@ -181,6 +175,10 @@ opacity: 0;
 
 .inputGroup {
   width: auto !important;
+}
+
+body {
+  background: #2f2f2f !important;
 }
 
 

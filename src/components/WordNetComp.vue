@@ -173,7 +173,7 @@ export default {
       return map;
     },
     wnCont: function() {
-      let word = this.searched.trim();
+      let word = this.searched.trim().toLowerCase();
       if(!word)
         return '';
       console.log(word);

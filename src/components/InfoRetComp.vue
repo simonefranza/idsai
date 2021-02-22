@@ -53,16 +53,10 @@
           <b-card-text>
           <div class="row">
             <div class="col-6 panelSwitches">
-              <b-form-group v-slot="{ ariaDescribedby }" >
-                <b-form-checkbox-group :aria-describedby="ariaDescribedby" v-model="selectedSettings" :options="settings" size="lg" switches stacked>
-                </b-form-checkbox-group>
-              </b-form-group>
+              <SwitchGroup :darkTheme="darkTheme" :settings="settings" v-model="selectedSettings" />
             </div>
             <div class="col-6 panelSwitches">
-              <b-form-group v-slot="{ ariaDescribedby }" >
-                <b-form-checkbox-group :aria-describedby="ariaDescribedby" v-model="selectedQuerySett" :options="querySettings" size="lg" switches stacked>
-                </b-form-checkbox-group>
-              </b-form-group>
+              <SwitchGroup :darkTheme="darkTheme" :settings="querySettings" v-model="selectedQuerySett" />
             </div>
           </div>
           <div>
@@ -134,12 +128,17 @@
 </template>
 
 <script>
+import SwitchGroup from '@/components/SwitchGroup.vue'
+
 export default {
   props: {
     darkTheme: {
       type: Boolean,
       required: true
     }
+  },
+  components: {
+    SwitchGroup
   },
   data() 
   {

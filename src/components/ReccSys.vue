@@ -9,25 +9,19 @@
 
         <b-card title="Control Panel" v-bind:bg-variant="!darkTheme ? 'light' : 'dark'" v-bind:text-variant="!darkTheme ? '' : 'white'">
           <b-card-text class="ctrlPanel">
-            <p>
-              User-based neighbours choice precision
-            </p>
-                <b-input-group prepend="-1" append="1" class="mt-3">
-                  <b-form-input v-b-tooltip.hover :title="neighbour_precisionUB" id="range-1" 
-                                                                                 v-model="neighbour_precisionUB" type="range" min="-1" max="1" step="0.01"></b-form-input>
-                </b-input-group>
-              <p>
-                Item-based neighbours choice precision
-              </p>
-                <b-input-group prepend="-1" append="1" class="mt-3">
-                  <b-form-input v-b-tooltip.hover :title="neighbour_precisionIB" id="range-1" 
-                                                                                 v-model="neighbour_precisionIB" type="range" min="-1" max="1" step="0.01"></b-form-input>
-                </b-input-group>
-                <b-form-group v-slot="{ ariaDescribedby }" >
-                  <b-form-checkbox-group :aria-describedby="ariaDescribedby" v-model="selectedSettings" :options="settings" size="lg" switches stacked>
-                  </b-form-checkbox-group>
-                </b-form-group>
-
+            <div class="precDiv">
+              <span>User-based precision</span>
+              <span>[{{neighbour_precisionUB}}]</span>
+              <input type="range" min="-1.0" max="1.0" value="0.5" step="0.01" 
+                                                                   v-model="neighbour_precisionUB" :class="{'darkSlider' : darkTheme}" id="range-1" v-b-tooltip.hover :title="neighbour_precisionUB"/>
+            </div>
+            <div class="precDiv">
+              <span>Item-based precision</span>
+              <span>[{{neighbour_precisionIB}}]</span>
+              <input type="range" min="-1.0" max="1.0" value="0.5" step="0.01" 
+                                                                   v-model="neighbour_precisionIB" :class="{'darkSlider' : darkTheme}" id="range-1" v-b-tooltip.hover :title="neighbour_precisionIB"/>
+            </div>
+            <SwitchGroup :darkTheme="darkTheme" :settings="settings" v-model="selectedSettings"/>
           </b-card-text>
         </b-card>
       </div>
@@ -45,6 +39,7 @@
 <script>
 import Book from '../data/book.js'
 import Person from '../data/person.js'
+import SwitchGroup from './SwitchGroup.vue'
 export default {
   props: {
     darkTheme: {
@@ -52,8 +47,13 @@ export default {
       required: true
     }
   },
+  components: {
+    SwitchGroup
+  },
   data() {
     return {
+      test: false,
+      test2: false,
       names: ["Emma", "Franz", "Paula", "Sebastian", "Hermine", "Cristoph"],
       bookNames : ["Gnadenlos", "Im Sturm", "Mit aller Gewalt", "Die Macht des Präsident",
         "Pflicht und Ehre"],
@@ -118,7 +118,7 @@ export default {
           list[list.length - 1][bookList[j].getTitle()] = rating;
           if(rating == '?')
           {
-            list[list.length - 1]['_cellVariants'] = { [bookList[j].getTitle()] : 'info' };
+            list[list.length - 1]['_cellVariants'] = { [bookList[j].getTitle()] : this.darkTheme ? 'secondary' : 'info' };
           }
         }
       }
@@ -286,4 +286,30 @@ export default {
 .ctrlPanel {
   text-align:left;
 }
+
+.darkSlider, .darkSlider:focus {
+  -webkit-appearance: none;
+  height:8px;
+  background: #303131;
+  border-radius:25px;
+  border:1px solid #111;
+  outline:none;
+}
+.darkSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius:100%;
+  background: #f5d782;
+  cursor: pointer;
+}
+
+.precDiv {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+
 </style>
