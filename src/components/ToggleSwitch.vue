@@ -96,13 +96,15 @@ input:checked + .lightSlider{
   background-color: #057bfe;
   border: 1px solid #057bfe;
 }
-
+input:checked + .darkSlider{
+  background-color: #f5d782;
+}
 
 input:checked + .lightSlider:before {
   background-color: #fff;
 }
 input:checked + .darkSlider:before{
-  background-color: #f5d782;
+  background-color: #272c2f;
 }
 
 input:focus + .lightSlider{

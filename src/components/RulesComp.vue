@@ -32,33 +32,46 @@
               <span>Cycles</span>
               <span>[{{cycleNum + 1}} of {{cycles.length}}]</span>
               <span>
-                <b-icon :class="['cyclesIconLeft', decreaseCycleDisabled ? 'iconDisabled' : 'iconEnabled']" 
-                  icon="dash-circle" aria-hidden="true" @click="decreaseCyclesNum"></b-icon>
-                <b-icon :class="['cyclesIconRight', increaseCycleDisabled ? 'iconDisabled' : 'iconEnabled']"
-                  icon="plus-circle" aria-hidden="true" @click="increaseCyclesNum"></b-icon>
+                <b-icon :class="['cyclesIconLeft', decreaseCycleDisabled ? 'iconDisabled' : 'iconEnabled', darkTheme ? 'iconDark' : 'iconLight']" 
+                 icon="dash-circle" aria-hidden="true" @click="decreaseCyclesNum"></b-icon>
+                <b-icon :class="['cyclesIconRight', increaseCycleDisabled ? 'iconDisabled' : 'iconEnabled', darkTheme ? 'iconDark' : 'iconLight']"
+                                    icon="plus-circle" aria-hidden="true" @click="increaseCyclesNum"></b-icon>
               </span>
             </div>
             <div class="cyclesDiv">
-              <div>
-              <SwitchGroup :darkTheme="darkTheme" :settings="settings" v-model="selectedSettings"/>
-              </div>
-              <div>
-                <b-icon :class="['cyclesIconRight', selectedSettings.includes('rand_facts') ? 'iconEnabled' : 'iconDisabled']"
-                  icon="arrow-clockwise" aria-hidden="true" @click="reloadFacts" :animation="reloadingFacts ? 'spin' : ''"></b-icon><br/>
-                <b-icon :class="['cyclesIconRight', selectedSettings.includes('rand_rules') ? 'iconEnabled' : 'iconDisabled']"
-                     icon="arrow-clockwise" aria-hidden="true" @click="reloadRules" :animation="reloadingRules ? 'spin' : ''"></b-icon>
-              </div>
+              <span class="toggleBlock"><ToggleSwitch class="switchPadding" :darkTheme="darkTheme" v-model="rand_facts"/>  Random facts</span>
+              <b-form-input size="sm" v-model="numFacts" :disabled="!rand_facts"
+                                      :class="{'shake' : invalidFactsNumber, 'darkInputForm' : darkTheme, 'smallInput' : 'true', 'disabledInput' : !rand_facts}"></b-form-input>
+              <b-icon :class="['cyclesIconRight', rand_facts ? 'iconEnabled' : 'iconDisabled', darkTheme ? 'iconDark' : 'iconLight']"
+                                      icon="arrow-clockwise" aria-hidden="true" @click="reloadFacts" :animation="reloadingFacts ? 'spin' : ''"></b-icon>
+            </div>
+            <div class="cyclesDiv">
+              <span class="toggleBlock"><ToggleSwitch class="switchPadding" :darkTheme="darkTheme" v-model="rand_rules"/>Random rules</span>
+              <b-form-input size="sm" v-model="numRules" :disabled="!rand_rules"
+                                      :class="{'shake' : invalidRulesNumber, 'darkInputForm' : darkTheme, 'smallInput' : 'true', 'disabledInput' : !rand_rules}"></b-form-input>
+              <b-icon :class="['cyclesIconRight', rand_rules? 'iconEnabled' : 'iconDisabled', darkTheme ? 'iconDark' : 'iconLight']"
+                                      icon="arrow-clockwise" aria-hidden="true" @click="reloadRules" :animation="reloadingRules ? 'spin' : ''"></b-icon>
+            </div>
+            <div class="cyclesDiv">
+              <span class="toggleBlock">Replace variable</span>
+              <b-form-input size="sm" v-model="mapFrom" placeholder="A"
+                                      :class="{'shake' : invalidRulesNumber, 'darkInputForm' : darkTheme, 'mediumInput' : 'true'}"></b-form-input>
+              <span>:</span>
+              <b-form-input size="sm" v-model="mapTo" placeholder="something"
+                                      :class="{'shake' : invalidRulesNumber, 'darkInputForm' : darkTheme, 'mediumInput' : 'true'}"></b-form-input>
+              <b-icon :class="['cyclesIconRight', isMapValid ? 'iconEnabled' : 'iconDisabled', darkTheme ? 'iconDark' : 'iconLight']"
+                                      icon="check-circle" aria-hidden="true" @click="addMapping"></b-icon>
             </div>
           </b-card-text>
         </b-card>
       </div>
-      <div class="col"></div>
+      <div class="col">{{addedMapping}}</div>
     </div>
   </div>
 </template>
 
 <script>
-import SwitchGroup from '@/components/SwitchGroup.vue';
+import ToggleSwitch from '@/components/ToggleSwitch.vue';
 
 export default {
   props: {
@@ -68,13 +81,15 @@ export default {
     }
   },
   components: {
-    SwitchGroup,
+    ToggleSwitch,
   },
   data() {
     return {
       variables : ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'],
       stdFacts: ['A','B','C','D','E'],
       savedFacts: [],
+      savedRules: [],
+      addedMapping: [],
       cycleNum : -1,
       ruleHovered: -1,
       selectedSettings : [],
@@ -82,13 +97,41 @@ export default {
         { text: 'Random facts', value: 'rand_facts' },
         { text: 'Random rules', value: 'rand_rules' },
         ],
+      rand_facts : false,
+      rand_rules : false,
+      num_rand_facts_bool : false,
+      num_rand_rules_bool : false,
       reloadingFacts : false,
       reloadingRules : false,
+      numRules : 6,
+      numFacts: 4,
+      mapFrom : '',
+      mapTo : '',
     }
   },
   computed: {
+    invalidFactsNumber: function() {
+      return !this.numFacts || isNaN(this.numFacts) || ('' + this.numFacts).includes('.') ||
+        parseInt(this.numFacts) > this.variables.length;
+    },
+    invalidRulesNumber: function() {
+      return !this.numRules || isNaN(this.numRules) || ('' + this.numRules).includes('.');
+    },
     currentFacts: function() {
-      return this.selectedSettings.includes('rand_facts') ? this.savedFacts : this.stdFacts;
+      return this.rand_facts ? this.savedFacts : this.stdFacts;
+    },
+    currentRules: function() {
+      return this.rand_rules ? this.savedRules: this.rules;
+    },
+    currentMappings: function() {
+      let map = new Map();
+      this.variables.forEach(vr => map.set(vr, vr));
+      this.addedMapping.forEach(mapping => {
+        map.set(mapping['from'], mapping['to']);
+      });
+      console.log(map);
+
+      return map;
     },
     rules: function(){
       let arr = []; 
@@ -108,7 +151,7 @@ export default {
       do 
       {
         tempAddedFacts = [];
-        this.rules.forEach(ruleObj => {
+        this.currentRules.forEach(ruleObj => {
           if(this.validateAnt(ruleObj.ant, currFacts) && !currFacts.includes(ruleObj.cons))
             tempAddedFacts.push({rule: ruleObj.id, fact: ruleObj.cons});
         });
@@ -127,13 +170,13 @@ export default {
     factsPrintable: function() {
       let str = '';
       this.currentFacts.forEach((fact, index) => {
-        str += fact + (index == this.savedFacts.length - 1 ? '' : ', ');
+        str += this.currentMappings.get(fact) + (index == this.currentFacts.length - 1 ? '' : ', ');
       });
       return str;
     },
     rulesPrintable: function() {
       let str = [];
-      this.rules.forEach(ruleObj => 
+      this.currentRules.forEach(ruleObj => 
         str.push('R' + ruleObj.id + ': ' + ruleObj.ant + ' → ' + ruleObj.cons));
       return str;
     },
@@ -142,19 +185,88 @@ export default {
     },
     decreaseCycleDisabled: function() {
       return this.cycleNum === -1;
+    },
+    isMapValid: function() {
+      if(!this.mapTo || (this.mapTo && !this.mapFrom))
+        return false;
+      let isPresent = false;
+      for(let i = 0; i < this.currentMappings; i++)
+      {
+        let map = this.currentMappings[i];
+        if(map['from'].localeCompare(this.mapFrom) === 0 &&
+          map['to'].localeCompare(this.mapTo) === 0)
+        {
+          isPresent = true;
+          break;
+        }
+      }
+      if(isPresent)
+        return false;
+      return true;
     }
   },
   methods: {
+    addMapping() {
+      if(!this.isMapValid)
+        return;
+      this.addedMapping.splice(0, 0,{from: this.mapFrom, to: this.mapTo});
+      this.mapFrom = '';
+      this.mapTo = '';
+    },
     generatedFacts() {
-      let factsNum = Math.floor(Math.random() * 5) + 3;
+      if(this.invalidFactsNumber)
+        return [];
       let facts = [];
-      while(facts.length !== factsNum)
+      let count = 0;
+      while(facts.length !== parseInt(this.numFacts))
       {
         let newFact = this.variables[Math.floor(Math.random() * this.variables.length)];
         if(!facts.includes(newFact))
           facts.push(newFact);
+        if(count++ > 40)
+          break;
       }
       return facts.sort();
+    },
+    generateRules() {
+      if(this.invalidRulesNumber)
+        return [];
+      let rules = [];
+      for(let i = 0; i < parseInt(this.numRules); i++)
+      {
+        let numAnts = Math.floor(Math.random() * 3) + 1;
+        let ants = [];
+        while(ants.length != numAnts)
+        {
+          let ant = this.variables[Math.floor(Math.random() * this.variables.length)];
+          if(!ants.includes(ant))
+            ants.push(ant);
+        }
+        let antStr = '';
+        ants.forEach((ant, index) => {
+          antStr += ant;
+          if(index !== ants.length - 1)
+            antStr += " & ";
+        });
+        let cons = this.variables[Math.floor(Math.random() * this.variables.length)];
+        let alreadyExists = false;
+        for(let j = 0; j < rules.length; j++)
+        {
+          if(rules[j]['ant'].localeCompare(antStr) === 0 && 
+          rules[j]['cons'].localeCompare(cons) === 0)
+          {
+            alreadyExists = true;
+            break;
+          }
+        }
+        if(alreadyExists)
+        {
+          i--;
+          continue;
+        }
+        rules.push({id: i + 1, ant: antStr, cons: cons});
+      }
+      return rules;
     },
     validateAnt(ant, facts) {
       let splitty = ant.split(' & ');
@@ -182,7 +294,7 @@ export default {
       this.ruleHovered = -1;
     },
     reloadFacts() {
-      if(!this.selectedSettings.includes('rand_facts'))
+      if(!this.rand_facts)
         return;
       this.reloadingFacts = true;
       this.savedFacts.splice(0, this.savedFacts.length, ...this.generatedFacts());
@@ -190,10 +302,10 @@ export default {
         this.reloadingFacts = false;}, 2000);
     },
     reloadRules () {
-      if(!this.selectedSettings.includes('rand_rules'))
+      if(!this.rand_rules)
         return;
       this.reloadingRules = true;
-      //this.savedFacts.splice(0, -1, ...this.generatedFacts());
+      this.savedRules.splice(0, this.savedRules.length, ...this.generateRules());
       setTimeout(() => {
         this.reloadingRules = false;}, 2000);
     }
@@ -203,10 +315,17 @@ export default {
       if(this.cycleNum > this.cycles.length - 1)
         this.cycleNum = this.cycles.length - 1;
     },
+    numRules() {
+      this.savedRules.splice(0, this.savedRules.length, ...this.generateRules());
+    },
+    numFacts() {
+      this.savedFacts.splice(0, this.savedFacts.length, ...this.generatedFacts());
+    },
   },
   created() {
     this.savedFacts.splice(0, this.savedFacts.length, ...this.generatedFacts());
-  }
+    this.savedRules.splice(0, this.savedRules.length, ...this.generateRules());
+  },
 }
 </script>
 
@@ -222,6 +341,7 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 20px;
 }
 
 .cyclesIconLeft {
@@ -237,10 +357,54 @@ opacity: 0.5;
 
 .iconEnabled{
   opacity: 1;
-  color: #f5d782;
   cursor: pointer;
+}
+.iconDark {
+  color: #f5d782;
+}
+.iconLight {
+  color: #111;
 }
 .highlightedRule {
   font-weight: bold;
+}
+.toggleBlock{
+  display: flex;
+  align-items: center;
+}
+.switchPadding {
+  margin-right:10px;
+}
+.smallInput {
+  width: 50px;
+}
+.mediumInput {
+  width: 25%;
+}
+.darkInputForm {
+  background-color: #303131;
+  border: 1px solid #111;
+  color: #f8f1f1;
+}
+.shake {
+  animation: shake 0.82s cubic-bezier(.36,.07,.19,.97) both;
+  transform: translate3d(0, 0, 0);
+}
+@keyframes shake {
+  10%, 90% {
+    transform: translate3d(-1px, 0, 0);
+  }
+  20%, 80% {
+    transform: translate3d(2px, 0, 0);
+  }
+  30%, 50%, 70% {
+    transform: translate3d(-4px, 0, 0);
+  }
+  40%, 60% {
+    transform: translate3d(4px, 0, 0);
+  }
+}
+.disabledInput {
+  opacity: 0.7;
 }
 </style>
