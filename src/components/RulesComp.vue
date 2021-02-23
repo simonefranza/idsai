@@ -21,7 +21,7 @@
 
       <!-- Rules table -->
       <div class="col" v-if="cycleNum >= 0">
-        <b-table striped hover :items="cycles[cycleNum]" v-bind:dark="darkTheme" @mouseover="test(1)" @row-hovered="rowHovered" @row-unhovered="rowUnhovered"></b-table>
+        <b-table striped hover :items="cycles[cycleNum]" v-bind:dark="darkTheme" @row-hovered="rowHovered" @row-unhovered="rowUnhovered"></b-table>
       </div>
 
       <div class="col-3">
@@ -54,23 +54,34 @@
             </div>
             <div class="cyclesDiv">
               <span class="toggleBlock">Replace variable</span>
-              <b-form-input size="sm" v-model="mapFrom" placeholder="A"
-                                      :class="{'shake' : invalidRulesNumber, 'darkInputForm' : darkTheme, 'mediumInput' : 'true'}"></b-form-input>
+              <b-form-input size="sm" ref="fromInputField" v-model="mapFrom" placeholder="A"
+                                      :class="{'shake' : invalidRulesNumber, 'darkInputForm' : darkTheme, 'mediumInput' : 'true'}"
+                                      @keyup.enter="addMapping()"></b-form-input>
               <span>:</span>
               <b-form-input size="sm" v-model="mapTo" placeholder="something"
-                                      :class="{'shake' : invalidRulesNumber, 'darkInputForm' : darkTheme, 'mediumInput' : 'true'}"></b-form-input>
+                                      :class="{'shake' : invalidRulesNumber, 'darkInputForm' : darkTheme, 'mediumInput' : 'true'}"
+                                      @keyup.enter="addMapping()"></b-form-input>
               <b-icon :class="['cyclesIconRight', isMapValid ? 'iconEnabled' : 'iconDisabled', darkTheme ? 'iconDark' : 'iconLight']"
                                       icon="check-circle" aria-hidden="true" @click="addMapping"></b-icon>
             </div>
           </b-card-text>
         </b-card>
       </div>
-      <div class="col">{{addedMapping}}</div>
+      <div class="col" v-if="addedMapping.length">
+        <b-table striped hover :items="addedMapping" :fields="fields" v-bind:dark="darkTheme" >
+          <template #cell(remove)="row">
+            <b-icon icon="x-circle" aria-hidden="true" @click="removeMapping(row.index)"
+              :class="[darkTheme ? 'iconDark' : 'iconLight']"></b-icon>
+          </template>
+        </b-table>
+      </div>
+      <div class="col"></div>
     </div>
   </div>
 </template>
 
 <script>
+//TODO: implement writing own formulas
 import ToggleSwitch from '@/components/ToggleSwitch.vue';
 
 export default {
@@ -87,6 +98,7 @@ export default {
     return {
       variables : ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'],
       stdFacts: ['A','B','C','D','E'],
+      fields: ["from", "to", "remove"],
       savedFacts: [],
       savedRules: [],
       addedMapping: [],
@@ -188,6 +200,12 @@ export default {
       });
       return str;
     },
+    currentMappingsPrintable: function() {
+      let mappings = [];
+      console.log(this.addedMapping);
+      this.addedMapping.forEach((to, from)=> mappings.push({from: from, to: to}));
+      return mappings;
+    },
     increaseCycleDisabled: function() {
       return this.cycleNum === this.cycles.length - 1;
     },
@@ -195,7 +213,7 @@ export default {
       return this.cycleNum === -1;
     },
     isMapValid: function() {
-      if(!this.mapTo || (this.mapTo && !this.mapFrom) || !this.variables.includes(this.mapFrom.toUpperCase()))
+      if(!this.mapTo.trim() || !this.mapFrom.trim() || !this.variables.includes(this.mapFrom.trim().toUpperCase()))
         return false;
       let isPresent = false;
       //Check if mapping is already present
@@ -203,7 +221,8 @@ export default {
       {
         let map = this.addedMapping[i];
         console.log({from: this.mapFrom, to: this.mapTo, map: map['from'], map2: map['to']});
-        if(map['to'].toUpperCase().localeCompare(this.mapTo.toUpperCase()) === 0)
+        if(map['to'].toUpperCase().localeCompare(this.mapTo.toUpperCase().trim()) === 0 &&
+        map.from.toUpperCase().localeCompare(this.mapFrom.trim()))
         {
           isPresent = true;
           break;
@@ -215,22 +234,27 @@ export default {
     }
   },
   methods: {
+    removeMapping(index) {
+      this.addedMapping.splice(index,1);
+    },
     addMapping() {
-      if(!this.isMapValid)
+      if(!this.isMapValid || !this.mapTo.trim())
         return;
       let index = -1;
       for(let i = 0; i < this.addedMapping.length; i++)
       {
         let mapping = this.addedMapping[i];
-        if(mapping.from.localeCompare(this.mapFrom.toUpperCase()) === 0)
+        if(mapping.from.localeCompare(this.mapFrom.trim().toUpperCase()) === 0)
           index = i;
       }
       if(index === -1)
         this.addedMapping.splice(this.addedMapping.length, 0, {from: this.mapFrom.toUpperCase(), to: this.mapTo});
       else
-        this.addedMapping.splice(index, 1,{from: this.mapFrom.toUpperCase(), to: this.mapTo});
+        this.addedMapping.splice(index, 1,{from: this.mapFrom.toUpperCase().trim(), to: this.mapTo.trim()});
       this.mapFrom = '';
       this.mapTo = '';
+      console.log(this.$refs.fromInputField);
+      this.$refs.fromInputField.$el.focus();
     },
     generatedFacts() {
       if(this.invalidFactsNumber)
