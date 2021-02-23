@@ -135,11 +135,11 @@ export default {
     },
     rules: function(){
       let arr = []; 
-      arr.push({id: 1, ant: 'Y & D', cons: 'Z'});
-      arr.push({id: 2, ant: 'X & B & E', cons: 'Y'});
-      arr.push({id: 3, ant: 'A', cons: 'X'});
-      arr.push({id: 4, ant: 'C', cons: 'L'});
-      arr.push({id: 5, ant: 'L & M', cons: 'N'});
+      arr.push({id: 1, ant: ['Y', 'D'], cons: 'Z'});
+      arr.push({id: 2, ant: ['X', 'B', 'E'], cons: 'Y'});
+      arr.push({id: 3, ant: ['A'], cons: 'X'});
+      arr.push({id: 4, ant: ['C'], cons: 'L'});
+      arr.push({id: 5, ant: ['L', 'M'], cons: 'N'});
       return arr;
     },
     cycles: function() {
@@ -157,7 +157,7 @@ export default {
         });
         tempAddedFacts.forEach((addedObj, index) => {
           data.push({cycle: index === 0 ? cycleN++ : '', 
-            fired_rules: 'R' + addedObj['rule'], added_facts: addedObj['fact']});
+            fired_rules: 'R' + addedObj['rule'], added_facts: this.currentMappings.get(addedObj['fact'])});
           currFacts.push(addedObj['fact']);
         });
         if(tempAddedFacts.length !== 0)
@@ -176,8 +176,16 @@ export default {
     },
     rulesPrintable: function() {
       let str = [];
-      this.currentRules.forEach(ruleObj => 
-        str.push('R' + ruleObj.id + ': ' + ruleObj.ant + ' → ' + ruleObj.cons));
+
+      this.currentRules.forEach(ruleObj => {
+        let antStr = '';
+        ruleObj.ant.forEach((el,index) => {
+          antStr += this.currentMappings.get(el);
+          if(index !== ruleObj.ant.length - 1)
+            antStr += " & ";
+        });
+        str.push('R' + ruleObj.id + ': ' + antStr + ' → ' + this.currentMappings.get(ruleObj.cons));
+      });
       return str;
     },
     increaseCycleDisabled: function() {
@@ -187,14 +195,15 @@ export default {
       return this.cycleNum === -1;
     },
     isMapValid: function() {
-      if(!this.mapTo || (this.mapTo && !this.mapFrom))
+      if(!this.mapTo || (this.mapTo && !this.mapFrom) || !this.variables.includes(this.mapFrom.toUpperCase()))
         return false;
       let isPresent = false;
-      for(let i = 0; i < this.currentMappings; i++)
+      //Check if mapping is already present
+      for(let i = 0; i < this.addedMapping.length; i++)
       {
-        let map = this.currentMappings[i];
-        if(map['from'].localeCompare(this.mapFrom) === 0 &&
-          map['to'].localeCompare(this.mapTo) === 0)
+        let map = this.addedMapping[i];
+        console.log({from: this.mapFrom, to: this.mapTo, map: map['from'], map2: map['to']});
+        if(map['to'].toUpperCase().localeCompare(this.mapTo.toUpperCase()) === 0)
         {
           isPresent = true;
           break;
@@ -209,7 +218,17 @@ export default {
     addMapping() {
       if(!this.isMapValid)
         return;
-      this.addedMapping.splice(0, 0,{from: this.mapFrom, to: this.mapTo});
+      let index = -1;
+      for(let i = 0; i < this.addedMapping.length; i++)
+      {
+        let mapping = this.addedMapping[i];
+        if(mapping.from.localeCompare(this.mapFrom.toUpperCase()) === 0)
+          index = i;
+      }
+      if(index === -1)
+        this.addedMapping.splice(this.addedMapping.length, 0, {from: this.mapFrom.toUpperCase(), to: this.mapTo});
+      else
+        this.addedMapping.splice(index, 1,{from: this.mapFrom.toUpperCase(), to: this.mapTo});
       this.mapFrom = '';
       this.mapTo = '';
     },
@@ -242,18 +261,22 @@ export default {
           if(!ants.includes(ant))
             ants.push(ant);
         }
-        let antStr = '';
-        ants.forEach((ant, index) => {
-          antStr += ant;
-          if(index !== ants.length - 1)
-            antStr += " & ";
-        });
         let cons = this.variables[Math.floor(Math.random() * this.variables.length)];
         let alreadyExists = false;
         for(let j = 0; j < rules.length; j++)
         {
-          if(rules[j]['ant'].localeCompare(antStr) === 0 && 
-          rules[j]['cons'].localeCompare(cons) === 0)
+          let currAnts = rules[j]['ant'].sort();
+          let haveSameAnts = true;
+          if(currAnts.length !== ants.length)
+            continue;
+
+          ants.sort().forEach((el, index) => {
+            if(currAnts[index].localeCompare(el))
+              haveSameAnts = false;
+          });
+
+          
+          if(haveSameAnts && rules[j]['cons'].localeCompare(cons) === 0)
           {
             alreadyExists = true;
             break;
@@ -264,15 +287,14 @@ export default {
           i--;
           continue;
         }
-        rules.push({id: i + 1, ant: antStr, cons: cons});
+        rules.push({id: i + 1, ant: ants, cons: cons});
       }
       return rules;
     },
     validateAnt(ant, facts) {
-      let splitty = ant.split(' & ');
-      for(let i = 0; i < splitty.length; i++)
+      for(let i = 0; i < ant.length; i++)
       {
-        if(!facts.includes(splitty[i]))
+        if(!facts.includes(ant[i]))
           return false;
       }
       return true;
