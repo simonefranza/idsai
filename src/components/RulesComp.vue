@@ -29,6 +29,11 @@
         <b-card title="Control Panel" v-bind:bg-variant="!darkTheme ? 'light' : 'dark'" v-bind:text-variant="!darkTheme ? '' : 'white'">
           <b-card-text>
             <div class="cyclesDiv">
+              <span class="toggleBlock"><ToggleSwitch class="switchPadding" :darkTheme="darkTheme" v-model="bckwd_chain"/>Backward chaining</span>
+              <b-form-input size="sm" v-model="searchedVariable" :disabled="!bckwd_chain"
+                                      :class="{'shake' : invalidGoal, 'darkInputForm' : darkTheme, 'smallInput' : 'true', 'disabledInput' : !bckwd_chain}"></b-form-input>
+            </div>
+            <div class="cyclesDiv">
               <span>Cycles</span>
               <span>[{{cycleNum + 1}} of {{cycles.length}}]</span>
               <span>
@@ -77,12 +82,21 @@
       </div>
       <div class="col"></div>
     </div>
+    <div class="row">
+    <div class="col"></div>
+    <div class="col" v-if="bckwd_chain">
+      <BackwardChaining :darkTheme="darkTheme" :facts="currentFacts" :rules="currentRules"
+                     :mappings="addedMapping" :goal="currentGoal" />
+    </div>
+    <div class="col"></div>
+    </div>
   </div>
 </template>
 
 <script>
 //TODO: implement writing own formulas
 import ToggleSwitch from '@/components/ToggleSwitch.vue';
+import BackwardChaining from '@/components/BackwardChaining.vue';
 
 export default {
   props: {
@@ -93,6 +107,7 @@ export default {
   },
   components: {
     ToggleSwitch,
+    BackwardChaining,
   },
   data() {
     return {
@@ -111,17 +126,22 @@ export default {
         ],
       rand_facts : false,
       rand_rules : false,
+      bckwd_chain : false,
       num_rand_facts_bool : false,
       num_rand_rules_bool : false,
       reloadingFacts : false,
       reloadingRules : false,
       numRules : 6,
       numFacts: 4,
+      searchedVariable : '',
       mapFrom : '',
       mapTo : '',
     }
   },
   computed: {
+    currentGoal: function() {
+      return this.searchedVariable.trim().toUpperCase();
+    },
     invalidFactsNumber: function() {
       return !this.numFacts || isNaN(this.numFacts) || ('' + this.numFacts).includes('.') ||
         parseInt(this.numFacts) > this.variables.length;
@@ -141,7 +161,6 @@ export default {
       this.addedMapping.forEach(mapping => {
         map.set(mapping['from'], mapping['to']);
       });
-      console.log(map);
 
       return map;
     },
@@ -202,7 +221,6 @@ export default {
     },
     currentMappingsPrintable: function() {
       let mappings = [];
-      console.log(this.addedMapping);
       this.addedMapping.forEach((to, from)=> mappings.push({from: from, to: to}));
       return mappings;
     },
@@ -220,7 +238,6 @@ export default {
       for(let i = 0; i < this.addedMapping.length; i++)
       {
         let map = this.addedMapping[i];
-        console.log({from: this.mapFrom, to: this.mapTo, map: map['from'], map2: map['to']});
         if(map['to'].toUpperCase().localeCompare(this.mapTo.toUpperCase().trim()) === 0 &&
         map.from.toUpperCase().localeCompare(this.mapFrom.trim()))
         {
@@ -231,6 +248,17 @@ export default {
       if(isPresent)
         return false;
       return true;
+    },
+    invalidGoal: function() {
+      if(!this.currentGoal.trim())
+        return false;
+      let found = false;
+      this.addedMapping.forEach(map => {
+        if(map.to.toUpperCase().localeCompare(this.currentGoal) === 0)
+          found = true;
+        console.log({map: map.to, th: this.currentGoal, found: found});
+      });
+      return !(this.variables.includes(this.currentGoal) || found);
     }
   },
   methods: {
@@ -253,7 +281,6 @@ export default {
         this.addedMapping.splice(index, 1,{from: this.mapFrom.toUpperCase().trim(), to: this.mapTo.trim()});
       this.mapFrom = '';
       this.mapTo = '';
-      console.log(this.$refs.fromInputField);
       this.$refs.fromInputField.$el.focus();
     },
     generatedFacts() {
@@ -299,8 +326,8 @@ export default {
               haveSameAnts = false;
           });
 
-          
-          if(haveSameAnts && rules[j]['cons'].localeCompare(cons) === 0)
+          if((haveSameAnts && rules[j]['cons'].localeCompare(cons) === 0) ||
+          ants.includes(cons))
           {
             alreadyExists = true;
             break;

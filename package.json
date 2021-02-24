@@ -9,6 +9,7 @@
     "deploy": "sh deploy.sh"
   },
   "dependencies": {
+    "@ssthouse/vue-tree-chart": "^0.4.3",
     "core-js": "^3.8.3",
     "natural": "^3.0.3",
     "vue": "^2.6.11",
