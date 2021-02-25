@@ -8,31 +8,38 @@
         <b-card class="dataCard" v-bind:bg-variant="!darkTheme ? 'light' : 'dark'" v-bind:text-variant="!darkTheme ? '' : 'white'">
           <b-card-text>
             <p class="dataTitle">Facts</p>
-            {{factsPrintable}}
+            <span v-for="(fact, index) in currentFacts" :key="fact">
+              <span :class="{'dataTitle' : fact.localeCompare(mapFrom.trim()) ===0}">
+                {{fact}}</span><span v-if="index !== currentFacts.length - 1">, </span>
+            </span>
             <br/><br/>
             <p class="dataTitle">Rules</p>
-            <span v-for="(rule, index) in rulesPrintable" :key="rule">
-              <span :class="{'highlightedRule' : index+1 == ruleHovered}">{{rule}}<br/></span>
-            </span>
+            <span v-for="(rule, index) in currentRules" :key ="rule.id" :class="{'highlightedRule' : index+1 == ruleHovered}">
+              <span>R{{rule.id}}: </span> 
+              <span v-for="(ant,index) in rule.ant" :key="ant"><span :class="{'dataTitle' : ant.localeCompare(mapFrom.trim()) ===0}">{{ant}}</span><span v-if="index !== rule.ant.length - 1"> & </span>
+              </span>
+              <span> → </span>
+              <span :class="{'dataTitle' : rule.cons.localeCompare(mapFrom.trim()) ===0}">{{rule.cons}}</span><br/>
 
+            </span>
           </b-card-text>
         </b-card>
       </div>
 
       <!-- Rules table -->
       <div class="col" v-if="cycleNum >= 0">
-        <b-table striped hover :items="cycles[cycleNum]" v-bind:dark="darkTheme" @row-hovered="rowHovered" @row-unhovered="rowUnhovered"></b-table>
+        <b-table striped hover :items="cycles[cycleNum]" v-bind:dark="darkTheme" @row-hovered="rowHovered" @row-unhovered="rowUnhovered">
+          <template #cell(added_facts)="row">
+            <span :class="{'dataTitle' : row.value.localeCompare(mapFrom.trim()) === 0}">{{row.value}}</span>
+
+          </template>
+        </b-table>
       </div>
 
       <div class="col-3">
 
         <b-card title="Control Panel" v-bind:bg-variant="!darkTheme ? 'light' : 'dark'" v-bind:text-variant="!darkTheme ? '' : 'white'">
           <b-card-text>
-            <div class="cyclesDiv">
-              <span class="toggleBlock"><ToggleSwitch class="switchPadding" :darkTheme="darkTheme" v-model="bckwd_chain"/>Backward chaining</span>
-              <b-form-input size="sm" v-model="searchedVariable" :disabled="!bckwd_chain"
-                                      :class="{'shake' : invalidGoal, 'darkInputForm' : darkTheme, 'smallInput' : 'true', 'disabledInput' : !bckwd_chain}"></b-form-input>
-            </div>
             <div class="cyclesDiv">
               <span>Cycles</span>
               <span>[{{cycleNum + 1}} of {{cycles.length}}]</span>
@@ -69,6 +76,11 @@
               <b-icon :class="['cyclesIconRight', isMapValid ? 'iconEnabled' : 'iconDisabled', darkTheme ? 'iconDark' : 'iconLight']"
                                       icon="check-circle" aria-hidden="true" @click="addMapping"></b-icon>
             </div>
+            <div class="cyclesDiv">
+              <span class="toggleBlock">Backward chaining goal </span>
+              <b-form-input size="sm" v-model="searchedVariable" 
+                                      :class="{'shake' : invalidGoal, 'darkInputForm' : darkTheme, 'smallInput' : 'true'}"></b-form-input>
+            </div>
           </b-card-text>
         </b-card>
       </div>
@@ -83,12 +95,10 @@
       <div class="col"></div>
     </div>
     <div class="row">
-    <div class="col"></div>
-    <div class="col" v-if="bckwd_chain">
+    <div class="col-12">
       <BackwardChaining :darkTheme="darkTheme" :facts="currentFacts" :rules="currentRules"
-                     :mappings="addedMapping" :goal="currentGoal" />
+                     :mappings="currentMappings" :goal="currentGoal" />
     </div>
-    <div class="col"></div>
     </div>
   </div>
 </template>
@@ -112,7 +122,6 @@ export default {
   data() {
     return {
       variables : ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'],
-      stdFacts: ['A','B','C','D','E'],
       fields: ["from", "to", "remove"],
       savedFacts: [],
       savedRules: [],
@@ -139,8 +148,17 @@ export default {
     }
   },
   computed: {
+    stdFacts: function() {
+      return this.variables.slice(0, 5);
+    },
     currentGoal: function() {
-      return this.searchedVariable.trim().toUpperCase();
+      let currGoal = this.searchedVariable.trim().toUpperCase();
+      for(let [from, to] of this.currentMappings)
+      {
+        if(currGoal.localeCompare(to.toUpperCase()) === 0)
+          return from;
+      }
+      return '';
     },
     invalidFactsNumber: function() {
       return !this.numFacts || isNaN(this.numFacts) || ('' + this.numFacts).includes('.') ||
@@ -166,11 +184,11 @@ export default {
     },
     rules: function(){
       let arr = []; 
-      arr.push({id: 1, ant: ['Y', 'D'], cons: 'Z'});
-      arr.push({id: 2, ant: ['X', 'B', 'E'], cons: 'Y'});
-      arr.push({id: 3, ant: ['A'], cons: 'X'});
-      arr.push({id: 4, ant: ['C'], cons: 'L'});
-      arr.push({id: 5, ant: ['L', 'M'], cons: 'N'});
+      arr.push({id: 1, ant: [this.variables[24], this.variables[3]], cons: this.variables[25]});
+      arr.push({id: 2, ant: [this.variables[23], this.variables[1], this.variables[4]], cons: this.variables[24]});
+      arr.push({id: 3, ant: [this.variables[0]], cons: this.variables[23]});
+      arr.push({id: 4, ant: [this.variables[2]], cons: this.variables[11]});
+      arr.push({id: 5, ant: [this.variables[11], this.variables[12]], cons: this.variables[13]});
       return arr;
     },
     cycles: function() {
@@ -231,21 +249,8 @@ export default {
       return this.cycleNum === -1;
     },
     isMapValid: function() {
-      if(!this.mapTo.trim() || !this.mapFrom.trim() || !this.variables.includes(this.mapFrom.trim().toUpperCase()))
-        return false;
-      let isPresent = false;
-      //Check if mapping is already present
-      for(let i = 0; i < this.addedMapping.length; i++)
-      {
-        let map = this.addedMapping[i];
-        if(map['to'].toUpperCase().localeCompare(this.mapTo.toUpperCase().trim()) === 0 &&
-        map.from.toUpperCase().localeCompare(this.mapFrom.trim()))
-        {
-          isPresent = true;
-          break;
-        }
-      }
-      if(isPresent)
+      if(!this.mapTo.trim() || !this.mapFrom.trim() || !this.variables.includes(this.mapFrom.trim()) ||
+      this.variables.includes(this.mapTo.trim()))
         return false;
       return true;
     },
@@ -256,7 +261,6 @@ export default {
       this.addedMapping.forEach(map => {
         if(map.to.toUpperCase().localeCompare(this.currentGoal) === 0)
           found = true;
-        console.log({map: map.to, th: this.currentGoal, found: found});
       });
       return !(this.variables.includes(this.currentGoal) || found);
     }
@@ -268,19 +272,12 @@ export default {
     addMapping() {
       if(!this.isMapValid || !this.mapTo.trim())
         return;
-      let index = -1;
-      for(let i = 0; i < this.addedMapping.length; i++)
-      {
-        let mapping = this.addedMapping[i];
-        if(mapping.from.localeCompare(this.mapFrom.trim().toUpperCase()) === 0)
-          index = i;
-      }
-      if(index === -1)
-        this.addedMapping.splice(this.addedMapping.length, 0, {from: this.mapFrom.toUpperCase(), to: this.mapTo});
-      else
-        this.addedMapping.splice(index, 1,{from: this.mapFrom.toUpperCase().trim(), to: this.mapTo.trim()});
-      this.mapFrom = '';
+      let indexVar = this.variables.indexOf(this.mapFrom.trim());
+      if(indexVar === -1)
+        return;
+      this.variables.splice(indexVar, 1, this.mapTo.trim());
       this.mapTo = '';
+      this.mapFrom = '';
       this.$refs.fromInputField.$el.focus();
     },
     generatedFacts() {

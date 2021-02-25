@@ -1,9 +1,5 @@
 <template>
   <div>
-    {{backwardChain}}<br/><br/><br/>
-
-
-    {{testData}}
   <vue-tree
     style="width: 2000px; height: 2000px;"
     :dataset="backwardChain"
@@ -12,7 +8,7 @@
     v-if="Object.keys(backwardChain).length !== 0"
     >
     <template v-slot:node="{ node, collapsed }">
-      <TreeNode :darkTheme="darkTheme" :data="node" :collapsed="collapsed" />
+      <TreeNode :darkTheme="darkTheme" :data="node" :collapsed="collapsed" :facts="facts" :mappings="mappings"/>
     </template>
   </vue-tree>
   </div>
@@ -39,17 +35,9 @@ export default {
   },
   data() {
     return {
-    sampleData: {
-      value: '1',
-      children: [
-        { value: '2', children: [{ value: '4' }, { value: '5' }] },
-        { value: '3' }
-      ]
-    },
-    treeConfig: { nodeWidth: 300, nodeHeight: 200, levelHeight: 500 },
+    treeConfig: { nodeWidth: 325, nodeHeight: 200, levelHeight: 200},
     treeNodes : 0,
     updateVar: false,
-
     }
   },
   computed: {
@@ -61,8 +49,9 @@ export default {
       if(res === true || res === false)
       {
         return {value: this.goal, nodeData: {goal: this.goal, 
-          facts: [...this.facts], isTrue: res}};
+          facts: [...this.facts], isRoot: true, isTrue: res}};
       }
+      res.nodeData.isRoot = true;
       return res;
     },
     testData: function() {
@@ -80,7 +69,6 @@ export default {
   methods: {
     checkGoal(goal, facts, path)
     {
-      this.updateVar = false;
       let data = {};
       if(facts.includes(goal))
       {
@@ -97,8 +85,8 @@ export default {
 //      console.log({goal: goal, ants: ants});
       for(let j = 0; j < ants.length; j++)
       {
-        let antGroup = ants[j];
         let counter = 0;
+        let antGroup = ants[j];
         let groupData = [];
         let foundValidGroup = true;
         for(let i = 0; i < antGroup.length; i++)
@@ -117,6 +105,8 @@ export default {
           {
             newObj.goal = ant;
             newObj.facts = [];
+            newObj.children = 0;
+            newObj.isRoot = false;
             facts.forEach(fact => {
               newObj.facts.push(fact);
             });
@@ -127,8 +117,7 @@ export default {
             continue;
           }
           groupData.push(res);
-          //TODO detect infinite loops
-          if(counter++ > 20)
+          if(counter++ > 10)
             break;
         }
 //        console.log({groupD: groupData});
@@ -140,10 +129,9 @@ export default {
       }
       let tempFacts = [...facts];
 //      console.log({children: data.children});
-      let isOneGroupTrue = false;
+      let areAllNeededTrue = true;
       data.children.forEach(childrenFact => {
-//        console.log({child: childrenFact});
-        let areAllNeededTrue = true;
+        console.log({child: childrenFact});
 
         if(!childrenFact.nodeData.isTrue)
           areAllNeededTrue = false;
@@ -152,20 +140,19 @@ export default {
           if(!tempFacts.includes(fact))
             tempFacts.push(fact);
         });
-        if(areAllNeededTrue)
-          isOneGroupTrue = true;
       });
 
-      if(isOneGroupTrue)
+      if(areAllNeededTrue)
       {
 //        console.log(`added ${goal} to local facts`);
         tempFacts.push(goal);
       }
       data.nodeData.facts = [...tempFacts];
-      data.nodeData.isTrue = isOneGroupTrue;
+      data.nodeData.children = data.children.length;
+      data.nodeData.isRoot = false;
+      data.nodeData.isTrue = areAllNeededTrue;
       data.value = goal; 
 //      console.log({returningData: data});
-      this.updateVar = true;
       return data;
     },
     findAnts(goal)
@@ -181,6 +168,29 @@ export default {
       }
       return ants;
     }
+  },
+  watch: {
+    backwardChain: function(val) {
+      console.log(val);
+      this.updateVar = Math.random();
+    },
+//    facts: function() {
+//      this.updateVar = false;
+//      setTimeout(() => {this.updateVar = true}, 500);
+//    },
+//    rules: function() {
+//      this.updateVar = true;
+//      setTimeout(() => {this.updateVar = false}, 500);
+//    },
+//    mappings: function() {
+//      this.updateVar = true;
+//      setTimeout(() => {this.updateVar = false}, 500);
+//    },
+//    goal: function() {
+//      this.updateVar = true;
+//      setTimeout(() => {this.updateVar = false}, 500);
+//    },
+    
   }
 }
 </script>
