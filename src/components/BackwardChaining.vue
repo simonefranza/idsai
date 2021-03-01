@@ -8,7 +8,7 @@
     v-if="Object.keys(backwardChain).length !== 0"
     >
     <template v-slot:node="{ node, collapsed }">
-      <TreeNode :darkTheme="darkTheme" :data="node" :collapsed="collapsed" :facts="facts" :mappings="mappings"/>
+      <TreeNode :darkTheme="darkTheme" :data="node" :collapsed="collapsed" :facts="facts" :variables="variables" :highlight="highlight"/>
     </template>
   </vue-tree>
   </div>
@@ -22,12 +22,13 @@ export default {
   props: {
     facts: { required: true, },
     rules: { required: true, },
-    mappings: {required: true},
+    variables: {required: true},
     goal: {required: true },
     darkTheme: {
       type: Boolean,
       required: true,
     },
+    highlight : {required: true},
   },
   components: {
     VueTree,
@@ -41,6 +42,7 @@ export default {
     }
   },
   computed: {
+    //TODO check A->B B->A
     backwardChain: function() {
       if(!this.goal)
         return {};
@@ -62,7 +64,6 @@ export default {
 //      data.test = [4,2,5,1,5];
 //      data.children = [{value: '5'}, {value: '6', children: [{value: '8'}]}];
       data.value = this.goal;
-      console.log(JSON.parse(JSON.stringify(data)));
       return JSON.parse(JSON.stringify(data));
     }
   },
@@ -131,7 +132,7 @@ export default {
 //      console.log({children: data.children});
       let areAllNeededTrue = true;
       data.children.forEach(childrenFact => {
-        console.log({child: childrenFact});
+//        console.log({child: childrenFact});
 
         if(!childrenFact.nodeData.isTrue)
           areAllNeededTrue = false;
@@ -170,27 +171,9 @@ export default {
     }
   },
   watch: {
-    backwardChain: function(val) {
-      console.log(val);
+    backwardChain: function() {
       this.updateVar = Math.random();
     },
-//    facts: function() {
-//      this.updateVar = false;
-//      setTimeout(() => {this.updateVar = true}, 500);
-//    },
-//    rules: function() {
-//      this.updateVar = true;
-//      setTimeout(() => {this.updateVar = false}, 500);
-//    },
-//    mappings: function() {
-//      this.updateVar = true;
-//      setTimeout(() => {this.updateVar = false}, 500);
-//    },
-//    goal: function() {
-//      this.updateVar = true;
-//      setTimeout(() => {this.updateVar = false}, 500);
-//    },
-    
   }
 }
 </script>

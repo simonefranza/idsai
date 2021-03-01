@@ -8,19 +8,34 @@
         <b-card class="dataCard" v-bind:bg-variant="!darkTheme ? 'light' : 'dark'" v-bind:text-variant="!darkTheme ? '' : 'white'">
           <b-card-text>
             <p class="dataTitle">Facts</p>
-            <span v-for="(fact, index) in currentFacts" :key="fact">
+            <span v-for="(fact, index) in currentFacts" :key="fact"  
+                  :class="{'highlightRowDark' : index === hoveredFact && darkTheme, 'highlightRowLight' : index  === hoveredFact && !darkTheme}"
+              @mouseover="hoveredFact = index" @mouseleave="hoveredFact = -1" class="flexSpan">
+              <span>
               <span :class="{'dataTitle' : fact.localeCompare(mapFrom.trim()) ===0}">
-                {{fact}}</span><span v-if="index !== currentFacts.length - 1">, </span>
+                {{fact}}</span>
+                </span>
+                <span>
+                <b-icon :class="['cyclesIconRight', 'iconEnabled', darkTheme ? 'iconDark' : 'iconLight']"
+                  icon="x-circle" aria-hidden="true" @click="deleteFact(index)" v-if="index === hoveredFact"></b-icon>
+                <br/>
+                </span>
             </span>
-            <br/><br/>
+            <br/>
             <p class="dataTitle">Rules</p>
-            <span v-for="(rule, index) in currentRules" :key ="rule.id" :class="{'highlightedRule' : index+1 == ruleHovered}">
+            <span v-for="(rule, index) in rules" :key ="rule.id" 
+                  :class="{'highlightedRule' : index+1 == ruleHovered, 'highlightRowDark' : index  === hoveredRule && darkTheme, 'highlightRowLight' : index === hoveredRule && !darkTheme}"
+              @mouseover="hoveredRule = index" @mouseleave="hoveredRule = -1" class="flexSpan">
+              <span>
               <span>R{{rule.id}}: </span> 
               <span v-for="(ant,index) in rule.ant" :key="ant"><span :class="{'dataTitle' : ant.localeCompare(mapFrom.trim()) ===0}">{{ant}}</span><span v-if="index !== rule.ant.length - 1"> & </span>
               </span>
               <span> → </span>
               <span :class="{'dataTitle' : rule.cons.localeCompare(mapFrom.trim()) ===0}">{{rule.cons}}</span><br/>
-
+              </span><span>
+              <b-icon :class="['cyclesIconRight', 'iconEnabled', darkTheme ? 'iconDark' : 'iconLight']"
+                                                              icon="x-circle" aria-hidden="true" @click="deleteRule(index)" v-if="index === hoveredRule"></b-icon>
+              </span>
             </span>
           </b-card-text>
         </b-card>
@@ -51,19 +66,36 @@
               </span>
             </div>
             <div class="cyclesDiv">
-              <span class="toggleBlock"><ToggleSwitch class="switchPadding" :darkTheme="darkTheme" v-model="rand_facts"/>  Random facts</span>
-              <b-form-input size="sm" v-model="numFacts" :disabled="!rand_facts"
-                                      :class="{'shake' : invalidFactsNumber, 'darkInputForm' : darkTheme, 'smallInput' : 'true', 'disabledInput' : !rand_facts}"></b-form-input>
-              <b-icon :class="['cyclesIconRight', rand_facts ? 'iconEnabled' : 'iconDisabled', darkTheme ? 'iconDark' : 'iconLight']"
+              <span class="toggleBlock">Number of facts</span>
+              <b-form-input size="sm" v-model="numFacts"
+                                      :class="{'shake' : invalidFactsNumber, 'darkInputForm' : darkTheme, 'mediumInput' : 'true'}"></b-form-input>
+              <b-icon :class="['cyclesIconRight', 'iconEnabled', darkTheme ? 'iconDark' : 'iconLight']"
                                       icon="arrow-clockwise" aria-hidden="true" @click="reloadFacts" :animation="reloadingFacts ? 'spin' : ''"></b-icon>
             </div>
             <div class="cyclesDiv">
-              <span class="toggleBlock"><ToggleSwitch class="switchPadding" :darkTheme="darkTheme" v-model="rand_rules"/>Random rules</span>
-              <b-form-input size="sm" v-model="numRules" :disabled="!rand_rules"
-                                      :class="{'shake' : invalidRulesNumber, 'darkInputForm' : darkTheme, 'smallInput' : 'true', 'disabledInput' : !rand_rules}"></b-form-input>
-              <b-icon :class="['cyclesIconRight', rand_rules? 'iconEnabled' : 'iconDisabled', darkTheme ? 'iconDark' : 'iconLight']"
+              <span class="toggleBlock">Number of rules</span>
+              <b-form-input size="sm" v-model="numRules"
+                                      :class="{'shake' : invalidRulesNumber, 'darkInputForm' : darkTheme, 'mediumInput' : 'true'}"></b-form-input>
+              <b-icon :class="['cyclesIconRight', 'iconEnabled', darkTheme ? 'iconDark' : 'iconLight']"
                                       icon="arrow-clockwise" aria-hidden="true" @click="reloadRules" :animation="reloadingRules ? 'spin' : ''"></b-icon>
             </div>
+            <span class="cyclesDiv">
+              <span>New fact</span>
+              <b-form-input size="sm" v-model="newFact" placeholder="Fact"
+               :class="{'newFact' : 'true', 'darkInputForm' : darkTheme}" @keyup.enter="addNewFact()"></b-form-input>
+              <b-icon :class="['cyclesIconRight', isNewFactValid ? 'iconEnabled' : 'iconDisabled', darkTheme ? 'iconDark' : 'iconLight']"
+                                icon="check-circle" aria-hidden="true" @click="addNewFact"></b-icon>
+            </span>
+            <span class="cyclesDiv">
+              <span>New rule</span> 
+              <b-form-input size="sm" v-model="newAntecedents" placeholder="Ants & separated"
+               :class="{'newRule' : 'true', 'darkInputForm' : darkTheme}"></b-form-input>
+              <span> → </span>
+                <b-form-input size="sm" v-model="newConsequent" placeholder="Cons"
+                    :class="{'newRule' : 'true', 'consequentInput' : 'true', 'darkInputForm' : darkTheme}" @keyup.enter="addNewRule()"></b-form-input>
+              <b-icon :class="['cyclesIconRight', isNewRuleValid ? 'iconEnabled' : 'iconDisabled', darkTheme ? 'iconDark' : 'iconLight']"
+                                                              icon="check-circle" aria-hidden="true" @click="addNewRule"></b-icon>
+            </span>
             <div class="cyclesDiv">
               <span class="toggleBlock">Replace variable</span>
               <b-form-input size="sm" ref="fromInputField" v-model="mapFrom" placeholder="A"
@@ -79,25 +111,17 @@
             <div class="cyclesDiv">
               <span class="toggleBlock">Backward chaining goal </span>
               <b-form-input size="sm" v-model="searchedVariable" 
-                                      :class="{'shake' : invalidGoal, 'darkInputForm' : darkTheme, 'smallInput' : 'true'}"></b-form-input>
+                                      :class="{'shake' : invalidGoal, 'darkInputForm' : darkTheme, 'mediumInput' : 'true'}"></b-form-input>
             </div>
           </b-card-text>
         </b-card>
       </div>
-      <div class="col" v-if="addedMapping.length">
-        <b-table striped hover :items="addedMapping" :fields="fields" v-bind:dark="darkTheme" >
-          <template #cell(remove)="row">
-            <b-icon icon="x-circle" aria-hidden="true" @click="removeMapping(row.index)"
-              :class="[darkTheme ? 'iconDark' : 'iconLight']"></b-icon>
-          </template>
-        </b-table>
-      </div>
       <div class="col"></div>
     </div>
     <div class="row">
-    <div class="col-12">
-      <BackwardChaining :darkTheme="darkTheme" :facts="currentFacts" :rules="currentRules"
-                     :mappings="currentMappings" :goal="currentGoal" />
+    <div class="col-12" v-if="!invalidGoal">
+      <BackwardChaining :darkTheme="darkTheme" :facts="currentFacts" :rules="rules"
+                     :variables="variables" :goal="currentGoal" :highlight="mapFrom.trim()"/>
     </div>
     </div>
   </div>
@@ -105,7 +129,6 @@
 
 <script>
 //TODO: implement writing own formulas
-import ToggleSwitch from '@/components/ToggleSwitch.vue';
 import BackwardChaining from '@/components/BackwardChaining.vue';
 
 export default {
@@ -116,80 +139,49 @@ export default {
     }
   },
   components: {
-    ToggleSwitch,
     BackwardChaining,
   },
   data() {
     return {
       variables : ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'],
       fields: ["from", "to", "remove"],
-      savedFacts: [],
-      savedRules: [],
-      addedMapping: [],
+      rules: [],
+      facts: [],
+      addedRules: [],
       cycleNum : -1,
       ruleHovered: -1,
-      selectedSettings : [],
-      settings : [
-        { text: 'Random facts', value: 'rand_facts' },
-        { text: 'Random rules', value: 'rand_rules' },
-        ],
-      rand_facts : false,
-      rand_rules : false,
       bckwd_chain : false,
-      num_rand_facts_bool : false,
-      num_rand_rules_bool : false,
+      num_facts_bool : false,
+      num_rules_bool : false,
       reloadingFacts : false,
       reloadingRules : false,
-      numRules : 6,
-      numFacts: 4,
+      numRules : 5,
+      numFacts: 5,
+      hoveredRule : false,
+      hoveredFact : false,
       searchedVariable : '',
       mapFrom : '',
       mapTo : '',
+      newAntecedents: '',
+      newConsequent: '',
+      newFact: '',
+      reloadRulesDisabled : false,
+      reloadFactsDisabled : false,
     }
   },
   computed: {
-    stdFacts: function() {
-      return this.variables.slice(0, 5);
-    },
     currentGoal: function() {
-      let currGoal = this.searchedVariable.trim().toUpperCase();
-      for(let [from, to] of this.currentMappings)
-      {
-        if(currGoal.localeCompare(to.toUpperCase()) === 0)
-          return from;
-      }
-      return '';
+      return this.searchedVariable.trim();
     },
     invalidFactsNumber: function() {
       return !this.numFacts || isNaN(this.numFacts) || ('' + this.numFacts).includes('.') ||
-        parseInt(this.numFacts) > this.variables.length;
+        parseInt(this.numFacts) > this.variables.length || parseInt(this.numFacts) < 0;
     },
     invalidRulesNumber: function() {
       return !this.numRules || isNaN(this.numRules) || ('' + this.numRules).includes('.');
     },
     currentFacts: function() {
-      return this.rand_facts ? this.savedFacts : this.stdFacts;
-    },
-    currentRules: function() {
-      return this.rand_rules ? this.savedRules: this.rules;
-    },
-    currentMappings: function() {
-      let map = new Map();
-      this.variables.forEach(vr => map.set(vr, vr));
-      this.addedMapping.forEach(mapping => {
-        map.set(mapping['from'], mapping['to']);
-      });
-
-      return map;
-    },
-    rules: function(){
-      let arr = []; 
-      arr.push({id: 1, ant: [this.variables[24], this.variables[3]], cons: this.variables[25]});
-      arr.push({id: 2, ant: [this.variables[23], this.variables[1], this.variables[4]], cons: this.variables[24]});
-      arr.push({id: 3, ant: [this.variables[0]], cons: this.variables[23]});
-      arr.push({id: 4, ant: [this.variables[2]], cons: this.variables[11]});
-      arr.push({id: 5, ant: [this.variables[11], this.variables[12]], cons: this.variables[13]});
-      return arr;
+      return this.facts;
     },
     cycles: function() {
       let currFacts = [...this.currentFacts];
@@ -200,13 +192,18 @@ export default {
       do 
       {
         tempAddedFacts = [];
-        this.currentRules.forEach(ruleObj => {
-          if(this.validateAnt(ruleObj.ant, currFacts) && !currFacts.includes(ruleObj.cons))
+        this.rules.forEach(ruleObj => {
+          let already_present = false;
+          tempAddedFacts.forEach(el => {
+            if(el.fact.localeCompare(ruleObj.cons) === 0)
+              already_present = true;
+          });
+          if(this.validateAnt(ruleObj.ant, currFacts) && !currFacts.includes(ruleObj.cons) && !already_present)
             tempAddedFacts.push({rule: ruleObj.id, fact: ruleObj.cons});
         });
         tempAddedFacts.forEach((addedObj, index) => {
           data.push({cycle: index === 0 ? cycleN++ : '', 
-            fired_rules: 'R' + addedObj['rule'], added_facts: this.currentMappings.get(addedObj['fact'])});
+            fired_rules: 'R' + addedObj['rule'], added_facts: addedObj['fact']});
           currFacts.push(addedObj['fact']);
         });
         if(tempAddedFacts.length !== 0)
@@ -215,32 +212,6 @@ export default {
       data.push({cycle: cycleN, fired_rules: '', added_facts: ''});
       cyclesData.push([...data]);
       return cyclesData;
-    },
-    factsPrintable: function() {
-      let str = '';
-      this.currentFacts.forEach((fact, index) => {
-        str += this.currentMappings.get(fact) + (index == this.currentFacts.length - 1 ? '' : ', ');
-      });
-      return str;
-    },
-    rulesPrintable: function() {
-      let str = [];
-
-      this.currentRules.forEach(ruleObj => {
-        let antStr = '';
-        ruleObj.ant.forEach((el,index) => {
-          antStr += this.currentMappings.get(el);
-          if(index !== ruleObj.ant.length - 1)
-            antStr += " & ";
-        });
-        str.push('R' + ruleObj.id + ': ' + antStr + ' → ' + this.currentMappings.get(ruleObj.cons));
-      });
-      return str;
-    },
-    currentMappingsPrintable: function() {
-      let mappings = [];
-      this.addedMapping.forEach((to, from)=> mappings.push({from: from, to: to}));
-      return mappings;
     },
     increaseCycleDisabled: function() {
       return this.cycleNum === this.cycles.length - 1;
@@ -257,41 +228,133 @@ export default {
     invalidGoal: function() {
       if(!this.currentGoal.trim())
         return false;
-      let found = false;
-      this.addedMapping.forEach(map => {
-        if(map.to.toUpperCase().localeCompare(this.currentGoal) === 0)
-          found = true;
+      return !this.variables.includes(this.currentGoal);
+    },
+    antecedentsToAdd: function() {
+      let splitty = this.newAntecedents.trim().split(' ');
+      let ants = [];
+      splitty.forEach((el, index) => {
+        if(index % 2 === 0)
+          ants.push(el);
       });
-      return !(this.variables.includes(this.currentGoal) || found);
+      return ants;
+    },
+    invalidNewAntecedents: function() {
+      if(!this.newAntecedents.trim())
+        return true;
+      let splitty = this.newAntecedents.trim().split(' ').filter(el => el);
+
+      if(splitty.length === 1 && !this.variables.includes(splitty[0]))
+        return true;
+      if(splitty.length % 2 === 0)
+        return true;
+      let isInvalid = false;
+      let alreadyUsed = [];
+      splitty.forEach((el, index) => {
+        if(index % 2 && el.localeCompare("&"))
+          isInvalid = true;
+        else if(index % 2 === 0 && (el.localeCompare('&') === 0 || 
+          el.localeCompare(this.newConsequent.trim()) === 0 || alreadyUsed.includes(el)))
+          isInvalid = true;
+        else
+          alreadyUsed.push(el);
+      });
+      return isInvalid;
+    },
+    invalidNewConsequent: function() {
+      if(!this.newConsequent.trim() || this.newConsequent.trim().includes(' '))
+        return true;
+      return false;
+    },
+    isNewFactValid: function() {
+      if(this.newFact.trim().includes(' ') || !this.newFact.trim())
+        return false;
+      return !this.facts.includes(this.newFact.trim());
+    },
+    isNewRuleValid: function() {
+      if(this.invalidNewAntecedents || this.invalidNewConsequent)
+        return false;
+      return !this.isRuleAlreadyPresent([...this.antecedentsToAdd], this.newConsequent.trim(), this.rules);
     }
+
   },
   methods: {
     removeMapping(index) {
       this.addedMapping.splice(index,1);
     },
+    addNewRule() {
+      if(!this.isNewRuleValid)
+        return;
+      this.rules.push({id: this.rules.length + 1, ant: this.antecedentsToAdd, cons: this.newConsequent.trim()});
+      if(!this.variables.includes(this.newConsequent.trim()))
+        this.variables.push(this.newConsequent.trim());
+      this.antecedentsToAdd.forEach(ant => {
+        if(!this.variables.includes(ant))
+          this.variables.push(ant);
+      });
+      this.reloadRulesDisabled = true;
+      this.numRules++;
+      this.newConsequent = '';
+      this.newAntecedents = '';
+    },
+    addNewFact() {
+      if(!this.isNewFactValid)
+        return;
+      this.facts.push(this.newFact.trim());
+      if(!this.variables.includes(this.newFact.trim()))
+        this.variables.push(this.newFact.trim());
+      this.reloadFactsDisabled = true;
+      this.numFacts++;
+      this.newFact = '';
+    },
     addMapping() {
       if(!this.isMapValid || !this.mapTo.trim())
         return;
-      let indexVar = this.variables.indexOf(this.mapFrom.trim());
+      let fromVar = this.mapFrom.trim();
+      let toVar = this.mapTo.trim();
+      let indexVar = this.variables.indexOf(fromVar);
       if(indexVar === -1)
         return;
-      this.variables.splice(indexVar, 1, this.mapTo.trim());
+      this.variables.splice(indexVar, 1, toVar);
+      if(this.searchedVariable.localeCompare(fromVar) === 0)
+        this.searchedVariable = toVar;
+      if((indexVar = this.facts.indexOf(fromVar)) !== -1)
+        this.facts.splice(indexVar, 1, toVar);
+      this.rules.forEach(ruleObj => {
+        let idx = -1;
+        if((idx = ruleObj['ant'].indexOf(fromVar)) !== -1)
+          ruleObj['ant'].splice(idx, 1, toVar);
+        if(ruleObj['cons'].localeCompare(fromVar) === 0)
+          ruleObj['cons'] = toVar;
+      });
+      if((indexVar = this.facts.indexOf(fromVar)) !== -1)
+        this.facts.splice(indexVar, 1, toVar);
+
+      
       this.mapTo = '';
       this.mapFrom = '';
       this.$refs.fromInputField.$el.focus();
+    },
+    deleteRule(index) {
+      this.rules.splice(index, 1);
+      this.rules.forEach((el, index) => el.id = index + 1);
+      this.reloadRulesDisabled = true;
+      this.numRules--;
+    },
+    deleteFact(index) {
+      this.facts.splice(index, 1);
+      this.reloadFactsDisabled = true;
+      this.numFacts--;
     },
     generatedFacts() {
       if(this.invalidFactsNumber)
         return [];
       let facts = [];
-      let count = 0;
       while(facts.length !== parseInt(this.numFacts))
       {
         let newFact = this.variables[Math.floor(Math.random() * this.variables.length)];
         if(!facts.includes(newFact))
           facts.push(newFact);
-        if(count++ > 40)
-          break;
       }
       return facts.sort();
     },
@@ -310,27 +373,7 @@ export default {
             ants.push(ant);
         }
         let cons = this.variables[Math.floor(Math.random() * this.variables.length)];
-        let alreadyExists = false;
-        for(let j = 0; j < rules.length; j++)
-        {
-          let currAnts = rules[j]['ant'].sort();
-          let haveSameAnts = true;
-          if(currAnts.length !== ants.length)
-            continue;
-
-          ants.sort().forEach((el, index) => {
-            if(currAnts[index].localeCompare(el))
-              haveSameAnts = false;
-          });
-
-          if((haveSameAnts && rules[j]['cons'].localeCompare(cons) === 0) ||
-          ants.includes(cons))
-          {
-            alreadyExists = true;
-            break;
-          }
-        }
-        if(alreadyExists)
+        if(this.isRuleAlreadyPresent(ants, cons, rules))
         {
           i--;
           continue;
@@ -339,6 +382,27 @@ export default {
       }
       return rules;
     },
+    isRuleAlreadyPresent(ants, cons, rules) {
+      for(let j = 0; j < rules.length; j++)
+      {
+        let currAnts = [...rules[j]['ant']].sort();
+        let haveSameAnts = true;
+        if(currAnts.length !== ants.length)
+          continue;
+
+        ants.sort().forEach((el, index) => {
+          if(currAnts[index].localeCompare(el))
+            haveSameAnts = false;
+        });
+
+        if((haveSameAnts && rules[j]['cons'].localeCompare(cons) === 0) ||
+          ants.includes(cons))
+        {
+          return true;
+        }
+      }
+      return false;
+      },
     validateAnt(ant, facts) {
       for(let i = 0; i < ant.length; i++)
       {
@@ -364,18 +428,14 @@ export default {
       this.ruleHovered = -1;
     },
     reloadFacts() {
-      if(!this.rand_facts)
-        return;
       this.reloadingFacts = true;
-      this.savedFacts.splice(0, this.savedFacts.length, ...this.generatedFacts());
+      this.facts.splice(0, this.facts.length, ...this.generatedFacts());
       setTimeout(() => {
         this.reloadingFacts = false;}, 2000);
     },
     reloadRules () {
-      if(!this.rand_rules)
-        return;
       this.reloadingRules = true;
-      this.savedRules.splice(0, this.savedRules.length, ...this.generateRules());
+      this.rules.splice(0, this.rules.length, ...this.generateRules());
       setTimeout(() => {
         this.reloadingRules = false;}, 2000);
     }
@@ -386,15 +446,31 @@ export default {
         this.cycleNum = this.cycles.length - 1;
     },
     numRules() {
-      this.savedRules.splice(0, this.savedRules.length, ...this.generateRules());
+      if(this.reloadRulesDisabled)
+      {
+        this.reloadRulesDisabled = false;
+        return;
+      }
+      this.rules.splice(0, this.rules.length);
+      this.rules =  [...this.generateRules()];
     },
     numFacts() {
-      this.savedFacts.splice(0, this.savedFacts.length, ...this.generatedFacts());
+      if(this.reloadFactsDisabled)
+      {
+        this.reloadFactsDisabled = false;
+        return;
+      }
+      this.facts.splice(0, this.rules.length);
+      this.facts = [...this.generatedFacts()];
     },
   },
   created() {
-    this.savedFacts.splice(0, this.savedFacts.length, ...this.generatedFacts());
-    this.savedRules.splice(0, this.savedRules.length, ...this.generateRules());
+    this.facts = this.variables.slice(0, this.numFacts);
+    this.rules.push({id: 1, ant: [this.variables[24], this.variables[3]], cons: this.variables[25]});
+    this.rules.push({id: 2, ant: [this.variables[23], this.variables[1], this.variables[4]], cons: this.variables[24]});
+    this.rules.push({id: 3, ant: [this.variables[0]], cons: this.variables[23]});
+    this.rules.push({id: 4, ant: [this.variables[2]], cons: this.variables[11]});
+    this.rules.push({id: 5, ant: [this.variables[11], this.variables[12]], cons: this.variables[13]});
   },
 }
 </script>
@@ -412,6 +488,13 @@ export default {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
+}
+
+.flexSpan{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1px 5px 1px 0;
 }
 
 .cyclesIconLeft {
@@ -476,5 +559,21 @@ opacity: 0.5;
 }
 .disabledInput {
   opacity: 0.7;
+}
+.newRule {
+  width: 40%;
+  margin: 0 10px 0 10px;
+}
+.consequentInput {
+  width: 20%;
+}
+.highlightRowDark {
+  background: #1b1b1b;
+}
+.highlightRowLight{
+  background: #eae7e7;
+}
+.newFact {
+  width: 25%;
 }
 </style>

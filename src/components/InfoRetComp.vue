@@ -5,18 +5,14 @@
       <div class="col-3">
         <b-table striped hover :items="documents" :fields="fields" v-bind:dark="darkTheme" foot-clone>
           <template #cell(modify)="row">
-            <b-button size="sm" @click="startEditLine(row.index)" class="mr-2" variant="primary" v-if="row.index !== editLineIndex">
-              <b-icon icon="pencil" aria-hidden="true"></b-icon>
-            </b-button>
-            <b-button size="sm" @click="finishEditLine(row.index)" class="mr-2" variant="success" v-else>
-              <b-icon icon="check" aria-hidden="true"></b-icon>
-            </b-button>
-            <b-button size="sm" @click="removeDoc(row.index)" class="mr-2" variant="danger" v-if="row.index !== editLineIndex">
-              <b-icon icon="trash" aria-hidden="true"></b-icon>
-            </b-button>
-            <b-button size="sm" @click="cancelEdit" class="mr-2" variant="danger" v-else>
-              <b-icon icon="x" aria-hidden="true"></b-icon>
-            </b-button>
+              <b-icon icon="pencil-square" aria-hidden="true" @click="startEditLine(row.index)" v-if="row.index !== editLineIndex"
+               :class="['cyclesIconLeft', 'iconEnabled', darkTheme ? 'iconDark' : 'iconLight']" ></b-icon>
+              <b-icon icon="check-circle" aria-hidden="true" @click="finishEditLine(row.index)" v-else
+               :class="['alignMiddle', 'cyclesIconLeft', 'iconEnabled', darkTheme ? 'iconDark' : 'iconLight']" ></b-icon>
+              <b-icon icon="trash" @click="removeDoc(row.index)" aria-hidden="true" v-if="row.index !== editLineIndex"
+               :class="['cyclesIconRight', 'iconEnabled', darkTheme ? 'iconDark' : 'iconLight']" ></b-icon>
+              <b-icon icon="x-circle" aria-hidden="true" @click="cancelEdit" v-else
+               :class="['alignMiddle', 'cyclesIconRight', 'iconEnabled', darkTheme ? 'iconDark' : 'iconLight']" ></b-icon>
           </template>
 
           <template #cell(document)="row">
@@ -38,9 +34,8 @@
           </template>
 
           <template #foot(modify)="">
-            <b-button size="sm" @click="addDoc()" class="mr-2" >
-              <b-icon icon="plus" aria-hidden="true"></b-icon>
-            </b-button>
+              <b-icon icon="plus-circle" aria-hidden="true" @click="addDoc()" 
+               :class="['cyclesIconRight', 'iconEnabled', darkTheme ? 'iconDark' : 'iconLight', 'alignMiddle']" ></b-icon>
           </template>
         </b-table>
       </div>
@@ -571,5 +566,32 @@ export default {
 .darkInputForm::placeholder {
   color: #888;
 }
+.cyclesIconLeft {
+  margin-right: 5px;
+}
+.cyclesIconRight {
+  margin-left: 5px;
+}
 
+.iconDisabled{
+opacity: 0.5;
+}
+
+.iconEnabled{
+  opacity: 1;
+  cursor: pointer;
+}
+.iconDark {
+  color: #f5d782;
+}
+.iconLight {
+  color: #111;
+}
+
+.alignMiddle {
+  transform: translateY(50%);
+  -moz-transform: translateY(50%);
+  -ms-transform: translateY(50%);
+  -webkit-transform: translateY(50%);
+}
 </style>
