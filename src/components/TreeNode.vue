@@ -1,6 +1,6 @@
 <template>
   <b-card 
-       :class="['tree-node', data.nodeData.isTrue ? 'greenNode' : 'redNode']" 
+       :class="['tree-node', data.nodeData.isTrue ? 'greenNode' : 'redNode', darkTheme ? '' : 'lightNode']" 
      v-bind:bg-variant="!darkTheme ? 'light' : 'dark'" v-bind:text-variant="!darkTheme ? '' : 'white'">
     <b-card-text>
       <span><span v-if="data.nodeData.isRoot">Goal:</span>
@@ -42,13 +42,17 @@ export default {
   width: 300px;
 }
 .greenNode {
-  border: 1px solid #a0e7a0;
+  border: 3px solid #a0e7a0;
 }
 
 .redNode {
-  border: 1px solid  #dd7777;
+  border: 3px solid  #dd7777;
 }
 .newFact {
   font-weight: bold;
+}
+
+.lightNode {
+  box-shadow: 0 0 8px 2px rgba(0, 0, 0, 0.2);
 }
 </style>

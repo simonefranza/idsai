@@ -1,10 +1,80 @@
 <template>
   <div class="rulesComp">
     <div class="row">
-      <div class="col"></div>
+    <div class="col-4">
+
+      <b-card title="Control Panel" v-bind:bg-variant="!darkTheme ? 'light' : 'dark'" v-bind:text-variant="!darkTheme ? '' : 'white'">
+        <b-card-body>
+          <b-card-sub-title :sub-title-text-variant="darkTheme ? 'light' : 'secondary'" class="mb-3">Facts & Rules</b-card-sub-title>
+          <b-card-text>
+            <div class="cyclesDiv">
+              <span class="toggleBlock">Number of facts</span>
+              <b-form-input size="sm" v-model="numFactsTemp"
+                                      :class="{'shake' : invalidFactsNumber, 'darkInputForm' : darkTheme, 'mediumInput' : 'true'}"></b-form-input>
+              <b-icon :class="['cyclesIconRight', 'iconEnabled', darkTheme ? 'iconDark' : 'iconLight']"
+                                      icon="arrow-clockwise" aria-hidden="true" @click="reloadFacts" :animation="reloadingFacts ? 'spin' : ''"></b-icon>
+            </div>
+            <div class="cyclesDiv">
+              <span class="toggleBlock">Number of rules</span>
+              <b-form-input size="sm" v-model="numRulesTemp"
+                                      :class="{'shake' : invalidRulesNumber, 'darkInputForm' : darkTheme, 'mediumInput' : 'true'}"></b-form-input>
+              <b-icon :class="['cyclesIconRight', 'iconEnabled', darkTheme ? 'iconDark' : 'iconLight']"
+                                      icon="arrow-clockwise" aria-hidden="true" @click="reloadRules" :animation="reloadingRules ? 'spin' : ''"></b-icon>
+            </div>
+            <span class="cyclesDiv">
+              <span>New fact</span>
+              <b-form-input size="sm" v-model="newFact" placeholder="Fact"
+                                                        :class="{'newFact' : 'true', 'darkInputForm' : darkTheme}" @keyup.enter="addNewFact()"></b-form-input>
+              <b-icon :class="['cyclesIconRight', isNewFactValid ? 'iconEnabled' : 'iconDisabled', darkTheme ? 'iconDark' : 'iconLight']"
+                                                        icon="check-circle" aria-hidden="true" @click="addNewFact"></b-icon>
+            </span>
+            <span class="cyclesDiv">
+              <span>New rule</span> 
+              <b-form-input size="sm" v-model="newAntecedents" placeholder="Ants & separated"
+                                                               :class="{'newRule' : 'true', 'darkInputForm' : darkTheme}"></b-form-input>
+              <span> → </span>
+              <b-form-input size="sm" v-model="newConsequent" placeholder="Cons"
+                                                              :class="{'newRule' : 'true', 'consequentInput' : 'true', 'darkInputForm' : darkTheme}" @keyup.enter="addNewRule()"></b-form-input>
+              <b-icon :class="['cyclesIconRight', isNewRuleValid ? 'iconEnabled' : 'iconDisabled', darkTheme ? 'iconDark' : 'iconLight']"
+                                                              icon="check-circle" aria-hidden="true" @click="addNewRule"></b-icon>
+            </span>
+            <div class="cyclesDiv">
+              <span class="toggleBlock">Replace variable</span>
+              <b-form-input size="sm" ref="fromInputField" v-model="mapFrom" placeholder="A"
+                                                                             :class="{'shake' : invalidRulesNumber, 'darkInputForm' : darkTheme, 'mediumInput' : 'true'}"
+                                                                             @keyup.enter="addMapping()"></b-form-input>
+              <span>:</span>
+              <b-form-input size="sm" v-model="mapTo" placeholder="something"
+                                                      :class="{'shake' : invalidRulesNumber, 'darkInputForm' : darkTheme, 'mediumInput' : 'true'}"
+                                                      @keyup.enter="addMapping()"></b-form-input>
+              <b-icon :class="['cyclesIconRight', isMapValid ? 'iconEnabled' : 'iconDisabled', darkTheme ? 'iconDark' : 'iconLight']"
+                                                      icon="check-circle" aria-hidden="true" @click="addMapping"></b-icon>
+            </div>
+          </b-card-text>
+          <b-card-sub-title :sub-title-text-variant="darkTheme ? 'light' : 'secondary'" class="mb-3 mt-4">Algorithms</b-card-sub-title>
+          <b-card-text>
+            <div class="cyclesDiv">
+              <span>Forward chaining</span>
+              <span>[shown {{cycleNum + 1}} <span v-if="cycleNum != 0">cycles</span><span v-else>cycle</span> out of {{cycles.length}}]</span>
+              <span>
+                <b-icon :class="['cyclesIconLeft', decreaseCycleDisabled ? 'iconDisabled' : 'iconEnabled', darkTheme ? 'iconDark' : 'iconLight']" 
+                                                  icon="dash-circle" aria-hidden="true" @click="decreaseCyclesNum"></b-icon>
+                <b-icon :class="['cyclesIconRight', increaseCycleDisabled ? 'iconDisabled' : 'iconEnabled', darkTheme ? 'iconDark' : 'iconLight']"
+                                                                     icon="plus-circle" aria-hidden="true" @click="increaseCyclesNum"></b-icon>
+              </span>
+            </div>
+            <div class="cyclesDiv">
+              <span class="toggleBlock">Backward chaining</span>
+              <b-form-input size="sm" v-model="searchedVariable"  placeholder="Goal"
+                                      :class="{'shake' : invalidGoal, 'darkInputForm' : darkTheme, 'mediumInput' : 'true'}"></b-form-input>
+            </div>
+          </b-card-text>
+        </b-card-body>
+      </b-card>
+    </div>
 
       <!-- Facts and DB -->
-      <div class="col">
+      <div class="col-4">
         <b-card class="dataCard" v-bind:bg-variant="!darkTheme ? 'light' : 'dark'" v-bind:text-variant="!darkTheme ? '' : 'white'">
           <b-card-text>
             <p class="dataTitle">Facts</p>
@@ -42,7 +112,7 @@
       </div>
 
       <!-- Rules table -->
-      <div class="col" v-if="cycleNum >= 0">
+      <div class="col-4" v-if="cycleNum >= 0">
         <b-table striped hover :items="cycles[cycleNum]" v-bind:dark="darkTheme" @row-hovered="rowHovered" @row-unhovered="rowUnhovered">
           <template #cell(added_facts)="row">
             <span :class="{'dataTitle' : row.value.localeCompare(mapFrom.trim()) === 0}">{{row.value}}</span>
@@ -51,72 +121,6 @@
         </b-table>
       </div>
 
-      <div class="col-3">
-
-        <b-card title="Control Panel" v-bind:bg-variant="!darkTheme ? 'light' : 'dark'" v-bind:text-variant="!darkTheme ? '' : 'white'">
-          <b-card-text>
-            <div class="cyclesDiv">
-              <span>Cycles</span>
-              <span>[{{cycleNum + 1}} of {{cycles.length}}]</span>
-              <span>
-                <b-icon :class="['cyclesIconLeft', decreaseCycleDisabled ? 'iconDisabled' : 'iconEnabled', darkTheme ? 'iconDark' : 'iconLight']" 
-                 icon="dash-circle" aria-hidden="true" @click="decreaseCyclesNum"></b-icon>
-                <b-icon :class="['cyclesIconRight', increaseCycleDisabled ? 'iconDisabled' : 'iconEnabled', darkTheme ? 'iconDark' : 'iconLight']"
-                                    icon="plus-circle" aria-hidden="true" @click="increaseCyclesNum"></b-icon>
-              </span>
-            </div>
-            <div class="cyclesDiv">
-              <span class="toggleBlock">Number of facts</span>
-              <b-form-input size="sm" v-model="numFacts"
-                                      :class="{'shake' : invalidFactsNumber, 'darkInputForm' : darkTheme, 'mediumInput' : 'true'}"></b-form-input>
-              <b-icon :class="['cyclesIconRight', 'iconEnabled', darkTheme ? 'iconDark' : 'iconLight']"
-                                      icon="arrow-clockwise" aria-hidden="true" @click="reloadFacts" :animation="reloadingFacts ? 'spin' : ''"></b-icon>
-            </div>
-            <div class="cyclesDiv">
-              <span class="toggleBlock">Number of rules</span>
-              <b-form-input size="sm" v-model="numRules"
-                                      :class="{'shake' : invalidRulesNumber, 'darkInputForm' : darkTheme, 'mediumInput' : 'true'}"></b-form-input>
-              <b-icon :class="['cyclesIconRight', 'iconEnabled', darkTheme ? 'iconDark' : 'iconLight']"
-                                      icon="arrow-clockwise" aria-hidden="true" @click="reloadRules" :animation="reloadingRules ? 'spin' : ''"></b-icon>
-            </div>
-            <span class="cyclesDiv">
-              <span>New fact</span>
-              <b-form-input size="sm" v-model="newFact" placeholder="Fact"
-               :class="{'newFact' : 'true', 'darkInputForm' : darkTheme}" @keyup.enter="addNewFact()"></b-form-input>
-              <b-icon :class="['cyclesIconRight', isNewFactValid ? 'iconEnabled' : 'iconDisabled', darkTheme ? 'iconDark' : 'iconLight']"
-                                icon="check-circle" aria-hidden="true" @click="addNewFact"></b-icon>
-            </span>
-            <span class="cyclesDiv">
-              <span>New rule</span> 
-              <b-form-input size="sm" v-model="newAntecedents" placeholder="Ants & separated"
-               :class="{'newRule' : 'true', 'darkInputForm' : darkTheme}"></b-form-input>
-              <span> → </span>
-                <b-form-input size="sm" v-model="newConsequent" placeholder="Cons"
-                    :class="{'newRule' : 'true', 'consequentInput' : 'true', 'darkInputForm' : darkTheme}" @keyup.enter="addNewRule()"></b-form-input>
-              <b-icon :class="['cyclesIconRight', isNewRuleValid ? 'iconEnabled' : 'iconDisabled', darkTheme ? 'iconDark' : 'iconLight']"
-                                                              icon="check-circle" aria-hidden="true" @click="addNewRule"></b-icon>
-            </span>
-            <div class="cyclesDiv">
-              <span class="toggleBlock">Replace variable</span>
-              <b-form-input size="sm" ref="fromInputField" v-model="mapFrom" placeholder="A"
-                                      :class="{'shake' : invalidRulesNumber, 'darkInputForm' : darkTheme, 'mediumInput' : 'true'}"
-                                      @keyup.enter="addMapping()"></b-form-input>
-              <span>:</span>
-              <b-form-input size="sm" v-model="mapTo" placeholder="something"
-                                      :class="{'shake' : invalidRulesNumber, 'darkInputForm' : darkTheme, 'mediumInput' : 'true'}"
-                                      @keyup.enter="addMapping()"></b-form-input>
-              <b-icon :class="['cyclesIconRight', isMapValid ? 'iconEnabled' : 'iconDisabled', darkTheme ? 'iconDark' : 'iconLight']"
-                                      icon="check-circle" aria-hidden="true" @click="addMapping"></b-icon>
-            </div>
-            <div class="cyclesDiv">
-              <span class="toggleBlock">Backward chaining goal </span>
-              <b-form-input size="sm" v-model="searchedVariable" 
-                                      :class="{'shake' : invalidGoal, 'darkInputForm' : darkTheme, 'mediumInput' : 'true'}"></b-form-input>
-            </div>
-          </b-card-text>
-        </b-card>
-      </div>
-      <div class="col"></div>
     </div>
     <div class="row">
     <div class="col-12" v-if="!invalidGoal">
@@ -155,8 +159,8 @@ export default {
       num_rules_bool : false,
       reloadingFacts : false,
       reloadingRules : false,
-      numRules : 5,
-      numFacts: 5,
+      numRulesTemp : '5',
+      numFactsTemp : '5',
       hoveredRule : false,
       hoveredFact : false,
       searchedVariable : '',
@@ -275,6 +279,16 @@ export default {
       if(this.invalidNewAntecedents || this.invalidNewConsequent)
         return false;
       return !this.isRuleAlreadyPresent([...this.antecedentsToAdd], this.newConsequent.trim(), this.rules);
+    },
+    numRules: function() {
+      if(isNaN(this.numRulesTemp.trim()))
+        return 0;
+      return parseInt(this.numRulesTemp.trim());
+    },
+    numFacts: function() {
+      if(isNaN(this.numFactsTemp.trim()))
+        return 0;
+      return parseInt(this.numFactsTemp.trim());
     }
 
   },
@@ -445,21 +459,25 @@ export default {
       if(this.cycleNum > this.cycles.length - 1)
         this.cycleNum = this.cycles.length - 1;
     },
-    numRules() {
+    numRules(newVal, oldVal) {
       if(this.reloadRulesDisabled)
       {
         this.reloadRulesDisabled = false;
         return;
       }
+      if(newVal === oldVal)
+        return;
       this.rules.splice(0, this.rules.length);
       this.rules =  [...this.generateRules()];
     },
-    numFacts() {
+    numFacts(newVal, oldVal) {
       if(this.reloadFactsDisabled)
       {
         this.reloadFactsDisabled = false;
         return;
       }
+      if(newVal === oldVal)
+        return;
       this.facts.splice(0, this.rules.length);
       this.facts = [...this.generatedFacts()];
     },
@@ -495,6 +513,14 @@ export default {
   justify-content: space-between;
   align-items: center;
   padding: 1px 5px 1px 0;
+}
+
+.cyclesIconRight, .cyclesIconLeft {
+   -webkit-user-select: none;
+   -khtml-user-select: none;
+    -moz-user-select: none;
+    -o-user-select: none;
+    user-select: none;
 }
 
 .cyclesIconLeft {
