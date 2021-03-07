@@ -1,25 +1,32 @@
 <template>
-  <div class="wordNetComp">
-
+  <div>
     <b-spinner type="grow" label="Loading..." v-if="!loaded" :variant="darkTheme ? 'light' : 'dark'"></b-spinner>
-    <div v-else>
-      <b-form-input :class="{'darkInputForm' : darkTheme}" v-model="searched" placeholder="Input something"></b-form-input>
-      <DictEntry entryType="Noun" :data="nounFound" />
-      <DictEntry entryType="Verb" :data="verbFound" />
-      <DictEntry entryType="Adjective" :data="adjFound" />
-      <DictEntry entryType="Adverb" :data="advFound" />
+    <div class="wordNetComp row" v-else>
+      <div class="col">
+        <b-form-input :class="{'darkInputForm' : darkTheme}" v-model="searched" placeholder="Input something"></b-form-input>
+        <DictEntry entryType="Noun" :data="chosenNoun" />
+        <DictEntry entryType="Verb" :data="chosenVerb" />
+        <DictEntry entryType="Adjective" :data="chosenAdj" />
+        <DictEntry entryType="Adverb" :data="chosenAdv" />
+        <span v-if="posFound('a').length">
+        </span>
 
-      <footer :id="darkTheme? 'darkFooter' : 'lightFooter'">
-        Princeton University "About WordNet." 
-        <a href="https://wordnet.princeton.edu">WordNet</a>. 
-        Princeton University. 2010.
-      </footer>
+        <footer :id="darkTheme? 'darkFooter' : 'lightFooter'">
+          Princeton University "About WordNet." 
+          <a href="https://wordnet.princeton.edu">WordNet</a>. 
+          Princeton University. 2010.
+        </footer>
+      </div>
+      <div class="graphComp col">
+        <GraphComp :dark-theme="darkTheme" :data="chosenData"/>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
 import DictEntry from "./DictEntry";
+import GraphComp from '@/components/GraphComp.vue'
 
 export default {
   props: {
@@ -29,7 +36,8 @@ export default {
     }
   },
   components: {
-    DictEntry
+    DictEntry,
+    GraphComp,
   },
   data() {
     return {
@@ -172,13 +180,71 @@ export default {
       map.set(44, this.adjPpl);
       return map;
     },
+    ptrSymbols: function() {
+      let outerMap = new Map();
+      let nounsMap = new Map();
+      let verbsMap = new Map();
+      let adjsMap = new Map();
+      let advsMap = new Map();
+      outerMap.set('n', nounsMap);
+      outerMap.set('v', verbsMap);
+      outerMap.set('a', adjsMap);
+      outerMap.set('r', advsMap);
+
+      nounsMap.set('!', 'Antonym');
+      nounsMap.set('@', 'Hypernym');
+      nounsMap.set('@i', 'Instance Hypernym');
+      nounsMap.set('~', 'Hyponym');
+      nounsMap.set('~i', 'Instance Hyponym');
+      nounsMap.set('#m', 'Member holonym');
+      nounsMap.set('#s', 'Substance holonym');
+      nounsMap.set('#p', 'Part holonym');
+      nounsMap.set('%m', 'Member meronym');
+      nounsMap.set('%s', 'Substance meronym');
+      nounsMap.set('%p', 'Part meronym');
+      nounsMap.set('=', 'Attribute');
+      nounsMap.set('+', 'Derivationally related form');
+      nounsMap.set(';c', 'Domain of synset - TOPIC');
+      nounsMap.set('-c', 'Member of this domain - TOPIC');
+      nounsMap.set(';r', 'Domain of synset - REGION');
+      nounsMap.set('-r', 'Member of this domain - REGION');
+      nounsMap.set(';u', 'Domain of synset - USAGE');
+      nounsMap.set('-u', 'Member of this domain - USAG');
+
+      verbsMap.set('!', 'Antonym');
+      verbsMap.set('@', 'Hypernym');
+      verbsMap.set('~', 'Hyponym');
+      verbsMap.set('*', 'Entailment');
+      verbsMap.set('>', 'Cause');
+      verbsMap.set('^', 'Also see');
+      verbsMap.set('$', 'Verb Group');
+      verbsMap.set('+', 'Derivationally related form');
+      verbsMap.set(';c', 'Domain of synset - TOPIC');
+      verbsMap.set(';r', 'Domain of synset - REGION');
+      verbsMap.set(';u', 'Domain of synset - USAGE');
+
+      adjsMap.set('!', 'Antonym');
+      adjsMap.set('&', 'Similar to');
+      adjsMap.set('<', 'Participle of verb');
+      adjsMap.set('\\', 'Pertainym (pertains to noun)');
+      adjsMap.set('=', 'Attribute');
+      adjsMap.set('^', 'Also see');
+      adjsMap.set(';c', 'Domain of synset - TOPIC');
+      adjsMap.set(';r', 'Domain of synset - REGION');
+      adjsMap.set(';u', 'Domain of synset - USAG');
+
+      advsMap.set('!', 'Antonym');
+      advsMap.set('\\', 'Derived from adjective');
+      advsMap.set(';c', 'Domain of synset - TOPIC');
+      advsMap.set(';r', 'Domain of synset - REGION');
+      advsMap.set(';u', 'Domain of synset - USAG');
+      return outerMap;
+    },
     wnCont: function() {
       let word = this.searched.trim().toLowerCase();
       if(!word)
         return '';
-      console.log(word);
       word = word.replace(/ /g, "_");
-      console.log(word);
 
       let indexFile = [];
       let dataFile = new Map();
@@ -195,7 +261,6 @@ export default {
             return '';
           word = excWord;
         }
-        console.log(res);
         let split = res.split(' ');
         let lemma = split[0];
         let pos = split[1];
@@ -213,88 +278,112 @@ export default {
         {
           synset_offset.push(parseInt(split[6 + p_cnt + i]));
 
-          dataFile.set(pos+synset_offset[i], this.parseDataline(pos, synset_offset[i], word));
+          let key = pos + synset_offset[i];
+          let val = this.parseDataline(pos, synset_offset[i], word, 3);
+          //call function to find all hypnonyms, then hypernyms etc
+          dataFile.set(key, val);
         }
+        // need hyponym ~, hypernym @, holonym #, meronym %
         indexFile.push({lemma: lemma, pos: pos, synset_cnt: synset_cnt, p_cnt: p_cnt,
           ptr_symbol: [...ptr_symbol], tagsense_cnt: tagsense_cnt, synset_offset: [...synset_offset]});
 
       });
+      console.log(dataFile);
 
       let ret = {index: indexFile, data: dataFile};
-      console.log(ret);
       return ret; 
     },
-    nounFound: function() {
-      const {index, data} = this.wnCont;
-      if(!index)
-        return '';
-
-      let arr = [];
-      let nouns = index.filter(el => !el.pos.localeCompare('n'));
-      if(nouns.length === 0 || nouns[0].synset_cnt === 0)
-        return '';
-      nouns.forEach(noun => {
-        noun.synset_offset.forEach(off =>
-          arr.push(data.get(noun.pos + off)))});
-
-      return arr;
+    chosenNoun: function() {
+      return this.printablePos(this.posFound('n'));
     },
-    verbFound: function() {
-      const {index, data} = this.wnCont;
-      if(!index)
-        return '';
-
-      let arr = [];
-      let nouns = index.filter(el => !el.pos.localeCompare('v'));
-      if(nouns.length === 0 || nouns[0].synset_cnt === 0)
-        return '';
-      nouns.forEach(noun => {
-        noun.synset_offset.forEach(off =>
-          arr.push(data.get(noun.pos + off)))});
-
-      return arr;
+    chosenVerb: function() {
+      return this.printablePos(this.posFound('v'));
     },
-    adjFound: function() {
-      const {index, data} = this.wnCont;
-      if(!index)
-        return '';
-
-      let arr = [];
-      let nouns = index.filter(el => !el.pos.localeCompare('a'));
-      if(nouns.length === 0 || nouns[0].synset_cnt === 0)
-        return '';
-      nouns.forEach(noun => {
-        noun.synset_offset.forEach(off =>
-          arr.push(data.get(noun.pos + off)))});
-
-      return arr;
+    chosenAdj: function() {
+      return this.printablePos(this.posFound('a'));
     },
-    advFound: function() {
-      const {index, data} = this.wnCont;
-      if(!index)
-        return '';
-
-      let arr = [];
-      let nouns = index.filter(el => !el.pos.localeCompare('r'));
-      if(nouns.length === 0 || nouns[0].synset_cnt === 0)
-        return '';
-      nouns.forEach(noun => {
-        noun.synset_offset.forEach(off =>
-          arr.push(data.get(noun.pos + off)))});
-
-      return arr;
-    }
+    chosenAdv: function() {
+      return this.printablePos(this.posFound('r'));
+    },
+    chosenData: function() {
+      let ret = this.chosenNoun;
+      let nData = ret.data ? ret.data.size : 0;
+      if(this.chosenVerb.data && this.chosenVerb.data.size > nData)
+      {
+        ret = this.chosenVerb;
+        nData = ret.data.size;
+      }
+      if(this.chosenAdj.data && this.chosenAdj.data.size > nData)
+      {
+        ret = this.chosenAdj;
+        nData = ret.data.size;
+      }
+      if(this.chosenAdv.data && this.chosenAdv.data.size > nData)
+      {
+        ret = this.chosenAdv;
+      }
+      return ret[0];
+    },
   },
   methods: {
-    binSearch: function(word, file) {
-      let lines = file.split(/\r\n|\r|\n/);
-      let len = lines.length - 1;
-      let index = Math.round((len)/ 2); 
-      let start = 0;
-      let end = len;
-      while(end >= start)
-      {
-        let currWord = lines[index].split(' ')[0];
+    posFound: function(currPos) {
+      const {index, data} = this.wnCont;
+      if(!index)
+        return [];
+
+      let arr = [];
+      let elements = index.filter(el => !el.pos.localeCompare(currPos));
+      if(elements.length === 0 || elements[0].synset_cnt === 0)
+        return [];
+      elements.forEach(el => {
+        el.synset_offset.forEach(off =>
+          arr.push(data.get(el.pos + off)))});
+      arr.forEach(el => {
+        el.ptrs.forEach(ptr => {
+          if(!ptr.data)
+            return;
+          let label = this.ptrSymbols.get(currPos).get(ptr.pointer_symbol);
+          if(!el.data)
+            el.data = new Map();
+          if(!el.data.has(label))
+            el.data.set(label, []);
+          el.data.get(label).push({id : el.data.get(label).length, words:[...ptr.data.words]});
+        });
+      });
+      return [...arr];
+    },
+    printablePos: function(pos) {
+      let toChooseFrom = [];
+      let maxData = 0;
+      pos.forEach(el => {
+        if(!el.data || el.data.size < maxData)
+          return;
+        else if(el.data.size > maxData)
+        {
+          toChooseFrom = [];
+          maxData = el.data.size;
+        }
+        toChooseFrom.push(el);
+      });
+      if(toChooseFrom.length === 0)
+        return [];
+      let chosen = toChooseFrom[Math.floor(Math.random() * toChooseFrom.length)];
+      chosen.data.forEach((arr, label) => {
+        let chosenWords = arr[Math.floor(Math.random() * arr.length)];
+        chosen.data.set(label, [chosenWords]); 
+      });
+
+      return [chosen];
+    },
+      binSearch: function(word, file) {
+        let lines = file.split(/\r\n|\r|\n/);
+        let len = lines.length - 1;
+        let index = Math.round((len)/ 2); 
+        let start = 0;
+        let end = len;
+        while(end >= start)
+        {
+          let currWord = lines[index].split(' ')[0];
 
         let compare = currWord.localeCompare(word);
         if(!compare)
@@ -308,7 +397,7 @@ export default {
       }
       return -1;
     },
-    parseDataline: function(pos, offset, searchedWord) {
+    parseDataline: function(pos, offset, searchedWord, depth) {
       let data = {};
       let newlineId = this.posData.get(pos).indexOf('\n', offset);
       let line = this.posData.get(pos).slice(offset, newlineId);
@@ -329,9 +418,18 @@ export default {
         let src_trgt = split[8 + 2 * w_cnt + 4 * i];
         let src = parseInt(src_trgt.slice(0,2) ,16);
         let trgt = parseInt(src_trgt.slice(2,4) ,16);
-        ptrs.push({pointer_symbol: split[5 + 2 * w_cnt + 4 * i],
-          synset_offset: parseInt(split[6 + 2 * w_cnt + 4 * i]),
-          pos: split[7 + 2 * w_cnt + 4 * i], source: src, target: trgt});
+        let ptr_sym = split[5 + 2 * w_cnt + 4 * i];
+        let synset_offset = parseInt(split[6 + 2 * w_cnt + 4 * i]);
+        let newPos = split[7 + 2 * w_cnt + 4 * i];
+        let data = null;
+        if(depth > 0 && (ptr_sym.localeCompare('@') === 0 || ptr_sym.localeCompare('~') === 0))
+            data = this.parseDataline(newPos, synset_offset, '', depth - 1);
+        else if(searchedWord && (ptr_sym.localeCompare('!') === 0 ||
+          ptr_sym.localeCompare('\\') === 0 || ptr_sym.includes('#') || ptr_sym.includes('%')))
+          data = this.parseDataline(newPos, synset_offset, '', depth - 1);
+
+        ptrs.push({pointer_symbol: ptr_sym, synset_offset: synset_offset,
+          pos: newPos, source: src, target: trgt, data: data});
       }
       data = {synset_offset: synset_offset, lex_filenum: lex_filenum, ss_type: ss_type,
         w_cnt: w_cnt, words: [...words], p_cnt: p_cnt, ptrs: [...ptrs], keyWord: searchedWord};
@@ -519,6 +617,11 @@ footer {
 
 .darkInputForm::placeholder {
   color: #888;
+}
+
+.graphComp {
+  width:100%;
+  height: 100%;
 }
 
 </style>

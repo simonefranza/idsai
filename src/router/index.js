@@ -26,9 +26,9 @@ const routes = [
     component: () => import(/* webpackChunkName: "rec-sys" */ '../views/Recommender.vue')
   },
   {
-    path: '/word-net',
-    name: 'Word Net',
-    component: () => import(/* webpackChunkName: "word-net" */ '../views/WordNet.vue')
+    path: '/graphs',
+    name: 'Graphs',
+    component: () => import(/* webpackChunkName: "word-net" */ '../views/Graph.vue')
   }
 
 ]
