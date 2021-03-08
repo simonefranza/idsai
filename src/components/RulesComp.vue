@@ -54,17 +54,21 @@
           <b-card-sub-title :sub-title-text-variant="darkTheme ? 'light' : 'secondary'" class="mb-3 mt-4">Algorithms</b-card-sub-title>
           <b-card-text>
             <div class="cyclesDiv">
-              <span>Forward chaining</span>
-              <span>[shown {{cycleNum + 1}} <span v-if="cycleNum != 0">cycles</span><span v-else>cycle</span> out of {{cycles.length}}]</span>
+              <span>Forward chaining ({{cycleNum + 1}} / {{cycles.length}})</span>
               <span>
-                <b-icon :class="['cyclesIconLeft', decreaseCycleDisabled ? 'iconDisabled' : 'iconEnabled', darkTheme ? 'iconDark' : 'iconLight']" 
+                <b-button :class="['cyclesIconLeft', decreaseCycleDisabled ? 'iconDisabled' : 'iconEnabled', darkTheme ? 'iconDark' : 'iconLight']" 
+                @click="decreaseCyclesNum" variant="outline-custom">Remove 1 Cycle</b-button>
+                <b-button :class="['cyclesIconRight', increaseCycleDisabled ?  'iconDisabled' : 'iconEnabled', darkTheme ? 'iconDark' : 'iconLight']" 
+                @click="increaseCyclesNum" variant="outline-custom">Add 1 Cycle</b-button>
+                <!--<b-icon :class="['cyclesIconLeft', decreaseCycleDisabled ? 'iconDisabled' : 'iconEnabled', darkTheme ? 'iconDark' : 'iconLight']" 
                                                   icon="dash-circle" aria-hidden="true" @click="decreaseCyclesNum"></b-icon>
                 <b-icon :class="['cyclesIconRight', increaseCycleDisabled ? 'iconDisabled' : 'iconEnabled', darkTheme ? 'iconDark' : 'iconLight']"
                                                                      icon="plus-circle" aria-hidden="true" @click="increaseCyclesNum"></b-icon>
+                -->
               </span>
             </div>
             <div class="cyclesDiv">
-              <span class="toggleBlock">Backward chaining</span>
+              <span class="toggleBlock">Backward chaining goal</span>
               <b-form-input size="sm" v-model="searchedVariable"  placeholder="Goal"
                                       :class="{'shake' : invalidGoal, 'darkInputForm' : darkTheme, 'mediumInput' : 'true'}"></b-form-input>
             </div>
@@ -493,6 +497,17 @@ export default {
 }
 </script>
 
+<style>
+.btn-outline-custom{
+  color: #f5d782;
+  border-color: #f5d782;
+}
+.btn-outline-custom:hover {
+    color: #303131;
+    background-color: #f5d782;
+    border-color: #f5d782;
+}
+</style>
 <style scoped>
 .dataCard {
   text-align: left;

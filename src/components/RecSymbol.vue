@@ -121,6 +121,18 @@ export default {
       return false;
     }
   },
+  watch: {
+    data() {
+      this.showHypernym = false;
+      this.showHyponym = false;
+      this.showMemberHolonym = false;
+      this.showSubstanceHolonym = false;
+      this.showPartHolonym = false;
+      this.showMemberMeronym = false;
+      this.showSubstanceMeronym = false;
+      this.showPartMeronym = false;
+    }
+  }
 }
 </script>
 

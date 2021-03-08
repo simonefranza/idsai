@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="graphComp">
     <!-- from https://codepen.io/emilio/pen/QOaQjP -->
     <d3-network :net-nodes="nodesAndLinks.nodes" :net-links="nodesAndLinks.links" :options="options" />
 <!--    <d3-network :net-nodes="nodesAndLinks.nodes" :net-links="nodesAndLinks.links" :options="options" :link-cb="lcb" />
@@ -53,6 +53,11 @@ export default {
       let addedNames = [];
       let currId = 1;
       nodes.push({id: currId++, name: this.formatWord(this.data.words[0].word)});
+      if(!this.depth)
+      {
+        nodes.forEach(el => el._color = this.darkTheme ? '#6a6868' : '#2c3e4f');
+        return {nodes: nodes, links:  []};
+      }
       addedNames.push(this.data.words[0].word.toUpperCase());
       let functions = [this.hypernyms, this.hyponyms, this.memberHolonym, this.substanceHolonym,
         this.partHolonym, this.memberMeronym, this.substanceMeronym, this.partMeronym];
@@ -78,7 +83,11 @@ export default {
         {
           currQueueEl = queue[0];
           queue.splice(0, 1);
-          if(currQueueEl.ptr.words.length && !addedNames.includes(currQueueEl.ptr.words[0].word.toUpperCase()))
+          if(!currQueueEl.ptr.words)
+            continue;
+          if(!currQueueEl.ptr.words.length)
+              continue;
+          if(!addedNames.includes(currQueueEl.ptr.words[0].word.toUpperCase()))
           {
             nodes.push({id: currId++, name: this.formatWord(currQueueEl.ptr.words[0].word)});
             addedNames.push(currQueueEl.ptr.words[0].word.toUpperCase());
@@ -291,6 +300,10 @@ export default {
 }
 
 .net-svg {
+  height: 100%;
+}
+
+.graphComp {
   height: 100%;
 }
 </style>

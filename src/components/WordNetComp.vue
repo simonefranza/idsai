@@ -1,9 +1,45 @@
 <template>
   <div>
-    <b-spinner type="grow" label="Loading..." v-if="!loaded" :variant="darkTheme ? 'light' : 'dark'"></b-spinner>
-    <div class="wordNetComp row" v-else>
-      <div class="col">
-        <b-form-input :class="{'darkInputForm' : darkTheme}" v-model="searched" placeholder="Input something"></b-form-input>
+    <div class="wordNetComp row">
+      <div class="col-4">
+      <b-card title="Control Panel" v-bind:bg-variant="!darkTheme ? 'light' : 'dark'" v-bind:text-variant="!darkTheme ? '' : 'white'">
+        <b-card-body>
+          <b-card-text>
+          <div class="cyclesDiv">
+            <span :class="{'disabledText' : showWordNet}">Adjacency Matrix</span>
+            <ToggleSwitch :darkTheme="darkTheme" v-model="showWordNet" />
+            <span :class="{'disabledText' : !showWordNet}">WordNet</span>
+          </div>
+          <span v-if="showWordNet">
+            <b-spinner type="grow" label="Loading..." v-if="!loaded" :variant="darkTheme ? 'light' : 'dark'"></b-spinner>
+            <div v-else>
+              <div class="cyclesDiv">
+                <span>Search depth (current {{exploreDepth}}, slow above 2)</span>
+                <span>
+                  <b-icon :class="['cyclesIconLeft', decreaseDepthDisabled ? 'iconDisabled' : 'iconEnabled', darkTheme ? 'iconDark' : 'iconLight']" 
+                                                    icon="dash-circle" aria-hidden="true" @click="decreaseDepthNum"></b-icon>
+                  <b-icon :class="['cyclesIconRight', 'iconEnabled', darkTheme ? 'iconDark' : 'iconLight']"
+                                                                       icon="plus-circle" aria-hidden="true" @click="increaseDepthNum"></b-icon>
+                </span>
+              </div>
+              <div class="cyclesDiv">
+                <span class="toggleBlock">Random word</span>
+                <b-icon :class="['cyclesIconRight', 'iconEnabled', darkTheme ? 'iconDark' : 'iconLight']"
+                                        icon="arrow-clockwise" aria-hidden="true" @click="randomWord()" :animation="choosingRandomWord ? 'spin' : ''"></b-icon>
+              </div>
+              <div class="cyclesDiv">
+                <span class="toggleBlock">Search </span>
+                <b-form-input :class="{'darkInputForm' : darkTheme, 'inputForm' : 'true'}" v-model="searched" placeholder="Input something"></b-form-input>
+              </div>
+            </div>
+          </span>
+          </b-card-text>
+        </b-card-body>
+      </b-card>
+      <br/>
+      <b-card title="Search Result" v-bind:bg-variant="!darkTheme ? 'light' : 'dark'" v-bind:text-variant="!darkTheme ? '' : 'white'" v-if="searched.trim() && showWordNet" >
+      <b-card-body>
+        <b-card-text>
         <DictEntry :ptrSymbols="ptrSymbols" :depth="exploreDepth" entryType="Noun" :data="chosenNoun" :darkTheme="darkTheme"/>
         <DictEntry :ptrSymbols="ptrSymbols" :depth="exploreDepth" entryType="Verb" :data="chosenVerb" :darkTheme="darkTheme"/>
         <DictEntry :ptrSymbols="ptrSymbols" :depth="exploreDepth" entryType="Adjective" :data="chosenAdj" :darkTheme="darkTheme"/>
@@ -14,9 +50,12 @@
           <a href="https://wordnet.princeton.edu">WordNet</a>. 
           Princeton University. 2010.
         </footer>
+        </b-card-text>
+      </b-card-body>
+      </b-card>
       </div>
-      <div class="graphComp col">
-        <GraphComp :dark-theme="darkTheme" :data="chosenData" :ptrSymbols="ptrSymbols" :depth="exploreDepth"/>
+      <div class="col-8">
+        <GraphComp :dark-theme="darkTheme" :data="chosenData" :ptrSymbols="ptrSymbols" :depth="exploreDepth" v-if="showWordNet"/>
       </div>
     </div>
   </div>
@@ -25,6 +64,7 @@
 <script>
 import DictEntry from "./DictEntry";
 import GraphComp from '@/components/GraphComp.vue'
+import ToggleSwitch from '@/components/ToggleSwitch.vue'
 
 export default {
   props: {
@@ -36,10 +76,13 @@ export default {
   components: {
     DictEntry,
     GraphComp,
+    ToggleSwitch,
   },
   data() {
     return {
       exploreDepth : 2,
+      showWordNet : false,
+      choosingRandomWord: false,
       searched: '',
       poss: ['n', 'v', 'a', 'r'],
       loaded : false,
@@ -105,6 +148,9 @@ export default {
     }
   },
   computed: {
+    decreaseDepthDisabled: function() {
+      return this.exploreDepth === 0;
+    },
     posIndex : function() {
       let map = new Map();
       map.set('n', this.nounIndex);
@@ -305,6 +351,25 @@ export default {
     },
   },
   methods: {
+    randomWord: function() {
+      this.choosingRandomWord= true;
+      let file = this.posIndex.get('n');
+      let lines = file.split(/\r\n|\r|\n/);
+      let len = lines.length - 1;
+      let line = lines[Math.floor(Math.random() * len)];
+      this.searched = line.split(' ')[0].replace(/_/g, " ");
+      setTimeout(() => {
+        this.choosingRandomWord = false;}, 2000);
+
+    },
+    increaseDepthNum() {
+      this.exploreDepth++;
+    },
+    decreaseDepthNum() {
+      if(this.exploreDepth === 0)
+        return;
+      this.exploreDepth--;
+    },
     posFound: function(currPos) {
       const {index, data} = this.wnCont;
       if(!index)
@@ -391,11 +456,11 @@ export default {
 
         return ret;
       },
-    printablePos: function(pos) {
-      if(!pos.length)
-        return {};
-      return pos[Math.floor(Math.random() * pos.length)];
-    },
+      printablePos: function(pos) {
+        if(!pos.length)
+          return {};
+        return pos[Math.floor(Math.random() * pos.length)];
+      },
       binSearch: function(word, file) {
         let lines = file.split(/\r\n|\r|\n/);
         let len = lines.length - 1;
@@ -641,9 +706,69 @@ footer {
   color: #888;
 }
 
-.graphComp {
-  width:100%;
-  height: 100%;
+.cyclesDiv {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+.toggleBlock{
+  display: flex;
+  align-items: center;
+}
+
+.inputForm {
+  margin: 0 1em 0 1em ;
+
+}
+.cyclesIconRight, .cyclesIconLeft {
+   -webkit-user-select: none;
+   -khtml-user-select: none;
+    -moz-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+}
+
+.cyclesIconLeft {
+  margin-right: 5px;
+}
+.cyclesIconRight {
+  margin-left: 5px;
+}
+.iconEnabled{
+  opacity: 1;
+  cursor: pointer;
+}
+.iconDisabled{
+opacity: 0.5;
+}
+.shake {
+  animation: shake 0.82s cubic-bezier(.36,.07,.19,.97) both;
+  transform: translate3d(0, 0, 0);
+}
+@keyframes shake {
+  10%, 90% {
+    transform: translate3d(-1px, 0, 0);
+  }
+  20%, 80% {
+    transform: translate3d(2px, 0, 0);
+  }
+  30%, 50%, 70% {
+    transform: translate3d(-4px, 0, 0);
+  }
+  40%, 60% {
+    transform: translate3d(4px, 0, 0);
+  }
+}
+.iconDark {
+  color: #f5d782;
+}
+.iconLight {
+  color: #111;
+}
+
+.disabledText {
+  color: #909090;
 }
 
 </style>
