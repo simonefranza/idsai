@@ -4,12 +4,10 @@
     <div class="wordNetComp row" v-else>
       <div class="col">
         <b-form-input :class="{'darkInputForm' : darkTheme}" v-model="searched" placeholder="Input something"></b-form-input>
-        <DictEntry entryType="Noun" :data="chosenNoun" />
-        <DictEntry entryType="Verb" :data="chosenVerb" />
-        <DictEntry entryType="Adjective" :data="chosenAdj" />
-        <DictEntry entryType="Adverb" :data="chosenAdv" />
-        <span v-if="posFound('a').length">
-        </span>
+        <DictEntry :ptrSymbols="ptrSymbols" :depth="exploreDepth" entryType="Noun" :data="chosenNoun" :darkTheme="darkTheme"/>
+        <DictEntry :ptrSymbols="ptrSymbols" :depth="exploreDepth" entryType="Verb" :data="chosenVerb" :darkTheme="darkTheme"/>
+        <DictEntry :ptrSymbols="ptrSymbols" :depth="exploreDepth" entryType="Adjective" :data="chosenAdj" :darkTheme="darkTheme"/>
+        <DictEntry :ptrSymbols="ptrSymbols" :depth="exploreDepth" entryType="Adverb" :data="chosenAdv" :darkTheme="darkTheme"/>
 
         <footer :id="darkTheme? 'darkFooter' : 'lightFooter'">
           Princeton University "About WordNet." 
@@ -18,7 +16,7 @@
         </footer>
       </div>
       <div class="graphComp col">
-        <GraphComp :dark-theme="darkTheme" :data="chosenData"/>
+        <GraphComp :dark-theme="darkTheme" :data="chosenData" :ptrSymbols="ptrSymbols" :depth="exploreDepth"/>
       </div>
     </div>
   </div>
@@ -41,6 +39,7 @@ export default {
   },
   data() {
     return {
+      exploreDepth : 2,
       searched: '',
       poss: ['n', 'v', 'a', 'r'],
       loaded : false,
@@ -49,7 +48,7 @@ export default {
       verbIndex : '',
       adjIndex : '',
       advIndex : '',
-      
+
       verbData : '',
       adjData : '',
       advData : '',
@@ -112,7 +111,6 @@ export default {
       map.set('v', this.verbIndex);
       map.set('a', this.adjIndex);
       map.set('r', this.advIndex);
-      this.testing;
       return map;
     },
     posData: function() {
@@ -279,22 +277,19 @@ export default {
           synset_offset.push(parseInt(split[6 + p_cnt + i]));
 
           let key = pos + synset_offset[i];
-          let val = this.parseDataline(pos, synset_offset[i], word, 3);
-          //call function to find all hypnonyms, then hypernyms etc
+          let val = this.parseDataline(pos, synset_offset[i], word);
           dataFile.set(key, val);
         }
-        // need hyponym ~, hypernym @, holonym #, meronym %
         indexFile.push({lemma: lemma, pos: pos, synset_cnt: synset_cnt, p_cnt: p_cnt,
           ptr_symbol: [...ptr_symbol], tagsense_cnt: tagsense_cnt, synset_offset: [...synset_offset]});
-
       });
-      console.log(dataFile);
 
       let ret = {index: indexFile, data: dataFile};
       return ret; 
     },
     chosenNoun: function() {
-      return this.printablePos(this.posFound('n'));
+      let ret = this.printablePos(this.posFound('n'));
+      return ret;
     },
     chosenVerb: function() {
       return this.printablePos(this.posFound('v'));
@@ -306,23 +301,7 @@ export default {
       return this.printablePos(this.posFound('r'));
     },
     chosenData: function() {
-      let ret = this.chosenNoun;
-      let nData = ret.data ? ret.data.size : 0;
-      if(this.chosenVerb.data && this.chosenVerb.data.size > nData)
-      {
-        ret = this.chosenVerb;
-        nData = ret.data.size;
-      }
-      if(this.chosenAdj.data && this.chosenAdj.data.size > nData)
-      {
-        ret = this.chosenAdj;
-        nData = ret.data.size;
-      }
-      if(this.chosenAdv.data && this.chosenAdv.data.size > nData)
-      {
-        ret = this.chosenAdv;
-      }
-      return ret[0];
+      return this.chosenNoun;
     },
   },
   methods: {
@@ -339,41 +318,83 @@ export default {
         el.synset_offset.forEach(off =>
           arr.push(data.get(el.pos + off)))});
       arr.forEach(el => {
-        el.ptrs.forEach(ptr => {
-          if(!ptr.data)
-            return;
-          let label = this.ptrSymbols.get(currPos).get(ptr.pointer_symbol);
-          if(!el.data)
-            el.data = new Map();
-          if(!el.data.has(label))
-            el.data.set(label, []);
-          el.data.get(label).push({id : el.data.get(label).length, words:[...ptr.data.words]});
-        });
+        el.memberMeronym = this.findOneElement(el, '%m', true).words;
+        el.substanceMeronym = this.findOneElement(el, '%s', true).words;
+        el.partMeronym = this.findOneElement(el, '%p', true).words;
+        el.memberHolonym = this.findOneElement(el, '#m', true).words;
+        el.substanceHolonym = this.findOneElement(el, '#s', true).words;
+        el.partHolonym = this.findOneElement(el, '#p', true).words;
+        el.hypernym = this.findOneElement(el, '@', true).words;
+        el.hyponym = this.findOneElement(el, '~', true).words;
+        el.fullHyponym = this.findFullChain(el, '@');
+        el.fullHypernym = this.findFullChain(el, '~');
+        this.exploreNode(el, this.exploreDepth);
       });
       return [...arr];
     },
-    printablePos: function(pos) {
-      let toChooseFrom = [];
-      let maxData = 0;
-      pos.forEach(el => {
-        if(!el.data || el.data.size < maxData)
-          return;
-        else if(el.data.size > maxData)
-        {
-          toChooseFrom = [];
-          maxData = el.data.size;
-        }
-        toChooseFrom.push(el);
-      });
-      if(toChooseFrom.length === 0)
-        return [];
-      let chosen = toChooseFrom[Math.floor(Math.random() * toChooseFrom.length)];
-      chosen.data.forEach((arr, label) => {
-        let chosenWords = arr[Math.floor(Math.random() * arr.length)];
-        chosen.data.set(label, [chosenWords]); 
-      });
+      //BFS 
+    exploreNode: function(element, depth) {
+      if(depth <= 0 || isNaN(depth))
+        return;
+      let queue = [];
 
-      return [chosen];
+      element.ptrs.forEach(ptr => queue.push({ptr: ptr, depth: depth - 1}));
+      let currQueueEl = null;
+      let res = null;
+      while(queue.length)
+      {
+        currQueueEl = queue[0];
+        queue.splice(0, 1);
+        res = this.parseDataline(currQueueEl.ptr.pos, currQueueEl.ptr.synset_offset, '');
+        currQueueEl.ptr.memberMeronym = this.findOneElement(res, '%m', true).words;
+        currQueueEl.ptr.substanceMeronym = this.findOneElement(res, '%s', true).words;
+        currQueueEl.ptr.partMeronym = this.findOneElement(res, '%p', true).words;
+        currQueueEl.ptr.memberHolonym = this.findOneElement(res, '#m', true).words;
+        currQueueEl.ptr.substanceHolonym = this.findOneElement(res, '#s', true).words;
+        currQueueEl.ptr.partHolonym = this.findOneElement(res, '#p', true).words;
+        currQueueEl.ptr.hypernym = this.findOneElement(res, '@', true).words;
+        currQueueEl.ptr.hyponym = this.findOneElement(res, '~', true).words;
+        currQueueEl.ptr.ptrs = res.ptrs;
+        currQueueEl.ptr.words = res.words;
+        if(currQueueEl.depth)
+        {
+          res.ptrs.forEach(ptr => queue.push({ptr: ptr, depth: currQueueEl.depth - 1}));
+        }
+      }
+    },
+    findFullChain: function(element, char) {
+      let res = [];
+      let oneEl = this.findOneElement(element, char, true);
+      if(!oneEl.ptrs)
+        return [];
+      res.push(oneEl.words);
+      while(oneEl.ptrs.filter(a => a.pointer_symbol.localeCompare(char) === 0).length)
+      {
+        oneEl = this.findOneElement(oneEl, char, true);
+        res.push(oneEl.words);
+      }
+      return res;
+    },
+      findOneElement: function(element, char, exactMatch) {
+        if(!element.ptrs || element.ptrs.length === 0)
+          return {};
+        let elWithChar = element.ptrs.filter(a => {
+          return exactMatch ? a.pointer_symbol.localeCompare(char) === 0 : a.pointer_symbol.includes(char);
+        });
+        if(!elWithChar.length)
+          return {};
+
+        let res = this.parseDataline(elWithChar[0].pos, elWithChar[0].synset_offset, '');
+        let words = [];
+        res.words.forEach(wordObj => words.push(wordObj.word));
+        let ret = {words: words, ptrs: res.ptrs};
+
+        return ret;
+      },
+    printablePos: function(pos) {
+      if(!pos.length)
+        return {};
+      return pos[Math.floor(Math.random() * pos.length)];
     },
       binSearch: function(word, file) {
         let lines = file.split(/\r\n|\r|\n/);
@@ -385,19 +406,19 @@ export default {
         {
           let currWord = lines[index].split(' ')[0];
 
-        let compare = currWord.localeCompare(word);
-        if(!compare)
-          return lines[index];
-        else if(compare < 0)
-          start = index + 1;
-        else
-          end = index - 1;
+          let compare = currWord.localeCompare(word);
+          if(!compare)
+            return lines[index];
+          else if(compare < 0)
+            start = index + 1;
+          else
+            end = index - 1;
 
-        index = Math.round(start + (end - start) / 2);
-      }
-      return -1;
-    },
-    parseDataline: function(pos, offset, searchedWord, depth) {
+          index = Math.round(start + (end - start) / 2);
+        }
+        return -1;
+      },
+    parseDataline: function(pos, offset, searchedWord) {
       let data = {};
       let newlineId = this.posData.get(pos).indexOf('\n', offset);
       let line = this.posData.get(pos).slice(offset, newlineId);
@@ -421,15 +442,16 @@ export default {
         let ptr_sym = split[5 + 2 * w_cnt + 4 * i];
         let synset_offset = parseInt(split[6 + 2 * w_cnt + 4 * i]);
         let newPos = split[7 + 2 * w_cnt + 4 * i];
-        let data = null;
-        if(depth > 0 && (ptr_sym.localeCompare('@') === 0 || ptr_sym.localeCompare('~') === 0))
-            data = this.parseDataline(newPos, synset_offset, '', depth - 1);
-        else if(searchedWord && (ptr_sym.localeCompare('!') === 0 ||
-          ptr_sym.localeCompare('\\') === 0 || ptr_sym.includes('#') || ptr_sym.includes('%')))
-          data = this.parseDataline(newPos, synset_offset, '', depth - 1);
+        //        let data = null;
+        //        if(depth > 0 && (ptr_sym.localeCompare('@') === 0 || ptr_sym.localeCompare('~') === 0))
+        //            data = this.parseDataline(newPos, synset_offset, '', depth - 1);
+        //        else if(searchedWord && (ptr_sym.localeCompare('!') === 0 ||
+        //          ptr_sym.localeCompare('\\') === 0 || ptr_sym.includes('#') || ptr_sym.includes('%')))
+        //          data = this.parseDataline(newPos, synset_offset, '', depth - 1);
 
         ptrs.push({pointer_symbol: ptr_sym, synset_offset: synset_offset,
-          pos: newPos, source: src, target: trgt, data: data});
+          pos: newPos, source: src, target: trgt});
+        //          pos: newPos, source: src, target: trgt, data: data});
       }
       data = {synset_offset: synset_offset, lex_filenum: lex_filenum, ss_type: ss_type,
         w_cnt: w_cnt, words: [...words], p_cnt: p_cnt, ptrs: [...ptrs], keyWord: searchedWord};
@@ -460,12 +482,12 @@ export default {
       data['example'] = [...examples];
       return data;
     },
-    findBaseWord: function(pos, word) {
-      let line = this.binSearch(word, this.excFiles.get(pos));
-      if(line == -1)
-        return -1;
-      return line.split(' ')[1];
-    }
+      findBaseWord: function(pos, word) {
+        let line = this.binSearch(word, this.excFiles.get(pos));
+        if(line == -1)
+          return -1;
+        return line.split(' ')[1];
+      }
   },
   async created() {
     if(this.nounIndex)
@@ -596,7 +618,7 @@ export default {
 
 <style scoped>
 footer {
-    padding: 10px;
+  padding: 10px;
 }
 
 #lightFooter a {
