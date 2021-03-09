@@ -21,7 +21,6 @@
               <b-icon :class="['cyclesIconRight', 'iconEnabled', darkTheme ? 'iconDark' : 'iconLight']"
                                       icon="arrow-clockwise" aria-hidden="true" @click="reloadRules" :animation="reloadingRules ? 'spin' : ''"></b-icon>
             </div>
-            <!--
             <span class="cyclesDiv">
               <span>New fact</span>
               <b-form-input size="sm" v-model="newFact" placeholder="Fact"
@@ -51,7 +50,6 @@
               <b-icon :class="['cyclesIconRight', isMapValid ? 'iconEnabled' : 'iconDisabled', darkTheme ? 'iconDark' : 'iconLight']"
                                                       icon="check-circle" aria-hidden="true" @click="addMapping"></b-icon>
             </div>
-            -->
           </b-card-text>
           <b-card-sub-title :sub-title-text-variant="darkTheme ? 'light' : 'secondary'" class="mb-3 mt-4">Algorithms</b-card-sub-title>
           <b-card-text>
