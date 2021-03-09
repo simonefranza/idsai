@@ -24,6 +24,12 @@ $text-secondary-light: #f8f9fa;
   }
 }
 //-------
+.smallInput {
+  width: 50px;
+}
+.mediumInput {
+  width: 25%;
+}
 
 .iconEnabled{
   opacity: 1;
@@ -171,4 +177,3 @@ opacity: 0.5;
   cursor: pointer;
   border: 0 solid transparent;
 }
-/* end Slider */

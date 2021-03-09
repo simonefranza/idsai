@@ -33,6 +33,15 @@
               </div>
             </div>
           </span>
+          <span v-else>
+            <div class="cyclesDiv">
+              <span class="toggleBlock">Matrix size</span>
+              <b-form-input size="sm" v-model="adjMatSize"
+                                      :class="{'shake' : invalidMatrixSize, 'darkInputForm' : darkTheme, 'mediumInput' : 'true'}"></b-form-input>
+              <b-icon :class="['cyclesIconRight', 'iconEnabled', darkTheme ? 'iconDark' : 'iconLight']"
+                                      icon="arrow-clockwise" aria-hidden="true" @click="reloadMatrix" :animation="reloadingMatrix ? 'spin' : ''"></b-icon>
+            </div>
+          </span>
           </b-card-text>
         </b-card-body>
       </b-card>
@@ -47,7 +56,7 @@
                      :chosenAdv="chosenAdv" 
                      v-if="showWordNet" />
       <AdjacencyMat :darkTheme="darkTheme" 
-                    :matrixSize="adjMatSize"
+                    :matrixSize="parsedAdjMatSize"
                     v-model="adjMatrix"
                     v-else />
       </div>
@@ -91,6 +100,7 @@ export default {
       //Adj Matrix
       adjMatrix : [],
       adjMatSize: 5,
+      reloadingMatrix: false,
 
       //Word Net
       exploreDepth : 2,
@@ -161,6 +171,13 @@ export default {
     }
   },
   computed: {
+    parsedAdjMatSize: function() {
+      return this.invalidMatrixSize ? 2 : parseInt(this.adjMatSize);
+    },
+    invalidMatrixSize: function() {
+      return !this.adjMatSize || isNaN(this.adjMatSize) || ('' + this.adjMatSize).includes('.') ||
+        parseFloat(this.adjMatSize) < 2;
+    },
     decreaseDepthDisabled: function() {
       return this.exploreDepth === 0;
     },
@@ -364,6 +381,12 @@ export default {
     },
   },
   methods: {
+    reloadMatrix () {
+      this.reloadingMatrix= true;
+      this.adjMatrix = [];
+      setTimeout(() => {
+        this.reloadingMatrix = false;}, 2000);
+    },
     randomWord: function() {
       this.choosingRandomWord= true;
       let file = this.posIndex.get('n');

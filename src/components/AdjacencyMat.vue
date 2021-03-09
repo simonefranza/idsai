@@ -27,14 +27,20 @@ export default {
     matrixSize: {
       required: true,
       type: Number,
+    },
+    value : {
+      required: true,
     }
+
   },
   data() {
     return {
+      reload: 0,
     }
   },
   computed: {
     matrix: function() {
+      this.reload;
       let mat = [];
       for(let row = 0; row < this.matrixSize; row++)
       {
@@ -71,6 +77,12 @@ export default {
       this.$emit("newMatrix", mat);
     },
   },
+  watch: {
+    value() {
+      if(!this.value.length)
+        this.reload = Math.random();
+    }
+  }
 }
 </script>
 
