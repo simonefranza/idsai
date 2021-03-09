@@ -46,6 +46,10 @@
                      :chosenAdj="chosenAdj"
                      :chosenAdv="chosenAdv" 
                      v-if="showWordNet" />
+      <AdjacencyMat :darkTheme="darkTheme" 
+                    :matrixSize="adjMatSize"
+                    v-model="adjMatrix"
+                    v-else />
       </div>
       <div class="col-8">
         <GraphComp :dark-theme="darkTheme" 
@@ -53,6 +57,9 @@
                    :ptrSymbols="ptrSymbols" 
                    :depth="exploreDepth" 
                    v-if="showWordNet"/>
+        <AdjacencyGraph :darkTheme="darkTheme"
+                        :matrix="adjMatrix"
+                        v-else />
       </div>
     </div>
   </div>
@@ -61,6 +68,8 @@
 <script>
 import WordNetResult from '@/components/WordNetResult.vue'
 import GraphComp from '@/components/GraphComp.vue'
+import AdjacencyMat from '@/components/AdjacencyMat.vue'
+import AdjacencyGraph from '@/components/AdjacencyGraph.vue'
 import ToggleSwitch from '@/components/ToggleSwitch.vue'
 
 export default {
@@ -73,10 +82,17 @@ export default {
   components: {
     WordNetResult,
     GraphComp,
+    AdjacencyMat,
+    AdjacencyGraph,
     ToggleSwitch,
   },
   data() {
     return {
+      //Adj Matrix
+      adjMatrix : [],
+      adjMatSize: 5,
+
+      //Word Net
       exploreDepth : 2,
       showWordNet : false,
       choosingRandomWord: false,
