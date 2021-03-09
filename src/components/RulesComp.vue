@@ -56,10 +56,10 @@
             <div class="cyclesDiv">
               <span>Forward chaining ({{cycleNum + 1}} / {{cycles.length}})</span>
               <span>
-                <b-button :class="['cyclesIconLeft', decreaseCycleDisabled ? 'iconDisabled' : 'iconEnabled', darkTheme ? 'iconDark' : 'iconLight']" 
-                @click="decreaseCyclesNum" variant="outline-custom">Remove 1 Cycle</b-button>
-                <b-button :class="['cyclesIconRight', increaseCycleDisabled ?  'iconDisabled' : 'iconEnabled', darkTheme ? 'iconDark' : 'iconLight']" 
-                @click="increaseCyclesNum" variant="outline-custom">Add 1 Cycle</b-button>
+                <b-button :disabled="decreaseCycleDisabled" :class="['cyclesIconLeft', decreaseCycleDisabled ? 'iconDisabled' : 'iconEnabled']" 
+                @click="decreaseCyclesNum" :variant="darkTheme ? 'outline-dark' : 'outline-light'">Remove 1 Cycle</b-button>
+                <b-button :disabled="increaseCycleDisabled" :class="['cyclesIconRight', increaseCycleDisabled ?  'iconDisabled' : 'iconEnabled']" 
+                @click="increaseCyclesNum" :variant="darkTheme ? 'outline-dark' : 'outline-light'">Add 1 Cycle</b-button>
                 <!--<b-icon :class="['cyclesIconLeft', decreaseCycleDisabled ? 'iconDisabled' : 'iconEnabled', darkTheme ? 'iconDark' : 'iconLight']" 
                                                   icon="dash-circle" aria-hidden="true" @click="decreaseCyclesNum"></b-icon>
                 <b-icon :class="['cyclesIconRight', increaseCycleDisabled ? 'iconDisabled' : 'iconEnabled', darkTheme ? 'iconDark' : 'iconLight']"
@@ -497,30 +497,12 @@ export default {
 }
 </script>
 
-<style>
-.btn-outline-custom{
-  color: #f5d782;
-  border-color: #f5d782;
-}
-.btn-outline-custom:hover {
-    color: #303131;
-    background-color: #f5d782;
-    border-color: #f5d782;
-}
-</style>
-<style scoped>
+<style scoped lang="scss">
 .dataCard {
   text-align: left;
 }
 .dataTitle {
   font-weight: bold;
-}
-
-.cyclesDiv {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
 }
 
 .flexSpan{
@@ -530,35 +512,6 @@ export default {
   padding: 1px 5px 1px 0;
 }
 
-.cyclesIconRight, .cyclesIconLeft {
-   -webkit-user-select: none;
-   -khtml-user-select: none;
-    -moz-user-select: none;
-    -o-user-select: none;
-    user-select: none;
-}
-
-.cyclesIconLeft {
-  margin-right: 5px;
-}
-.cyclesIconRight {
-  margin-left: 5px;
-}
-
-.iconDisabled{
-opacity: 0.5;
-}
-
-.iconEnabled{
-  opacity: 1;
-  cursor: pointer;
-}
-.iconDark {
-  color: #f5d782;
-}
-.iconLight {
-  color: #111;
-}
 .highlightedRule {
   font-weight: bold;
 }
@@ -574,29 +527,6 @@ opacity: 0.5;
 }
 .mediumInput {
   width: 25%;
-}
-.darkInputForm {
-  background-color: #303131;
-  border: 1px solid #111;
-  color: #f8f1f1;
-}
-.shake {
-  animation: shake 0.82s cubic-bezier(.36,.07,.19,.97) both;
-  transform: translate3d(0, 0, 0);
-}
-@keyframes shake {
-  10%, 90% {
-    transform: translate3d(-1px, 0, 0);
-  }
-  20%, 80% {
-    transform: translate3d(2px, 0, 0);
-  }
-  30%, 50%, 70% {
-    transform: translate3d(-4px, 0, 0);
-  }
-  40%, 60% {
-    transform: translate3d(4px, 0, 0);
-  }
 }
 .disabledInput {
   opacity: 0.7;

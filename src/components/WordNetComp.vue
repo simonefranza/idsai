@@ -23,12 +23,12 @@
                 </span>
               </div>
               <div class="cyclesDiv">
-                <span class="toggleBlock">Random word</span>
+                <span>Random word</span>
                 <b-icon :class="['cyclesIconRight', 'iconEnabled', darkTheme ? 'iconDark' : 'iconLight']"
                                         icon="arrow-clockwise" aria-hidden="true" @click="randomWord()" :animation="choosingRandomWord ? 'spin' : ''"></b-icon>
               </div>
               <div class="cyclesDiv">
-                <span class="toggleBlock">Search </span>
+                <span>Search </span>
                 <b-form-input :class="{'darkInputForm' : darkTheme, 'inputForm' : 'true'}" v-model="searched" placeholder="Input something"></b-form-input>
               </div>
             </div>
@@ -37,32 +37,29 @@
         </b-card-body>
       </b-card>
       <br/>
-      <b-card title="Search Result" v-bind:bg-variant="!darkTheme ? 'light' : 'dark'" v-bind:text-variant="!darkTheme ? '' : 'white'" v-if="searched.trim() && showWordNet" >
-      <b-card-body>
-        <b-card-text>
-        <DictEntry :ptrSymbols="ptrSymbols" :depth="exploreDepth" entryType="Noun" :data="chosenNoun" :darkTheme="darkTheme"/>
-        <DictEntry :ptrSymbols="ptrSymbols" :depth="exploreDepth" entryType="Verb" :data="chosenVerb" :darkTheme="darkTheme"/>
-        <DictEntry :ptrSymbols="ptrSymbols" :depth="exploreDepth" entryType="Adjective" :data="chosenAdj" :darkTheme="darkTheme"/>
-        <DictEntry :ptrSymbols="ptrSymbols" :depth="exploreDepth" entryType="Adverb" :data="chosenAdv" :darkTheme="darkTheme"/>
-
-        <footer :id="darkTheme? 'darkFooter' : 'lightFooter'">
-          Princeton University "About WordNet." 
-          <a href="https://wordnet.princeton.edu">WordNet</a>. 
-          Princeton University. 2010.
-        </footer>
-        </b-card-text>
-      </b-card-body>
-      </b-card>
+      <WordNetResult :ptrSymbols="ptrSymbols" 
+                     :darkTheme="darkTheme" 
+                     :searched="searched"
+                     :depth="exploreDepth"
+                     :chosenNoun="chosenNoun"
+                     :chosenVerb="chosenVerb"
+                     :chosenAdj="chosenAdj"
+                     :chosenAdv="chosenAdv" 
+                     v-if="showWordNet" />
       </div>
       <div class="col-8">
-        <GraphComp :dark-theme="darkTheme" :data="chosenData" :ptrSymbols="ptrSymbols" :depth="exploreDepth" v-if="showWordNet"/>
+        <GraphComp :dark-theme="darkTheme" 
+                   :data="chosenData"
+                   :ptrSymbols="ptrSymbols" 
+                   :depth="exploreDepth" 
+                   v-if="showWordNet"/>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import DictEntry from "./DictEntry";
+import WordNetResult from '@/components/WordNetResult.vue'
 import GraphComp from '@/components/GraphComp.vue'
 import ToggleSwitch from '@/components/ToggleSwitch.vue'
 
@@ -74,7 +71,7 @@ export default {
     }
   },
   components: {
-    DictEntry,
+    WordNetResult,
     GraphComp,
     ToggleSwitch,
   },
@@ -681,11 +678,10 @@ export default {
 }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 footer {
   padding: 10px;
 }
-
 #lightFooter a {
   font-weight: bold;
   color: #2c3e50;
@@ -693,82 +689,7 @@ footer {
 
 #darkFooter a {
   font-weight: bold;
-  color: #f8f1f1;
-}
-
-.darkInputForm {
-  background-color: #303131;
-  border: 1px solid #111;
-  color: #f8f1f1;
-}
-
-.darkInputForm::placeholder {
-  color: #888;
-}
-
-.cyclesDiv {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
-.toggleBlock{
-  display: flex;
-  align-items: center;
-}
-
-.inputForm {
-  margin: 0 1em 0 1em ;
-
-}
-.cyclesIconRight, .cyclesIconLeft {
-   -webkit-user-select: none;
-   -khtml-user-select: none;
-    -moz-user-select: none;
-    -o-user-select: none;
-    user-select: none;
-}
-
-.cyclesIconLeft {
-  margin-right: 5px;
-}
-.cyclesIconRight {
-  margin-left: 5px;
-}
-.iconEnabled{
-  opacity: 1;
-  cursor: pointer;
-}
-.iconDisabled{
-opacity: 0.5;
-}
-.shake {
-  animation: shake 0.82s cubic-bezier(.36,.07,.19,.97) both;
-  transform: translate3d(0, 0, 0);
-}
-@keyframes shake {
-  10%, 90% {
-    transform: translate3d(-1px, 0, 0);
-  }
-  20%, 80% {
-    transform: translate3d(2px, 0, 0);
-  }
-  30%, 50%, 70% {
-    transform: translate3d(-4px, 0, 0);
-  }
-  40%, 60% {
-    transform: translate3d(4px, 0, 0);
-  }
-}
-.iconDark {
-  color: #f5d782;
-}
-.iconLight {
-  color: #111;
-}
-
-.disabledText {
-  color: #909090;
+  color: $text-primary-dark;
 }
 
 </style>

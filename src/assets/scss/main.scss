@@ -1,0 +1,174 @@
+$secondary-dark: #f5d782;
+$text-primary-dark: #f8f1f1;
+$text-secondary-dark: #303131;
+$primary-light: #111;
+$text-secondary-light: #f8f9fa;
+
+//Taken from https://stackoverflow.com/questions/59855732/vuelidate-shaking-the-incorrect-input-field
+.shake {
+  animation: shake 0.82s cubic-bezier(.36,.07,.19,.97) both;
+  transform: translate3d(0, 0, 0);
+}
+@keyframes shake {
+  10%, 90% {
+    transform: translate3d(-1px, 0, 0);
+  }
+  20%, 80% {
+    transform: translate3d(2px, 0, 0);
+  }
+  30%, 50%, 70% {
+    transform: translate3d(-4px, 0, 0);
+  }
+  40%, 60% {
+    transform: translate3d(4px, 0, 0);
+  }
+}
+//-------
+
+.iconEnabled{
+  opacity: 1;
+  cursor: pointer;
+}
+
+.iconDisabled{
+opacity: 0.5;
+}
+
+.iconDark {
+  color: $secondary-dark;
+}
+
+.iconLight {
+  color: $primary-light;
+}
+
+.cyclesIconLeft {
+  margin-right: 5px;
+}
+.cyclesIconRight {
+  margin-left: 5px;
+}
+
+.cyclesIconRight, .cyclesIconLeft {
+   -webkit-user-select: none;
+   -khtml-user-select: none;
+    -moz-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+}
+.darkInputForm {
+  background-color: $text-secondary-dark;
+  border: 1px solid $primary-light;
+  color: $text-primary-dark;
+}
+
+.darkInputForm::placeholder {
+  color: #888;
+}
+
+.cyclesDiv {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.inputForm {
+  margin: 0 0 0 1em ;
+
+}
+
+.disabledText {
+  color: #909090;
+}
+/*classes for bootstrap buttons*/
+.btn-outline-dark, .btn-outline-dark:disabled, .btn-outline-dark.disabled{
+  color: $secondary-dark;
+  border-color: $secondary-dark;
+}
+.btn-outline-light, .btn-outline-light.disabled, .btn-outline-light:disabled {
+  color: $primary-light;
+  border-color: $primary-light;
+}
+.btn-outline-dark:hover:not(:disabled):not(.disabled) {
+    color: $text-secondary-dark;
+    background-color: $secondary-dark;
+    border-color: $secondary-dark;
+}
+.btn-outline-light:hover:not(:disabled):not(.disabled) {
+    color: $text-secondary-light;
+    background-color: $primary-light;
+    border-color: $primary-light;
+}
+/* ----- */
+/* Slider */
+.slider {
+  height:8px;
+  width: 33%;
+  border-radius:25px;
+}
+
+.darkSlider, .darkSlider:focus {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  outline:none;
+  border:1px solid $primary-light;
+  background: $text-secondary-dark;
+}
+.lightSlider, .lightSlider:focus {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  outline:none;
+  border:1px solid #9a9b9b;
+  background: #fff;
+}
+
+.darkSlider::-moz-range-thumb {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius:100%;
+  background: $secondary-dark;
+  cursor: pointer;
+  border: 0 solid transparent;
+}
+
+.darkSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius:100%;
+  background: $secondary-dark;
+  cursor: pointer;
+  border: 0 solid transparent;
+
+}
+
+.lightSlider::-moz-range-thumb {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius:100%;
+  background: #999;
+  cursor: pointer;
+  border: 0 solid transparent;
+}
+
+.lightSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius:100%;
+  background: #999;
+  cursor: pointer;
+  border: 0 solid transparent;
+}
+/* end Slider */

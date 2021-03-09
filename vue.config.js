@@ -10,5 +10,14 @@ module.exports = {
       // Or if using full build of Vue (runtime + compiler)
       path.resolve(__dirname, 'node_modules/vue/dist/vue.esm.js')
     )
+  },
+  css: {
+    loaderOptions: {
+      scss: {
+        additionalData: `
+          @import "@/assets/scss/main.scss";
+        `
+      }
+    }
   }
 }

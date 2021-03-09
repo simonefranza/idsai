@@ -279,83 +279,13 @@ export default {
 }
 </script>
 
-
-<style  scoped>
-.tooltip { top: 0; }
+<style scoped lang="scss">
+.tooltip { 
+  top: 0; 
+}
 
 .ctrlPanel {
   text-align:left;
-}
-
-.slider {
-  height:8px;
-  width: 33%;
-  border-radius:25px;
-}
-
-
-.darkSlider, .darkSlider:focus {
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  outline:none;
-  border:1px solid #111;
-  background: #303131;
-}
-.lightSlider, .lightSlider:focus {
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  outline:none;
-  border:1px solid #9a9b9b;
-  background: #fff;
-}
-
-.darkSlider::-moz-range-thumb {
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-  width: 16px;
-  height: 16px;
-  border-radius:100%;
-  background: #f5d782;
-  cursor: pointer;
-  border: 0 solid transparent;
-}
-
-.darkSlider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-  width: 16px;
-  height: 16px;
-  border-radius:100%;
-  background: #f5d782;
-  cursor: pointer;
-  border: 0 solid transparent;
-
-}
-
-.lightSlider::-moz-range-thumb {
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-  width: 16px;
-  height: 16px;
-  border-radius:100%;
-  background: #999;
-  cursor: pointer;
-  border: 0 solid transparent;
-}
-
-.lightSlider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-  width: 16px;
-  height: 16px;
-  border-radius:100%;
-  background: #999;
-  cursor: pointer;
-  border: 0 solid transparent;
 }
 
 .precDiv {
@@ -363,6 +293,4 @@ export default {
   justify-content: space-between;
   align-items: center;
 }
-
-
 </style>

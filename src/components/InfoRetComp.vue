@@ -528,64 +528,17 @@ export default {
   }
 }
 
-//Taken from https://stackoverflow.com/questions/59855732/vuelidate-shaking-the-incorrect-input-field
 </script>
 
-<style scoped>
-.shake {
-  animation: shake 0.82s cubic-bezier(.36,.07,.19,.97) both;
-  transform: translate3d(0, 0, 0);
-}
-@keyframes shake {
-  10%, 90% {
-    transform: translate3d(-1px, 0, 0);
-  }
-  20%, 80% {
-    transform: translate3d(2px, 0, 0);
-  }
-  30%, 50%, 70% {
-    transform: translate3d(-4px, 0, 0);
-  }
-  40%, 60% {
-    transform: translate3d(4px, 0, 0);
-  }
-}
+<style scoped lang="scss">
+@import '@/assets/scss/main.scss';
+
 .panelSwitches {
   text-align : left;
 }
 .infoRetComp {
   width: 90%;
   margin: auto;
-}
-.darkInputForm {
-  background-color: #303131;
-  border: 1px solid #111;
-  color: #f8f1f1;
-}
-
-.darkInputForm::placeholder {
-  color: #888;
-}
-.cyclesIconLeft {
-  margin-right: 5px;
-}
-.cyclesIconRight {
-  margin-left: 5px;
-}
-
-.iconDisabled{
-opacity: 0.5;
-}
-
-.iconEnabled{
-  opacity: 1;
-  cursor: pointer;
-}
-.iconDark {
-  color: #f5d782;
-}
-.iconLight {
-  color: #111;
 }
 
 .alignMiddle {
