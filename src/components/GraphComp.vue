@@ -41,7 +41,6 @@ export default {
         linkWidth:5,
         strLinks: false,
       },
-      reloadColors: false,
     }
   },
   computed: {
@@ -55,7 +54,8 @@ export default {
       nodes.push({id: currId++, name: this.formatWord(this.data.words[0].word)});
       if(!this.depth)
       {
-        nodes.forEach(el => el._color = this.darkTheme ? '#6a6868' : '#2c3e4f');
+        nodes.forEach(el => el._color = this.darkTheme ? '#f5d782' : '#41ba82');
+        this.setStyle();
         return {nodes: nodes, links:  []};
       }
       addedNames.push(this.data.words[0].word.toUpperCase());
@@ -118,9 +118,11 @@ export default {
       
 
       nodes.forEach(el => el._color = this.darkTheme ? '#6a6868' : '#2c3e4f');
+      nodes[0]._color = this.darkTheme ? '#f5d782' : '#41ba82';
       links.forEach(el => el._color = this.darkTheme ? '#303131' : '#d0d0d0');
 
 
+      this.setStyle();
       return {nodes: nodes, links: links};
 
     },
@@ -199,7 +201,6 @@ export default {
       return word.replace(/_/g, " ");
     },
     getNodeId: function(arr, name) {
-      this.reloadColors = true;
       for(let el of arr){
         if(el.name.toUpperCase().localeCompare(this.formatWord(name).toUpperCase()) === 0)
           return el.id;
@@ -240,10 +241,6 @@ export default {
     }
   },
   watch: {
-    reloadColors() {
-      this.reloadColors = false;
-      this.setStyle();
-    },
   },
   mounted()
   {

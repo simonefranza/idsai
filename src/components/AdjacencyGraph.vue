@@ -51,7 +51,7 @@ export default {
 
       nodes.forEach(el => el._color = this.darkTheme ? '#6a6868' : '#2c3e4f');
       links.forEach(el => el._color = this.darkTheme ? '#303131' : '#d0d0d0');
-      this.reloadColors();
+      this.setStyle();
 
       return {nodes: nodes, links: links};
     },
@@ -66,7 +66,6 @@ export default {
       return false;
     },
     getNodeId: function(arr, name) {
-      this.reloadColors = true;
       for(let el of arr){
         if(el.name.toUpperCase().localeCompare(this.formatWord(name).toUpperCase()) === 0)
           return el.id;
@@ -102,9 +101,6 @@ export default {
           });
         });
       }
-    },
-    reloadColors() {
-      this.setStyle();
     },
   },
   watch: {
