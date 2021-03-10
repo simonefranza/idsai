@@ -8,6 +8,10 @@ import 'bootstrap-vue/dist/bootstrap-vue.css'
 import store from './store'
 import router from './router'
 
+//vue web worker
+import VueWorker from 'vue-worker'
+Vue.use(VueWorker)
+
 
 // Make BootstrapVue available throughout your project
 Vue.use(BootstrapVue)

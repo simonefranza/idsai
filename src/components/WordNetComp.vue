@@ -14,7 +14,7 @@
             <b-spinner type="grow" label="Loading..." v-if="!loaded" :variant="darkTheme ? 'light' : 'dark'"></b-spinner>
             <div v-else>
               <div class="cyclesDiv">
-                <span>Search depth (current {{exploreDepth}}, slow above 2)</span>
+                <span>Search depth (current {{exploreDepth}}, slow above 3)</span>
                 <span>
                   <b-icon :class="['cyclesIconLeft', decreaseDepthDisabled ? 'iconDisabled' : 'iconEnabled', darkTheme ? 'iconDark' : 'iconLight']" 
                                                     icon="dash-circle" aria-hidden="true" @click="decreaseDepthNum"></b-icon>
@@ -54,6 +54,7 @@
                      :chosenVerb="chosenVerb"
                      :chosenAdj="chosenAdj"
                      :chosenAdv="chosenAdv" 
+                     :loaded="dataWasChosen"
                      v-if="showWordNet" />
       <AdjacencyMat :darkTheme="darkTheme" 
                     :matrixSize="parsedAdjMatSize"
@@ -62,10 +63,10 @@
       </div>
       <div class="col-8">
         <GraphComp :dark-theme="darkTheme" 
-                   :data="chosenData"
+           :data="chosenData" 
                    :ptrSymbols="ptrSymbols" 
                    :depth="exploreDepth" 
-                   v-if="showWordNet"/>
+                    v-if="showWordNet" />
         <AdjacencyGraph :darkTheme="darkTheme"
                         :matrix="adjMatrix"
                         v-else />
@@ -103,8 +104,18 @@ export default {
       reloadingMatrix: false,
 
       //Word Net
+      dataWasChosen: false,
+      chosenNoun: {},
+      loadedNoun: false,
+      chosenVerb: {},
+      loadedVerb: false,
+      chosenAdj: {},
+      loadedAdj: false,
+      chosenAdv: {},
+      loadedAdv: false,
       exploreDepth : 2,
-      showWordNet : false,
+      showWordNet : true,
+      relevantSymbols : ['!', '@', '@i', '~', '~i', '#m', '#s', '#p', '%m', '%s', '%p'],
       choosingRandomWord: false,
       searched: '',
       poss: ['n', 'v', 'a', 'r'],
@@ -314,6 +325,11 @@ export default {
       advsMap.set(';u', 'Domain of synset - USAG');
       return outerMap;
     },
+    chosenData: function() {
+      if(!this.loadedNoun)
+        return {};
+      return this.chosenNoun; 
+    },
     wnCont: function() {
       let word = this.searched.trim().toLowerCase();
       if(!word)
@@ -323,16 +339,16 @@ export default {
       let indexFile = [];
       let dataFile = new Map();
       let res = '';
-      this.poss.forEach(part => {
+      for(let part of this.poss) {
         res = this.binSearch(word, this.posIndex.get(part));
         if(res == -1)
         {
           let excWord = this.findBaseWord(part, word);
           if(excWord == -1)
-            return '';
+            continue;
           res = this.binSearch(excWord, this.posIndex.get(part));
           if(res == -1)
-            return '';
+            continue;
           word = excWord;
         }
         let split = res.split(' ');
@@ -358,26 +374,10 @@ export default {
         }
         indexFile.push({lemma: lemma, pos: pos, synset_cnt: synset_cnt, p_cnt: p_cnt,
           ptr_symbol: [...ptr_symbol], tagsense_cnt: tagsense_cnt, synset_offset: [...synset_offset]});
-      });
+      }
 
       let ret = {index: indexFile, data: dataFile};
       return ret; 
-    },
-    chosenNoun: function() {
-      let ret = this.printablePos(this.posFound('n'));
-      return ret;
-    },
-    chosenVerb: function() {
-      return this.printablePos(this.posFound('v'));
-    },
-    chosenAdj: function() {
-      return this.printablePos(this.posFound('a'));
-    },
-    chosenAdv: function() {
-      return this.printablePos(this.posFound('r'));
-    },
-    chosenData: function() {
-      return this.chosenNoun;
     },
   },
   methods: {
@@ -406,118 +406,131 @@ export default {
         return;
       this.exploreDepth--;
     },
-    posFound: function(currPos) {
-      const {index, data} = this.wnCont;
-      if(!index)
-        return [];
+    posFound: async function(currPos) {
+      return this.$worker.run((currPos, wnCont, posData, relevantSymbols, depth) => {
+        const {index, data} = wnCont;
+        if(!index)
+          return [];
 
-      let arr = [];
-      let elements = index.filter(el => !el.pos.localeCompare(currPos));
-      if(elements.length === 0 || elements[0].synset_cnt === 0)
-        return [];
-      elements.forEach(el => {
-        el.synset_offset.forEach(off =>
-          arr.push(data.get(el.pos + off)))});
-      arr.forEach(el => {
-        el.memberMeronym = this.findOneElement(el, '%m', true).words;
-        el.substanceMeronym = this.findOneElement(el, '%s', true).words;
-        el.partMeronym = this.findOneElement(el, '%p', true).words;
-        el.memberHolonym = this.findOneElement(el, '#m', true).words;
-        el.substanceHolonym = this.findOneElement(el, '#s', true).words;
-        el.partHolonym = this.findOneElement(el, '#p', true).words;
-        el.hypernym = this.findOneElement(el, '@', true).words;
-        el.hyponym = this.findOneElement(el, '~', true).words;
-        el.fullHyponym = this.findFullChain(el, '@');
-        el.fullHypernym = this.findFullChain(el, '~');
-        this.exploreNode(el, this.exploreDepth);
-      });
-      return [...arr];
-    },
-      //BFS 
-    exploreNode: function(element, depth) {
-      if(depth <= 0 || isNaN(depth))
-        return;
-      let queue = [];
+        let arr = [];
 
-      element.ptrs.forEach(ptr => queue.push({ptr: ptr, depth: depth - 1}));
-      let currQueueEl = null;
-      let res = null;
-      while(queue.length)
-      {
-        currQueueEl = queue[0];
-        queue.splice(0, 1);
-        res = this.parseDataline(currQueueEl.ptr.pos, currQueueEl.ptr.synset_offset, '');
-        currQueueEl.ptr.memberMeronym = this.findOneElement(res, '%m', true).words;
-        currQueueEl.ptr.substanceMeronym = this.findOneElement(res, '%s', true).words;
-        currQueueEl.ptr.partMeronym = this.findOneElement(res, '%p', true).words;
-        currQueueEl.ptr.memberHolonym = this.findOneElement(res, '#m', true).words;
-        currQueueEl.ptr.substanceHolonym = this.findOneElement(res, '#s', true).words;
-        currQueueEl.ptr.partHolonym = this.findOneElement(res, '#p', true).words;
-        currQueueEl.ptr.hypernym = this.findOneElement(res, '@', true).words;
-        currQueueEl.ptr.hyponym = this.findOneElement(res, '~', true).words;
-        currQueueEl.ptr.ptrs = res.ptrs;
-        currQueueEl.ptr.words = res.words;
-        if(currQueueEl.depth)
-        {
-          res.ptrs.forEach(ptr => queue.push({ptr: ptr, depth: currQueueEl.depth - 1}));
+        for(let i = 0; i < index.length ; i++) {
+          let el = index[i];
+          if(el.pos.localeCompare(currPos))
+            continue;
+
+          for(let ii = 0; ii < el.synset_offset.length; ii++) {
+            let off = el.synset_offset[ii];
+            arr.push(data.get(el.pos + off))
+          }
         }
-      }
+
+        if(!arr.length || depth <= 0 || isNaN(depth))
+          return [];
+
+        for(let i = 0; i < arr.length; i++) {
+          let element = arr[i];
+          let queue = element.ptrs.map(ptr => {
+            return {ptr: ptr, depth: depth -1};});
+
+          let index = 0 ;
+          while(index < queue.length)
+          {
+            let currQueueEl = queue[index++];
+            let pos = currQueueEl.ptr.pos;
+            let offset = currQueueEl.ptr.synset_offset;
+
+            let newlineId = posData.get(pos).indexOf('\n', offset);
+            let line = posData.get(pos).slice(offset, newlineId);
+            let split = line.split(' ');
+            let w_cnt = parseInt(split[3], 16);
+            let words = [];
+            for(let i = 0; i < w_cnt; i++)
+              words.push({word: split[4 + 2 * i], lex_id: split[5 + 2 * i]});
+
+            let p_cnt = parseInt(split[4 + 2 * w_cnt]);
+            let ptrs = [];
+            for(let j = 0; j < p_cnt; j++)
+            {
+              let src_trgt = split[8 + 2 * w_cnt + 4 * j];
+              let src = parseInt(src_trgt.slice(0,2) ,16);
+              let trgt = parseInt(src_trgt.slice(2,4) ,16);
+              let ptr_sym = split[5 + 2 * w_cnt + 4 * j];
+              let synset_offset = parseInt(split[6 + 2 * w_cnt + 4 * j]);
+              let newPos = split[7 + 2 * w_cnt + 4 * j];
+
+              ptrs.push({pointer_symbol: ptr_sym, synset_offset: synset_offset,
+                pos: newPos, source: src, target: trgt});
+            }
+            currQueueEl.ptr.ptrs = [...ptrs];
+            currQueueEl.ptr.words = [...words];
+            if(currQueueEl.depth)
+            {
+              for(let j = 0; j < ptrs.length; j++) {
+                let ptr = ptrs[j];
+                if(relevantSymbols.includes(ptr.pointer_symbol))
+                  queue.push({ptr: ptr, depth: currQueueEl.depth - 1});
+              }
+            }
+          } 
+
+        }
+        posData;
+        depth;
+        relevantSymbols;
+        return arr[Math.floor(Math.random() * arr.length)];
+    }, [currPos, this.wnCont, this.posData, this.relevantSymbols, this.exploreDepth])
     },
-    findFullChain: function(element, char) {
+    findFullChain: async function(element, char) {
       let res = [];
-      let oneEl = this.findOneElement(element, char, true);
+      let oneEl = await this.findOneElement(element, char, true);
       if(!oneEl.ptrs)
         return [];
       res.push(oneEl.words);
       while(oneEl.ptrs.filter(a => a.pointer_symbol.localeCompare(char) === 0).length)
       {
-        oneEl = this.findOneElement(oneEl, char, true);
+        oneEl = await this.findOneElement(oneEl, char, true);
         res.push(oneEl.words);
       }
       return res;
     },
-      findOneElement: function(element, char, exactMatch) {
-        if(!element.ptrs || element.ptrs.length === 0)
-          return {};
-        let elWithChar = element.ptrs.filter(a => {
-          return exactMatch ? a.pointer_symbol.localeCompare(char) === 0 : a.pointer_symbol.includes(char);
-        });
-        if(!elWithChar.length)
-          return {};
+    findOneElement: async function(element, char, exactMatch) {
+      if(!element.ptrs || element.ptrs.length === 0)
+        return {};
+      let elWithChar = element.ptrs.filter(a => {
+        return exactMatch ? a.pointer_symbol.localeCompare(char) === 0 : a.pointer_symbol.includes(char);
+      });
+      if(!elWithChar.length)
+        return {};
 
-        let res = this.parseDataline(elWithChar[0].pos, elWithChar[0].synset_offset, '');
-        let words = [];
-        res.words.forEach(wordObj => words.push(wordObj.word));
-        let ret = {words: words, ptrs: res.ptrs};
+      let res = this.parseDataline(elWithChar[0].pos, elWithChar[0].synset_offset, '');
+      let words = [];
+      res.words.forEach(wordObj => words.push(wordObj.word));
+      let ret = {words: words, ptrs: res.ptrs};
 
-        return ret;
-      },
-      printablePos: function(pos) {
-        if(!pos.length)
-          return {};
-        return pos[Math.floor(Math.random() * pos.length)];
-      },
-      binSearch: function(word, file) {
-        let lines = file.split(/\r\n|\r|\n/);
-        let len = lines.length - 1;
-        let index = Math.round((len)/ 2); 
-        let start = 0;
-        let end = len;
-        while(end >= start)
-        {
-          let currWord = lines[index].split(' ')[0];
+      return ret;
+    },
+    binSearch: function(word, file) {
+      let lines = file.split(/\r\n|\r|\n/);
+      let len = lines.length - 1;
+      let index = Math.round((len)/ 2); 
+      let start = 0;
+      let end = len;
+      while(end >= start)
+      {
+        let currWord = lines[index].split(' ')[0];
 
-          let compare = currWord.localeCompare(word);
-          if(!compare)
-            return lines[index];
-          else if(compare < 0)
-            start = index + 1;
-          else
-            end = index - 1;
+        let compare = currWord.replace(/-/g, " ").localeCompare(word);
+        if(!compare)
+          return lines[index];
+        else if(compare < 0)
+          start = index + 1;
+        else
+          end = index - 1;
 
-          index = Math.round(start + (end - start) / 2);
-        }
-        return -1;
+        index = Math.round(start + (end - start) / 2);
+      }
+      return -1;
       },
     parseDataline: function(pos, offset, searchedWord) {
       let data = {};
@@ -543,16 +556,9 @@ export default {
         let ptr_sym = split[5 + 2 * w_cnt + 4 * i];
         let synset_offset = parseInt(split[6 + 2 * w_cnt + 4 * i]);
         let newPos = split[7 + 2 * w_cnt + 4 * i];
-        //        let data = null;
-        //        if(depth > 0 && (ptr_sym.localeCompare('@') === 0 || ptr_sym.localeCompare('~') === 0))
-        //            data = this.parseDataline(newPos, synset_offset, '', depth - 1);
-        //        else if(searchedWord && (ptr_sym.localeCompare('!') === 0 ||
-        //          ptr_sym.localeCompare('\\') === 0 || ptr_sym.includes('#') || ptr_sym.includes('%')))
-        //          data = this.parseDataline(newPos, synset_offset, '', depth - 1);
 
         ptrs.push({pointer_symbol: ptr_sym, synset_offset: synset_offset,
           pos: newPos, source: src, target: trgt});
-        //          pos: newPos, source: src, target: trgt, data: data});
       }
       data = {synset_offset: synset_offset, lex_filenum: lex_filenum, ss_type: ss_type,
         w_cnt: w_cnt, words: [...words], p_cnt: p_cnt, ptrs: [...ptrs], keyWord: searchedWord};
@@ -588,7 +594,35 @@ export default {
         if(line == -1)
           return -1;
         return line.split(' ')[1];
-      }
+      },
+    regenData: async function() {
+      this.chosenNoun = {};
+      this.chosenVerb = {};
+      this.chosenAdj = {};
+      this.chosenAdv= {};
+      this.loadedNoun = false;
+      this.loadedVerb = false;
+      this.loadedAdj = false;
+      this.loadedAdv= false;
+      this.dataWasChosen = false;
+      this.chosenNoun = await this.posFound('n');
+      this.chosenVerb = await this.posFound('v');
+      this.chosenAdj= await this.posFound('a');
+      this.chosenAdv= await this.posFound('r');
+      this.loadedNoun = true;
+      this.loadedVerb = true;
+      this.loadedAdj= true;
+      this.loadedAdv= true;
+      this.dataWasChosen = true;
+    }
+  },
+  watch: {
+    searched: async function() {
+      await this.regenData();
+    },
+    exploreDepth: async function() {
+      await this.regenData();
+    }
   },
   async created() {
     if(this.nounIndex)

@@ -1,5 +1,7 @@
 <template>
   <div class="graphComp">
+
+
     <!-- from https://codepen.io/emilio/pen/QOaQjP -->
     <d3-network :net-nodes="nodesAndLinks.nodes" :net-links="nodesAndLinks.links" :options="options" />
 <!--    <d3-network :net-nodes="nodesAndLinks.nodes" :net-links="nodesAndLinks.links" :options="options" :link-cb="lcb" />
@@ -11,6 +13,7 @@
         </defs>
       </svg>
       -->
+      {{scrollingPosition}}<br/>
   </div>
 
 </template>
@@ -32,18 +35,26 @@ export default {
   },
   data() {
     return {
-      options:
-      {
+      lastScrollEvent : null,
+    }
+  },
+  computed: {
+    scrollingPosition: function() {
+      return this.lastScrollEvent?.srcElement?.scrollingElement?.scrollTop || 0;
+    },
+    options: function() {
+      let options = {
         force: 5000,
         nodeSize: 20,
         nodeLabels: true,
         linkLabels: true,
         linkWidth:5,
         strLinks: false,
-      },
-    }
-  },
-  computed: {
+        offset: { x: 0, y: 0},
+      };
+      options.offset.y = this.scrollingPosition;
+      return options;
+    },
     nodesAndLinks: function() {
       if(!this.data || !this.data.ptrs)
         return {nodes: [], links: []};
@@ -115,8 +126,6 @@ export default {
         }
       });
 
-      
-
       nodes.forEach(el => el._color = this.darkTheme ? '#6a6868' : '#2c3e4f');
       nodes[0]._color = this.darkTheme ? '#f5d782' : '#41ba82';
       links.forEach(el => el._color = this.darkTheme ? '#303131' : '#d0d0d0');
@@ -142,6 +151,9 @@ export default {
     }
   },
   methods: {
+    onScroll(e) {
+      this.lastScrollEvent = e;
+    },
     isLinkAlreadyPresent: function(links, sid, tid) {
       for(let link in links)
       {
@@ -238,12 +250,13 @@ export default {
       }
 
 
-    }
+    },
   },
   watch: {
   },
   mounted()
   {
+    window.addEventListener("scroll", this.onScroll);
     this.setStyle();
   }
 
