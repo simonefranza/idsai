@@ -54,8 +54,9 @@
                      :chosenVerb="chosenVerb"
                      :chosenAdj="chosenAdj"
                      :chosenAdv="chosenAdv" 
-                     :loaded="dataWasChosen"
+                     :loaded="dataWasLoaded"
                      v-model="hoveredWord"
+                     @graphChosen="showNewGraph"
                      v-if="showWordNet" />
       <AdjacencyMat :darkTheme="darkTheme" 
                     :matrixSize="parsedAdjMatSize"
@@ -106,8 +107,10 @@ export default {
       reloadingMatrix: false,
 
       //Word Net
+      chosenGroup: -1,
+      chosenIndex: -1,
       hoveredWord: null,
-      dataWasChosen: false,
+      dataWasLoaded: false,
       chosenNoun: {},
       loadedNoun: false,
       chosenVerb: {},
@@ -329,9 +332,41 @@ export default {
       return outerMap;
     },
     chosenData: function() {
-      if(!this.loadedNoun)
+      if(!this.dataWasLoaded)
         return {};
-      return this.chosenNoun; 
+      if((this.chosenGroup === -1 || this.chosenIndex === -1) && this.chosenNoun.length)
+        return this.chosenNoun[0];
+      else if((this.chosenGroup === -1 || this.chosenIndex === -1) && this.chosenVerb.length)
+        return this.chosenVerb[0];
+      else if((this.chosenGroup === -1 || this.chosenIndex === -1) && this.chosenAdj.length)
+        return this.chosenAdj[0];
+      else if((this.chosenGroup === -1 || this.chosenIndex === -1) && this.chosenAdv.length)
+        return this.chosenAdv[0];
+      else if(this.chosenGroup === -1 || this.chosenIndex === -1)
+        return {};
+      else {
+        let data = [];
+        switch(this.chosenGroup) {
+          case 0:
+            data = this.chosenNoun;
+            break;
+          case 1:
+            data = this.chosenVerb;
+            break;
+          case 2:
+            data = this.chosenAdj;
+            break;
+          case 3:
+            data = this.chosenAdv;
+            break;
+          default:
+            break;
+        }
+        console.log("here");
+        if(this.chosenIndex < data.length)
+          return data[this.chosenIndex];
+      }
+      return {}; 
     },
     wnCont: function() {
       let word = this.searched.trim().toLowerCase();
@@ -384,6 +419,11 @@ export default {
     },
   },
   methods: {
+    showNewGraph(e) {
+      this.chosenGroup = e.group;
+      this.chosenIndex = e.index;
+      console.log(e);
+    },
     reloadMatrix () {
       this.reloadingMatrix= true;
       this.adjMatrix = [];
@@ -481,7 +521,7 @@ export default {
           }
 
         }
-        return arr[Math.floor(Math.random() * arr.length)];
+        return [...arr];
     }, [currPos, this.wnCont, this.posData, this.relevantSymbols, this.exploreDepth])
     },
     findFullChain: async function(element, char) {
@@ -601,6 +641,8 @@ export default {
     regenData: async function() {
       let currentSearched = this.searched;
       let currentDepth = this.exploreDepth;
+      this.chosenGroup = -1;
+      this.chosenIndex = -1;
       this.chosenNoun = {};
       this.chosenVerb = {};
       this.chosenAdj = {};
@@ -609,7 +651,7 @@ export default {
       this.loadedVerb = false;
       this.loadedAdj = false;
       this.loadedAdv= false;
-      this.dataWasChosen = false;
+      this.dataWasLoaded = false;
       let tempNoun = await this.posFound('n');
       let tempVerb = await this.posFound('v');
       let tempAdj = await this.posFound('a');
@@ -624,7 +666,7 @@ export default {
       this.chosenVerb = tempVerb;
       this.chosenAdj= tempAdj;
       this.chosenAdv= tempAdv;
-      this.dataWasChosen = true;
+      this.dataWasLoaded = true;
     }
   },
   watch: {

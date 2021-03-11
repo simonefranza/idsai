@@ -6,39 +6,21 @@
       <b-card-text>
         <b-spinner type="grow" label="Loading..." v-if="!loaded" :variant="darkTheme ? 'light' : 'dark'"></b-spinner>
         <div>
-        <span v-if="!Object.keys(chosenNoun).length && 
-                     !Object.keys(chosenVerb).length && 
-                     !Object.keys(chosenAdv).length && 
-                     !Object.keys(chosenAdj).length &&
-                     loaded">Nothing found.<br/><br/></span>
+          <span v-if="isNothingFound && loaded">Nothing found.<br/><br/></span>
 
-        <DictEntry :ptrSymbols="ptrSymbols" :depth="depth" entryType="Noun" 
-                    :data="chosenNoun" 
-                    :darkTheme="darkTheme" 
-                    v-model="hovered"
-                    v-if="Object.keys(chosenNoun).length"/>
-
-        <DictEntry :ptrSymbols="ptrSymbols" :depth="depth" entryType="Verb" 
-                    :data="chosenVerb" 
-                    :darkTheme="darkTheme" 
-                    v-model="hovered"
-                    v-if="Object.keys(chosenVerb).length"/>
-
-        <DictEntry :ptrSymbols="ptrSymbols" 
-                    :depth="depth" entryType="Adjective" 
-                    :data="chosenAdj" 
-                    :darkTheme="darkTheme" 
-                    v-model="hovered"
-                    v-if="Object.keys(chosenAdj).length"/>
-
-        <DictEntry :ptrSymbols="ptrSymbols" 
-                    :depth="depth" entryType="Adverb" 
-                    :data="chosenAdv" 
-                    :darkTheme="darkTheme" 
-                    v-model="hovered"
-                    v-if="Object.keys(chosenAdv).length"/>
-
+          <span v-else v-for="(entry,index) in dictEntries"
+                :key="entry.entryLabel">
+            <DictEntry :ptrSymbols="ptrSymbols" 
+                :depth="depth" 
+                :entryType="entry.entryLabel" 
+                :array="entry.array" 
+                :darkTheme="darkTheme" 
+                v-model="hovered"
+                @newGraph="chosenGraph($event, index)"
+                v-if="entry.array.length"/>
+          </span>
         </div>
+
         <footer :id="darkTheme? 'darkFooter' : 'lightFooter'">
           Princeton University "About WordNet." 
           <a href="https://wordnet.princeton.edu">WordNet</a>. 
@@ -65,6 +47,22 @@ export default {
     loaded: {required: true},
     value: {required: true},
   },
+  computed: {
+    isNothingFound() {
+      return !this.chosenNoun.length && !this.chosenVerb.length &&
+        !this.chosenAdj.length && !this.chosenAdv.length;
+    },
+    dictEntries() {
+      return [
+        {array: this.chosenNoun, entryLabel: 'Noun'},
+        {array: this.chosenVerb, entryLabel: 'Verb'},
+        {array: this.chosenAdj, entryLabel: 'Adjective'},
+        {array: this.chosenAdv, entryLabel: 'Adverb'},
+      ];
+
+
+    },
+  },
   components: {
     DictEntry
   },
@@ -86,6 +84,13 @@ export default {
     hovered() {
       this.$emit("isHovered", this.hovered);
     },
+  },
+  methods: {
+    chosenGraph(e,index) {
+      e.group = index;
+      this.$emit("graphChosen", e);
+    }
+
   }
 
 }
