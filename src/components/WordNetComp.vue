@@ -54,6 +54,8 @@
                      :chosenVerb="chosenVerb"
                      :chosenAdj="chosenAdj"
                      :chosenAdv="chosenAdv" 
+                     :chosenGroup="chosenGroup"
+                     :chosenIndex="chosenIndex"
                      :loaded="dataWasLoaded"
                      v-model="hoveredWord"
                      @graphChosen="showNewGraph"
@@ -332,40 +334,28 @@ export default {
       return outerMap;
     },
     chosenData: function() {
-      if(!this.dataWasLoaded)
+      if(!this.dataWasLoaded || this.chosenIndex === -1 ||
+        this.chosenGroup === -1)
         return {};
-      if((this.chosenGroup === -1 || this.chosenIndex === -1) && this.chosenNoun.length)
-        return this.chosenNoun[0];
-      else if((this.chosenGroup === -1 || this.chosenIndex === -1) && this.chosenVerb.length)
-        return this.chosenVerb[0];
-      else if((this.chosenGroup === -1 || this.chosenIndex === -1) && this.chosenAdj.length)
-        return this.chosenAdj[0];
-      else if((this.chosenGroup === -1 || this.chosenIndex === -1) && this.chosenAdv.length)
-        return this.chosenAdv[0];
-      else if(this.chosenGroup === -1 || this.chosenIndex === -1)
-        return {};
-      else {
-        let data = [];
-        switch(this.chosenGroup) {
-          case 0:
-            data = this.chosenNoun;
-            break;
-          case 1:
-            data = this.chosenVerb;
-            break;
-          case 2:
-            data = this.chosenAdj;
-            break;
-          case 3:
-            data = this.chosenAdv;
-            break;
-          default:
-            break;
-        }
-        console.log("here");
-        if(this.chosenIndex < data.length)
-          return data[this.chosenIndex];
+      let data = [];
+      switch(this.chosenGroup) {
+        case 0:
+          data = this.chosenNoun;
+          break;
+        case 1:
+          data = this.chosenVerb;
+          break;
+        case 2:
+          data = this.chosenAdj;
+          break;
+        case 3:
+          data = this.chosenAdv;
+          break;
+        default:
+          break;
       }
+      if(this.chosenIndex < data.length)
+        return data[this.chosenIndex];
       return {}; 
     },
     wnCont: function() {
@@ -422,7 +412,6 @@ export default {
     showNewGraph(e) {
       this.chosenGroup = e.group;
       this.chosenIndex = e.index;
-      console.log(e);
     },
     reloadMatrix () {
       this.reloadingMatrix= true;
@@ -553,6 +542,20 @@ export default {
 
       return ret;
     },
+    customCompare: function(a, b) {
+      //neg if a before b, pos a after b, 0 same 
+      let minLen = Math.min(a.length, b.length);
+      let diff = 0;
+      for(let id = 0; id < minLen; id++) 
+      {
+        diff = a.charCodeAt(id) - b.charCodeAt(id);
+        if(diff)
+          return diff;
+      }
+      if(a.length === b.length)
+        return 0;
+      return a.length - b.length;
+    },
     binSearch: function(word, file) {
       let lines = file.split(/\r\n|\r|\n/);
       let len = lines.length - 1;
@@ -563,7 +566,7 @@ export default {
       {
         let currWord = lines[index].split(' ')[0];
 
-        let compare = currWord.replace(/-/g, " ").localeCompare(word.replace(/-/g," "));
+        let compare = this.customCompare(currWord, word);
         if(!compare)
           return lines[index];
         else if(compare < 0)
@@ -666,6 +669,25 @@ export default {
       this.chosenVerb = tempVerb;
       this.chosenAdj= tempAdj;
       this.chosenAdv= tempAdv;
+      if(this.chosenNoun.length)
+      {
+        this.chosenGroup = 0;
+      }
+      else if(this.chosenVerb.length)
+      {
+        this.chosenGroup = 1;
+      }
+      else if(this.chosenAdj.length)
+      {
+        this.chosenGroup = 2;
+      }
+      else if(this.chosenAdv.length)
+      {
+        this.chosenGroup = 3;
+      }
+      if(this.chosenGroup !== -1)
+        this.chosenIndex = 0;
+
       this.dataWasLoaded = true;
     }
   },

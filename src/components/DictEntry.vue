@@ -29,7 +29,9 @@
                     pill
                     @click="emitNewGraph({index: outerIndex})"
                     :variant="darkTheme ? 'outline-dark' : 'outline-light'"
-                    >See graph
+                    :disabled="chosenIndex === outerIndex" >
+                    <span v-if="chosenIndex !== outerIndex">See graph</span>
+                    <span v-else>Current</span>
           </b-button>
           </div>
         </div>
@@ -66,7 +68,8 @@ export default {
     },
     value: {
       required:true,
-    }
+    },
+    chosenIndex: {required: true},
   },
   data() {
     return {

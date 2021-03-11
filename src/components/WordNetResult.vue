@@ -15,6 +15,7 @@
                 :entryType="entry.entryLabel" 
                 :array="entry.array" 
                 :darkTheme="darkTheme" 
+                :chosenIndex="index === chosenGroup ? chosenIndex : -1"
                 v-model="hovered"
                 @newGraph="chosenGraph($event, index)"
                 v-if="entry.array.length"/>
@@ -44,6 +45,8 @@ export default {
     chosenVerb: {required: true},
     chosenAdj: {required: true},
     chosenAdv: {required: true},
+    chosenGroup: {required:  true},
+    chosenIndex: {required:true},
     loaded: {required: true},
     value: {required: true},
   },
