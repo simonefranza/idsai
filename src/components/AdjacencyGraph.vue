@@ -15,6 +15,7 @@ export default {
     matrix: { required: true },
     selectedRow: { required: true},
     selectedCol: { required: true },
+    nodeNames: {required: true},
   },
   components: {
     D3Network,
@@ -41,13 +42,11 @@ export default {
       let from = this.selectedRow;
       let to = this.selectedCol;
       let linkObj = this.findLink(to, from);
-      console.log(linkObj);
       if(linkObj.id !== -1)
         sel.links[linkObj.id] = linkObj.link;
 
       sel.nodes[from] = this.nodesAndLinks.nodes[from - 1];
       sel.nodes[to] = this.nodesAndLinks.nodes[to - 1];
-      console.log({sel:sel, nodes: this.nodesAndLinks.nodes, links: this.nodesAndLinks.links});
 
       return sel;
     },
@@ -58,7 +57,7 @@ export default {
       let links = [];
       for(let i = 0; i < this.matrix.length; i++)
       {
-        nodes.push({id: i + 1, name: i + 1});
+        nodes.push({id: i + 1, name: this.nodeNames[i] ? this.nodeNames[i] : i + 1});
       }
       let linkID = 0;
       for(let row = 0; row < this.matrix.length; row++)

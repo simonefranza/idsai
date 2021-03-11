@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="wordNetComp row">
-      <div class="col-4">
+      <div class="col-5">
       <b-card title="Control Panel" v-bind:bg-variant="!darkTheme ? 'light' : 'dark'" v-bind:text-variant="!darkTheme ? '' : 'white'">
         <b-card-body>
           <b-card-text>
@@ -63,10 +63,11 @@
       <AdjacencyMat :darkTheme="darkTheme" 
                     :matrixSize="parsedAdjMatSize"
                     @hoverElement="highlightNode"
+                    @newNodeNames="updateNodeNames"
                     v-model="adjMatrix"
                     v-else />
       </div>
-      <div class="col-8">
+      <div class="col-7">
         <GraphComp :dark-theme="darkTheme" 
                     :data="chosenData" 
                     :ptrSymbols="ptrSymbols" 
@@ -77,6 +78,7 @@
                         :matrix="adjMatrix"
                         :selectedRow="selectedRow"
                         :selectedCol="selectedCol"
+                        :nodeNames="adjNodeNames"
                         v-else />
       </div>
     </div>
@@ -112,6 +114,7 @@ export default {
       reloadingMatrix: false,
       selectedRow: -1,
       selectedCol: -1,
+      adjNodeNames: {},
 
       //Word Net
       chosenGroup: -1,
@@ -414,6 +417,9 @@ export default {
     },
   },
   methods: {
+    updateNodeNames(e) {
+      this.adjNodeNames = e;
+    },
     highlightNode(e) {
       this.selectedRow = e.row;
       this.selectedCol = e.col;

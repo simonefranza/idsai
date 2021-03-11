@@ -6,12 +6,45 @@
         <b-table striped hover 
           :items="printableMatrix" 
           :dark="darkTheme" >
+
           <template #head(0)="">
             <span />
           </template>
-          <template #cell(0)="data">
-            <span class="firstColumn">{{data.value}}</span>
+
+          <template #head(edit)="">
+              <b-icon icon="pencil-square" 
+                      aria-hidden="true" 
+                      @click="editNodeNames = !editNodeNames"
+                      :class="['cyclesIconLeft', 'iconEnabled', darkTheme ? 'iconDark' : 'iconLight']" 
+                      v-if="!editNodeNames"></b-icon>
+              <b-icon icon="check-circle" 
+                      aria-hidden="true" 
+                      @click="saveNodeNames()" 
+                      :class="['alignMiddle', 'cyclesIconLeft', 'iconEnabled', darkTheme ? 'iconDark' : 'iconLight']" 
+                      v-else
+                      ></b-icon>
+           </template>
+          
+          <template #head()="data">
+            <span v-if="!editNodeNames">{{savedNames[parseInt(data.column)-1]}}</span>
+            <span v-else>
+              <b-form-input :class="{'darkInputForm' : darkTheme}" 
+                  v-model="savedNames[parseInt(data.column) - 1]" 
+                  placeholder="Type or cancel" 
+                  @keyup.enter="saveNodeNames()"></b-form-input>
+            </span>
           </template>
+
+          <template #cell(0)="data">
+            <span class="firstColumn">{{savedNames[parseInt(data.value)-1]}}</span>
+          </template>
+
+          <template #cell(edit)="">
+              <b-icon icon="pencil-square" 
+                      aria-hidden="true" 
+                      :class="['cyclesIconLeft', 'iconEnabled', darkTheme ? 'iconDark' : 'iconLight']" ></b-icon>
+          </template>
+
           <template #cell()="data">
             <span @mouseenter="hoverData({row:data.index + 1,
               col:parseInt(data.field.key)})"
@@ -43,9 +76,15 @@ export default {
   data() {
     return {
       reload: 0,
+      editNodeNames: false,
+      savedNames: [],
     }
   },
   computed: {
+    nodeNames() {
+      let arr = {};
+      return arr;
+    },
     matrix: function() {
       this.reload;
       let mat = [];
@@ -71,6 +110,7 @@ export default {
         row.forEach((el, colNum) => {
           newRow[(colNum+1).toString()] = el;
         });
+        newRow.edit = '';
         mat.push(newRow);
       });
       return mat;
@@ -80,6 +120,10 @@ export default {
     event: "newMatrix"
   },
   methods: {
+    saveNodeNames() {
+      this.editNodeNames = false;
+      this.$emit("newNodeNames", this.savedNames);
+    },
     emitChange: function(mat) {
       this.$emit("newMatrix", mat);
     },
@@ -94,7 +138,17 @@ export default {
     value() {
       if(!this.value.length)
         this.reload = Math.random();
+    },
+    matrix() {
+      this.savedNames = [];
+      for(let i = 1; i <= this.matrix.length; i++)
+        this.savedNames.push(i.toString());
     }
+  },
+  created() {
+    for(let i = 1; i <= this.matrix.length; i++)
+      this.savedNames.push(i.toString());
+    this.$emit("newNodeNames", this.savedNames);
   }
 }
 </script>
