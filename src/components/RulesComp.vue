@@ -30,11 +30,19 @@
             </span>
             <span class="cyclesDiv">
               <span>New rule</span> 
-              <b-form-input size="sm" v-model="newAntecedents" placeholder="Ants & separated"
-                                                               :class="{'newRule' : 'true', 'darkInputForm' : darkTheme}"></b-form-input>
+              <b-form-input size="sm" 
+                            v-model="newAntecedents" 
+                            placeholder="Ants & separated"
+                            :class="{'newRule' : 'true', 'darkInputForm' : darkTheme}"
+                            @keyup.enter="addNewRule()">
+              </b-form-input>
               <span> → </span>
-              <b-form-input size="sm" v-model="newConsequent" placeholder="Cons"
-                                                              :class="{'newRule' : 'true', 'consequentInput' : 'true', 'darkInputForm' : darkTheme}" @keyup.enter="addNewRule()"></b-form-input>
+              <b-form-input size="sm" 
+                            v-model="newConsequent" 
+                            placeholder="Cons"
+                            :class="{'newRule' : 'true', 'consequentInput' : 'true', 'darkInputForm' : darkTheme}" 
+                            @keyup.enter="addNewRule()">
+              </b-form-input>
               <b-icon :class="['cyclesIconRight', isNewRuleValid ? 'iconEnabled' : 'iconDisabled', darkTheme ? 'iconDark' : 'iconLight']"
                                                               icon="check-circle" aria-hidden="true" @click="addNewRule"></b-icon>
             </span>
@@ -56,9 +64,9 @@
             <div class="cyclesDiv">
               <span>Forward chaining ({{cycleNum + 1}} / {{cycles.length}})</span>
               <span>
-                <b-button :disabled="decreaseCycleDisabled" :class="['cyclesIconLeft', decreaseCycleDisabled ? 'iconDisabled' : 'iconEnabled']" 
+                <b-button pill :disabled="decreaseCycleDisabled" :class="['cyclesIconLeft', decreaseCycleDisabled ? 'iconDisabled' : 'iconEnabled']" 
                 @click="decreaseCyclesNum" :variant="darkTheme ? 'outline-dark' : 'outline-light'">Remove 1 Cycle</b-button>
-                <b-button :disabled="increaseCycleDisabled" :class="['cyclesIconRight', increaseCycleDisabled ?  'iconDisabled' : 'iconEnabled']" 
+                <b-button pill :disabled="increaseCycleDisabled" :class="['cyclesIconRight', increaseCycleDisabled ?  'iconDisabled' : 'iconEnabled']" 
                 @click="increaseCyclesNum" :variant="darkTheme ? 'outline-dark' : 'outline-light'">Add 1 Cycle</b-button>
                 <!--<b-icon :class="['cyclesIconLeft', decreaseCycleDisabled ? 'iconDisabled' : 'iconEnabled', darkTheme ? 'iconDark' : 'iconLight']" 
                                                   icon="dash-circle" aria-hidden="true" @click="decreaseCyclesNum"></b-icon>
@@ -195,28 +203,31 @@ export default {
       let currFacts = [...this.currentFacts];
       let cyclesData = [];
       let data = [];
-      let tempAddedFacts = [];
+      let newRules = [];
       let cycleN = 1;
       do 
       {
-        tempAddedFacts = [];
+        newRules = [];
         this.rules.forEach(ruleObj => {
           let already_present = false;
-          tempAddedFacts.forEach(el => {
+          newRules.forEach(el => {
             if(el.fact.localeCompare(ruleObj.cons) === 0)
               already_present = true;
           });
-          if(this.validateAnt(ruleObj.ant, currFacts) && !currFacts.includes(ruleObj.cons) && !already_present)
-            tempAddedFacts.push({rule: ruleObj.id, fact: ruleObj.cons});
+          if(!already_present && this.validateAnt(ruleObj.ant, currFacts) && !currFacts.includes(ruleObj.cons))
+          {
+            newRules.push({rule: ruleObj.id, fact: ruleObj.cons});
+            currFacts.push(ruleObj.cons);
+          }
         });
-        tempAddedFacts.forEach((addedObj, index) => {
+        newRules.forEach((addedObj, index) => {
           data.push({cycle: index === 0 ? cycleN++ : '', 
-            fired_rules: 'R' + addedObj['rule'], added_facts: addedObj['fact']});
-          currFacts.push(addedObj['fact']);
+                      fired_rules: 'R' + addedObj['rule'],
+                      added_facts: addedObj['fact']});
         });
-        if(tempAddedFacts.length !== 0)
+        if(newRules.length !== 0)
           cyclesData.push([...data]);
-      } while(tempAddedFacts.length !== 0);
+      } while(newRules.length !== 0);
       data.push({cycle: cycleN, fired_rules: '', added_facts: ''});
       cyclesData.push([...data]);
       return cyclesData;
@@ -284,15 +295,25 @@ export default {
         return false;
       return !this.isRuleAlreadyPresent([...this.antecedentsToAdd], this.newConsequent.trim(), this.rules);
     },
-    numRules: function() {
-      if(isNaN(this.numRulesTemp.trim()))
-        return 0;
-      return parseInt(this.numRulesTemp.trim());
+    numRules: {
+      set(newVal) {
+        this.numRulesTemp = (newVal).toString();
+      },
+      get() {
+        if(isNaN(this.numRulesTemp.trim()))
+          return 0;
+        return parseInt(this.numRulesTemp.trim());
+      }
     },
-    numFacts: function() {
-      if(isNaN(this.numFactsTemp.trim()))
-        return 0;
-      return parseInt(this.numFactsTemp.trim());
+    numFacts:  {
+      set(newVal) {
+        this.numFactsTemp = (newVal).toString();
+      },
+      get() {
+        if(isNaN(this.numFactsTemp.trim()))
+          return 0;
+        return parseInt(this.numFactsTemp.trim());
+      }
     }
 
   },
