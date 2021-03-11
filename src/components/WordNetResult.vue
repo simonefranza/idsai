@@ -13,16 +13,30 @@
                      loaded">Nothing found.<br/><br/></span>
 
         <DictEntry :ptrSymbols="ptrSymbols" :depth="depth" entryType="Noun" 
-           :data="chosenNoun" :darkTheme="darkTheme" v-if="Object.keys(chosenNoun).length"/>
+                    :data="chosenNoun" 
+                    :darkTheme="darkTheme" 
+                    v-model="hovered"
+                    v-if="Object.keys(chosenNoun).length"/>
 
         <DictEntry :ptrSymbols="ptrSymbols" :depth="depth" entryType="Verb" 
-           :data="chosenVerb" :darkTheme="darkTheme" v-if="Object.keys(chosenVerb).length"/>
+                    :data="chosenVerb" 
+                    :darkTheme="darkTheme" 
+                    v-model="hovered"
+                    v-if="Object.keys(chosenVerb).length"/>
 
-        <DictEntry :ptrSymbols="ptrSymbols" :depth="depth" entryType="Adjective" 
-           :data="chosenAdj" :darkTheme="darkTheme" v-if="Object.keys(chosenAdj).length"/>
+        <DictEntry :ptrSymbols="ptrSymbols" 
+                    :depth="depth" entryType="Adjective" 
+                    :data="chosenAdj" 
+                    :darkTheme="darkTheme" 
+                    v-model="hovered"
+                    v-if="Object.keys(chosenAdj).length"/>
 
-        <DictEntry :ptrSymbols="ptrSymbols" :depth="depth" entryType="Adverb" 
-           :data="chosenAdv" :darkTheme="darkTheme" v-if="Object.keys(chosenAdv).length"/>
+        <DictEntry :ptrSymbols="ptrSymbols" 
+                    :depth="depth" entryType="Adverb" 
+                    :data="chosenAdv" 
+                    :darkTheme="darkTheme" 
+                    v-model="hovered"
+                    v-if="Object.keys(chosenAdv).length"/>
 
         </div>
         <footer :id="darkTheme? 'darkFooter' : 'lightFooter'">
@@ -49,10 +63,31 @@ export default {
     chosenAdj: {required: true},
     chosenAdv: {required: true},
     loaded: {required: true},
+    value: {required: true},
   },
   components: {
     DictEntry
+  },
+  data() {
+    return {
+      hovered: '',
+    }
+  },
+  model: {
+    event: "isHovered"
+  },
+  created() {
+    this.hovered = this.value;
+  },
+  watch: {
+    value(newV) {
+      this.hovered = newV;
+    },
+    hovered() {
+      this.$emit("isHovered", this.hovered);
+    },
   }
+
 }
 </script>
 <style scoped lang="scss">

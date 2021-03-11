@@ -1,53 +1,14 @@
 <template>
   <ul v-if="depth" class="recSymbol">
-    <li v-if="hypernyms.length">
-      <b-icon icon="plus-circle" v-if="!showHypernym" @click="showHypernym = !showHypernym" class="iconNoHighlight" :class='darkTheme? "iconDark" : "iconLight"'/>
-        <b-icon icon="dash-circle" v-else @click="showHypernym = !showHypernym" class="iconNoHighlight" :class='darkTheme? "iconDark" : "iconLight"'/>
-      <span @click="showHypernym = !showHypernym"> Hypernym</span>
-      <SymbolList v-if="showHypernym" :data="hypernyms" :depth="depth" :ptrSymbols="ptrSymbols" :darkTheme="darkTheme"/>
-    </li>
-    <li v-if="hyponyms.length">
-      <b-icon icon="plus-circle" v-if="!showHyponym" @click="showHyponym = !showHyponym" class="iconNoHighlight" :class='darkTheme? "iconDark" : "iconLight"'/>
-        <b-icon icon="dash-circle" v-else @click="showHyponym = !showHyponym" class="iconNoHighlight" :class='darkTheme? "iconDark" : "iconLight"'/>
-          <span @click="showHyponym = !showHyponym"> Hyponym</span>
-      <SymbolList v-if="showHyponym" :data="hyponyms" :depth="depth" :ptrSymbols="ptrSymbols" :darkTheme="darkTheme"/>
-    </li>
-    <li v-if="memberHolonym.length">
-    <b-icon icon="plus-circle" v-if="!showMemberHolonym" @click="showMemberHolonym = !showMemberHolonym" class="iconNoHighlight" :class='darkTheme? "iconDark" : "iconLight"'/>
-      <b-icon icon="dash-circle" v-else @click="showMemberHolonym = !showMemberHolonym" class="iconNoHighlight" :class='darkTheme? "iconDark" : "iconLight"'/>
-        <span @click="showMemberHolonym = !showMemberHolonym"> Member Holonym</span>
-      <SymbolList v-if="showMemberHolonym" :data="memberHolonym" :depth="depth" :ptrSymbols="ptrSymbols" :darkTheme="darkTheme"/>
-    </li>
-    <li v-if="substanceHolonym.length">
-    <b-icon icon="plus-circle" v-if="!showSubstanceHolonym" @click="showSubstanceHolonym = !showSubstanceHolonym" class="iconNoHighlight" :class='darkTheme? "iconDark" : "iconLight"'/>
-      <b-icon icon="dash-circle" v-else @click="showSubstanceHolonym = !showSubstanceHolonym" class="iconNoHighlight" :class='darkTheme? "iconDark" : "iconLight"'/>
-        <span @click="showSubstanceHolonym = !showSubstanceHolonym"> Substance Holonym</span>
-      <SymbolList v-if="showSubstanceHolonym" :data="substanceHolonym" :depth="depth" :ptrSymbols="ptrSymbols" :darkTheme="darkTheme"/>
-    </li>
-    <li v-if="partHolonym.length">
-    <b-icon icon="plus-circle" v-if="!showPartHolonym" @click="showPartHolonym = !showPartHolonym" class="iconNoHighlight" :class='darkTheme? "iconDark" : "iconLight"'/>
-      <b-icon icon="dash-circle" v-else @click="showPartHolonym = !showPartHolonym" class="iconNoHighlight" :class='darkTheme? "iconDark" : "iconLight"'/>
-        <span @click="showPartHolonym = !showPartHolonym"> Part Holonym</span>
-      <SymbolList v-if="showPartHolonym" :data="partHolonym" :depth="depth" :ptrSymbols="ptrSymbols" :darkTheme="darkTheme"/>
-    </li>
-    <li v-if="memberMeronym.length">
-    <b-icon icon="plus-circle" v-if="!showMemberMeronym" @click="showMemberMeronym = !showMemberMeronym" class="iconNoHighlight" :class='darkTheme? "iconDark" : "iconLight"'/>
-      <b-icon icon="dash-circle" v-else @click="showMemberMeronym = !showMemberMeronym" class="iconNoHighlight" :class='darkTheme? "iconDark" : "iconLight"'/>
-        <span @click="showMemberMeronym = !showMemberMeronym"> Member Meronym</span>
-      <SymbolList v-if="showMemberMeronym" :data="memberMeronym" :depth="depth" :ptrSymbols="ptrSymbols" :darkTheme="darkTheme"/>
-    </li>
-    <li v-if="substanceMeronym.length">
-    <b-icon icon="plus-circle" v-if="!showSubstanceMeronym" @click="showSubstanceMeronym = !showSubstanceMeronym" class="iconNoHighlight" :class='darkTheme? "iconDark" : "iconLight"'/>
-      <b-icon icon="dash-circle" v-else @click="showSubstanceMeronym = !showSubstanceMeronym" class="iconNoHighlight" :class='darkTheme? "iconDark" : "iconLight"'/>
-        <span @click="showSubstanceMeronym = !showSubstanceMeronym"> Substance Meronym</span>
-      <SymbolList v-if="showSubstanceMeronym" :data="substanceMeronym" :depth="depth" :ptrSymbols="ptrSymbols" :darkTheme="darkTheme"/>
-    </li>
-    <li v-if="partMeronym.length">
-    <b-icon icon="plus-circle" v-if="!showPartMeronym" @click="showPartMeronym = !showPartMeronym" class="iconNoHighlight" :class='darkTheme? "iconDark" : "iconLight"'/>
-      <b-icon icon="dash-circle" v-else @click="showPartMeronym = !showPartMeronym" class="iconNoHighlight" :class='darkTheme? "iconDark" : "iconLight"'/>
-        <span @click="showPartMeronym = !showPartMeronym"> Part Meronym</span>
-      <SymbolList v-if="showPartMeronym" :data="partMeronym" :depth="depth" :ptrSymbols="ptrSymbols" :darkTheme="darkTheme"/>
-    </li>
+    <span v-for="(el,index) in printable" :key="el.label">
+      <li v-if="el && el.array && el.array.length">
+        <b-icon icon="plus-circle" v-if="!el.show" @click="printable = index" class="iconNoHighlight" :class='darkTheme? "iconDark" : "iconLight"'/>
+          <b-icon icon="dash-circle" v-else @click="printable = index" class="iconNoHighlight" :class='darkTheme? "iconDark" : "iconLight"'/>
+            <span @click="printable = index"> {{el.label}}</span>
+            <SymbolList v-if="el.show" :data="el.array" :depth="depth" :ptrSymbols="ptrSymbols" :darkTheme="darkTheme"
+            v-model="hovered"/>
+      </li>
+    </span>
   </ul>
 </template>
 
@@ -67,6 +28,7 @@ export default {
       showMemberMeronym: false,
       showSubstanceMeronym: false,
       showPartMeronym: false,
+      hovered: '',
     }
   },
   components: {
@@ -81,8 +43,52 @@ export default {
     },
     depth: {required: true},
     darkTheme: {required:true},
+    value: {required:true},
   },
   computed: {
+    printable: {
+      set(index) {
+        switch(index) {
+          case 0: 
+            this.showHypernym = !this.showHypernym;
+            break;
+          case 1: 
+            this.showHyponym = !this.showHyponym;
+            break;
+          case 2: 
+            this.showMemberHolonym = !this.showMemberHolonym;
+            break;
+          case 3: 
+            this.showSubstanceHolonym = !this.showSubstanceHolonym;
+            break;
+          case 4: 
+            this.showPartHolonym = !this.showPartHolonym;
+            break;
+          case 5: 
+            this.showMemberMeronym = !this.showMemberMeronym;
+            break;
+          case 6: 
+            this.showSubstanceMeronym = !this.showSubstanceMeronym;
+            break;
+          case 7: 
+            this.showPartMeronym = !this.showPartMeronym;
+            break;
+          default:
+        }
+      },
+      get() {
+        return [
+          {array: this.hypernyms, show: this.showHypernym, label: 'Hypernym', highlight: ''},
+          {array: this.hyponyms, show: this.showHyponym, label: 'Hyponym', highlight: ''},
+          {array: this.memberHolonym, show: this.showMemberHolonym, label: 'Member Holonym', highlight: ''},
+          {array: this.substanceHolonym, show: this.showSubstanceHolonym, label: 'Substance Holonym', highlight: ''},
+          {array: this.partHolonym, show: this.showPartHolonym, label: 'Part Holonym', highlight: ''},
+          {array: this.memberMeronym, show: this.showMemberMeronym, label: 'Member Meronym', highlight: ''},
+          {array: this.substanceMeronym, show: this.showSubstanceMeronym, label: 'Substance Meronym', highlight: ''},
+          {array: this.partMeronym, show: this.showPartMeronym, label: 'Part Meronym', highlight: ''},
+        ];
+      }
+    },
     hypernyms : function() {
       return this.data.ptrs.filter(a => a.pointer_symbol.includes('@'));
     },
@@ -119,9 +125,21 @@ export default {
           return true;
       }
       return false;
-    }
+    },
+  },
+  model: {
+    event: "isHovered"
+  },
+  created() {
+    this.hovered = this.value;
   },
   watch: {
+    value(newV) {
+      this.hovered = newV;
+    },
+    hovered() {
+      this.$emit("isHovered", this.hovered);
+    },
     data() {
       this.showHypernym = false;
       this.showHyponym = false;

@@ -14,7 +14,7 @@
             <b-spinner type="grow" label="Loading..." v-if="!loaded" :variant="darkTheme ? 'light' : 'dark'"></b-spinner>
             <div v-else>
               <div class="cyclesDiv">
-                <span>Search depth (current {{exploreDepth}}, slow above 3)</span>
+                <span>Search depth (current {{exploreDepth}}, slow above 4)</span>
                 <span>
                   <b-icon :class="['cyclesIconLeft', decreaseDepthDisabled ? 'iconDisabled' : 'iconEnabled', darkTheme ? 'iconDark' : 'iconLight']" 
                                                     icon="dash-circle" aria-hidden="true" @click="decreaseDepthNum"></b-icon>
@@ -55,6 +55,7 @@
                      :chosenAdj="chosenAdj"
                      :chosenAdv="chosenAdv" 
                      :loaded="dataWasChosen"
+                     v-model="hoveredWord"
                      v-if="showWordNet" />
       <AdjacencyMat :darkTheme="darkTheme" 
                     :matrixSize="parsedAdjMatSize"
@@ -63,9 +64,10 @@
       </div>
       <div class="col-8">
         <GraphComp :dark-theme="darkTheme" 
-           :data="chosenData" 
-                   :ptrSymbols="ptrSymbols" 
-                   :depth="exploreDepth" 
+                    :data="chosenData" 
+                    :ptrSymbols="ptrSymbols" 
+                    :depth="exploreDepth" 
+                    v-model="hoveredWord"
                     v-if="showWordNet" />
         <AdjacencyGraph :darkTheme="darkTheme"
                         :matrix="adjMatrix"
@@ -104,6 +106,7 @@ export default {
       reloadingMatrix: false,
 
       //Word Net
+      hoveredWord: null,
       dataWasChosen: false,
       chosenNoun: {},
       loadedNoun: false,
@@ -434,6 +437,7 @@ export default {
             return {ptr: ptr, depth: depth -1};});
 
           let index = 0 ;
+          let now = performance.now();
           while(index < queue.length)
           {
             let currQueueEl = queue[index++];
@@ -472,12 +476,11 @@ export default {
                   queue.push({ptr: ptr, depth: currQueueEl.depth - 1});
               }
             }
-          } 
+            if(performance.now() - now > 150)
+              setTimeout(now = performance.now(), 1);
+          }
 
         }
-        posData;
-        depth;
-        relevantSymbols;
         return arr[Math.floor(Math.random() * arr.length)];
     }, [currPos, this.wnCont, this.posData, this.relevantSymbols, this.exploreDepth])
     },
@@ -520,7 +523,7 @@ export default {
       {
         let currWord = lines[index].split(' ')[0];
 
-        let compare = currWord.replace(/-/g, " ").localeCompare(word);
+        let compare = currWord.replace(/-/g, " ").localeCompare(word.replace(/-/g," "));
         if(!compare)
           return lines[index];
         else if(compare < 0)
@@ -596,6 +599,8 @@ export default {
         return line.split(' ')[1];
       },
     regenData: async function() {
+      let currentSearched = this.searched;
+      let currentDepth = this.exploreDepth;
       this.chosenNoun = {};
       this.chosenVerb = {};
       this.chosenAdj = {};
@@ -605,14 +610,20 @@ export default {
       this.loadedAdj = false;
       this.loadedAdv= false;
       this.dataWasChosen = false;
-      this.chosenNoun = await this.posFound('n');
-      this.chosenVerb = await this.posFound('v');
-      this.chosenAdj= await this.posFound('a');
-      this.chosenAdv= await this.posFound('r');
+      let tempNoun = await this.posFound('n');
+      let tempVerb = await this.posFound('v');
+      let tempAdj = await this.posFound('a');
+      let tempAdv = await this.posFound('r');
+      if(this.searched !== currentSearched || this.exploreDepth !== currentDepth)
+        return;
       this.loadedNoun = true;
       this.loadedVerb = true;
       this.loadedAdj= true;
       this.loadedAdv= true;
+      this.chosenNoun = tempNoun;
+      this.chosenVerb = tempVerb;
+      this.chosenAdj= tempAdj;
+      this.chosenAdv= tempAdv;
       this.dataWasChosen = true;
     }
   },

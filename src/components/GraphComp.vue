@@ -1,9 +1,7 @@
 <template>
-  <div class="graphComp">
-
-
+  <div id="graphComp">
     <!-- from https://codepen.io/emilio/pen/QOaQjP -->
-    <d3-network :net-nodes="nodesAndLinks.nodes" :net-links="nodesAndLinks.links" :options="options" />
+    <d3-network :selection="selection" :net-nodes="nodesAndLinks.nodes" :net-links="nodesAndLinks.links" :options="options" />
 <!--    <d3-network :net-nodes="nodesAndLinks.nodes" :net-links="nodesAndLinks.links" :options="options" :link-cb="lcb" />
       <svg style="position: absolute; z-index: -1000; margin-top: -100px; margin-left: -100px;">
         <defs>
@@ -13,7 +11,6 @@
         </defs>
       </svg>
       -->
-      {{scrollingPosition}}<br/>
   </div>
 
 </template>
@@ -29,19 +26,17 @@ export default {
     data : { required: true },
     ptrSymbols: {required: true},
     depth: {required: true},
+    value : {required: true}
   },
   components: {
     D3Network,
   },
   data() {
     return {
-      lastScrollEvent : null,
+      lastY: 0,
     }
   },
   computed: {
-    scrollingPosition: function() {
-      return this.lastScrollEvent?.srcElement?.scrollingElement?.scrollTop || 0;
-    },
     options: function() {
       let options = {
         force: 5000,
@@ -50,10 +45,21 @@ export default {
         linkLabels: true,
         linkWidth:5,
         strLinks: false,
-        offset: { x: 0, y: 0},
+        offset: { x: 0, y: this.lastY},
       };
-      options.offset.y = this.scrollingPosition;
       return options;
+    },
+    selection() {
+      let sel = {links: {}, nodes: {}};
+      if(!this.value)
+        return sel;
+
+      let id = this.getNodeId(this.nodesAndLinks.nodes, this.formatWord(this.value));
+      if(id === -1)
+        return sel;
+
+      sel.nodes[id] = this.nodesAndLinks.nodes[id-1];
+      return sel;
     },
     nodesAndLinks: function() {
       if(!this.data || !this.data.ptrs)
@@ -90,6 +96,7 @@ export default {
         });
 
         let currQueueEl = null;
+        let now = performance.now();
         while(queue.length)
         {
           currQueueEl = queue[0];
@@ -123,13 +130,14 @@ export default {
             });
           }
 
+          if(performance.now() - now > 150)
+            setTimeout(now = performance.now(), 1);
         }
       });
 
       nodes.forEach(el => el._color = this.darkTheme ? '#6a6868' : '#2c3e4f');
       nodes[0]._color = this.darkTheme ? '#f5d782' : '#41ba82';
       links.forEach(el => el._color = this.darkTheme ? '#303131' : '#d0d0d0');
-
 
       this.setStyle();
       return {nodes: nodes, links: links};
@@ -152,7 +160,12 @@ export default {
   },
   methods: {
     onScroll(e) {
-      this.lastScrollEvent = e;
+      let scrollPos = e?.srcElement?.scrollingElement?.scrollTop || 0;
+      let precision = 100;
+      if(!(this.lastY < scrollPos + precision && this.lastY >= scrollPos - precision))
+        this.lastY = scrollPos;
+//      let str = 'translateY(' + (e?.srcElement?.scrollingElement?.scrollTop || 0) + 'px)';
+//      document.getElementById('graphComp').style.transform = str;
     },
     isLinkAlreadyPresent: function(links, sid, tid) {
       for(let link in links)
@@ -229,8 +242,11 @@ export default {
           ss.cssRules.forEach(rule => {
             if(rule.selectorText && rule.selectorText.localeCompare('.node:hover') === 0)
               rule.style.stroke = '#f5d782';
+            else if(rule.selectorText && rule.selectorText.localeCompare('.node.selected') === 0)
+              rule.style.stroke = '#f5d782';
             else if(rule.selectorText && rule.selectorText.localeCompare('.link-label, .node-label') === 0)
               rule.style.fill = '#f4eeee';
+
           });
         });
       }
@@ -243,6 +259,8 @@ export default {
           ss.cssRules.forEach(rule => {
             if(rule.selectorText && rule.selectorText.localeCompare('.node:hover') === 0)
               rule.style.stroke = '#41ba82';
+            else if(rule.selectorText && rule.selectorText.localeCompare('.node.selected') === 0)
+              rule.style.stroke = '#41ba82';
             else if(rule.selectorText && rule.selectorText.localeCompare('.link-label, .node-label') === 0)
               rule.style.fill = '#272d2f';
           });
@@ -253,6 +271,8 @@ export default {
     },
   },
   watch: {
+    value() {
+    }
   },
   mounted()
   {
@@ -271,8 +291,12 @@ export default {
 }
 
 .node:hover {
-  stroke: #f5d782 ;
+  stroke: #f5d782;
   stroke-width: 3px;
+}
+.node.selected {
+  stroke: #f5d782;
+  stroke-width: 3px !important;
 }
 
 .link:hover {
@@ -314,7 +338,9 @@ export default {
   height: 100%;
 }
 
-.graphComp {
+#graphComp {
   height: 100%;
+  transition: all .5s;
+  transition-timing-function: ease-out;
 }
 </style>

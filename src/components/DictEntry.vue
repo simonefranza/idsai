@@ -3,7 +3,7 @@
     <ul v-if="data.words"><span class="categoryName">{{entryType}}</span><br/>
       <li>
         <span v-for="(wordArr, index) in data.words" :key="wordArr.word">
-          <span :class="{'searchedWord' : wordArr.word.localeCompare(data.keyWord) == 0}">
+          <span :class="{'searchedWord' : wordArr.word.localeCompare(data.keyWord) == 0}" @mouseenter="hoveredWord(index)">
             {{formatWord(wordArr.word)}}</span><span v-if="index != data.words.length - 1">, </span>
         </span>
         <span v-for="(gloss, index) in data.gloss" :key="gloss">
@@ -13,7 +13,7 @@
           <span v-if="index === 0">~ {{ex}}</span>
           <span v-else>; {{ex}}</span>
         </span>
-          <RecSymbol :ptrSymbols="ptrSymbols" :data="data" :depth="depth" :darkTheme="darkTheme"/>
+          <RecSymbol :ptrSymbols="ptrSymbols" :data="data" :depth="depth" :darkTheme="darkTheme" v-model="hovered"/>
       </li>
     </ul>
   </div>
@@ -42,12 +42,33 @@ export default {
     },
     darkTheme: {
       required: true,
+    },
+    value: {
+      required:true,
     }
-
+  },
+  data() {
+    return {
+      hovered: '',
+    }
+  },
+  model: {
+    event: "isHovered"
+  },
+  watch: {
+    value(newV) {
+      this.hovered = newV;
+    },
+    hovered() {
+      this.$emit("isHovered", this.hovered);
+    },
   },
   methods: {
     formatWord: function(word) {
       return word.replace(/_/g, " ");
+    },
+    hoveredWord(index) {
+      console.log(index);
     }
 
   }

@@ -98,7 +98,7 @@
             <br/>
             <p class="dataTitle">Rules</p>
             <span v-for="(rule, index) in rules" :key ="rule.id" 
-                  :class="{'highlightedRule' : index+1 == ruleHovered, 'highlightRowDark' : index  === hoveredRule && darkTheme, 'highlightRowLight' : index === hoveredRule && !darkTheme}"
+                  :class="{'boldElement' : index+1 == ruleHovered, 'highlightRowDark' : index  === hoveredRule && darkTheme, 'highlightRowLight' : index === hoveredRule && !darkTheme}"
               @mouseover="hoveredRule = index" @mouseleave="hoveredRule = -1" class="flexSpan">
               <span>
               <span>R{{rule.id}}: </span> 
@@ -512,9 +512,6 @@ export default {
   padding: 1px 5px 1px 0;
 }
 
-.highlightedRule {
-  font-weight: bold;
-}
 .toggleBlock{
   display: flex;
   align-items: center;

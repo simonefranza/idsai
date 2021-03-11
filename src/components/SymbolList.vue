@@ -1,12 +1,17 @@
 <template>
   <span>
-    <span v-for="(ptr, index) in data" :key="index + ptr.pointer_symbol + ptr.synset_offset">
+    <span v-for="(ptr, outerIndex) in data" :key="outerIndex + ptr.pointer_symbol + ptr.synset_offset">
         <ul>
           <li>
-            <span v-for="(wordObj, index) in ptr.words" :key="wordObj.word">
-              {{formatWord(wordObj.word)}}<span v-if="index !== ptr.words.length - 1">, </span>
+            <span v-for="(wordObj, index) in ptr.words" :key="wordObj.word" @mouseenter="hoveredWord(outerIndex)" @mouseleave="mouseLeft()">
+              <span :class="{boldElement : index === 0 && outerIndex === hoveredIndex}">{{formatWord(wordObj.word)}}</span><span v-if="index !== ptr.words.length - 1">, </span>
             </span>
-            <RecSymbol v-if="ptr.ptrs" :data="ptr" :ptrSymbols="ptrSymbols" :depth="depth - 1" :darkTheme="darkTheme"/>
+            <RecSymbol v-if="ptr.ptrs" 
+                        :data="ptr" 
+                        :ptrSymbols="ptrSymbols" 
+                        :depth="depth - 1" 
+                        :darkTheme="darkTheme" 
+                        v-model="hovered"/>
           </li>
         </ul>
     </span>
@@ -24,11 +29,40 @@ export default {
     ptrSymbols: {required: true},
     depth: {required: true},
     darkTheme: {required: true},
+    value: { required: true}, 
+  },
+  data() {
+    return {
+      hovered: '',
+      hoveredIndex: -1,
+    }
+  },
+  model: {
+    event: "isHovered"
+  },
+  created() {
+    this.hovered = this.value;
+  },
+  watch: {
+    value(newV) {
+      this.hovered = newV;
+    },
+    hovered() {
+      this.$emit("isHovered", this.hovered);
+    },
   },
   methods: {
     formatWord: function(word) {
       return word.replace(/_/g, " ");
     },
+    hoveredWord(index) {
+      this.hoveredIndex = index;
+      this.hovered = this.data[index].words[0].word;
+    },
+    mouseLeft() {
+      this.hovered = '';
+      this.hoveredIndex = -1;
+    }
   },
   beforeCreate() {
     this.$options.components.RecSymbol = require("./RecSymbol.vue").default;
@@ -37,3 +71,6 @@ export default {
 }
 </script>
 
+<style scoped lang="scss">
+.boldElement{}
+</style>
