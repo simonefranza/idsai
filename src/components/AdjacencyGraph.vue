@@ -1,6 +1,6 @@
 <template>
   <div class="graphComp">
-    <d3-network :net-nodes="nodesAndLinks.nodes" :net-links="nodesAndLinks.links" :options="options" />
+    <d3-network :net-nodes="nodesAndLinks.nodes" :net-links="nodesAndLinks.links" :options="options" :selection="selection"/>
   </div>
 </template>
 
@@ -13,6 +13,8 @@ export default {
       required: true
     },
     matrix: { required: true },
+    selectedRow: { required: true},
+    selectedCol: { required: true },
   },
   components: {
     D3Network,
@@ -28,9 +30,27 @@ export default {
         linkWidth:5,
         strLinks: true,
       },
+
     }
   },
   computed: {
+    selection: function() {
+      let sel = {links:{}, nodes:{}};
+      if(this.selectedRow === -1 || this.selectedCol === -1)
+        return sel;
+      let from = this.selectedRow;
+      let to = this.selectedCol;
+      let linkObj = this.findLink(to, from);
+      console.log(linkObj);
+      if(linkObj.id !== -1)
+        sel.links[linkObj.id] = linkObj.link;
+
+      sel.nodes[from] = this.nodesAndLinks.nodes[from - 1];
+      sel.nodes[to] = this.nodesAndLinks.nodes[to - 1];
+      console.log({sel:sel, nodes: this.nodesAndLinks.nodes, links: this.nodesAndLinks.links});
+
+      return sel;
+    },
     nodesAndLinks: function() {
       if(!this.matrix || !this.matrix.length)
         return {nodes: [], links: []};
@@ -40,12 +60,13 @@ export default {
       {
         nodes.push({id: i + 1, name: i + 1});
       }
+      let linkID = 0;
       for(let row = 0; row < this.matrix.length; row++)
       {
         for(let col = row + 1; col < this.matrix.length; col++)
         {
           if(this.matrix[row][col])
-            links.push({sid: col + 1, tid: row + 1});
+            links.push({id: linkID++, sid: col + 1, tid: row + 1});
         }
       }
 
@@ -57,6 +78,20 @@ export default {
     },
   },
   methods: {
+    findLink: function(from, to) {
+      let links = this.nodesAndLinks.links;
+      let id = -1;
+      let foundLink = {};
+      //TODO change if directed
+      links.forEach(link => {
+        if((link.sid === from && link.tid === to) || (link.sid === to && link.tid === from))
+        {
+          id = link.id;
+          foundLink = link;
+        }
+      });
+      return {id: id, link: foundLink};
+    },
     isLinkAlreadyPresent: function(links, sid, tid) {
       for(let link in links)
       {
@@ -82,6 +117,10 @@ export default {
           ss.cssRules.forEach(rule => {
             if(rule.selectorText && rule.selectorText.localeCompare('.node:hover') === 0)
               rule.style.stroke = '#f5d782';
+            else if(rule.selectorText && rule.selectorText.localeCompare('.node.selected') === 0)
+              rule.style.stroke = '#f5d782';
+            else if(rule.selectorText && rule.selectorText.localeCompare('.link.selected') === 0)
+              rule.style.setProperty('stroke','#f5d782', 'important');
             else if(rule.selectorText && rule.selectorText.localeCompare('.link-label, .node-label') === 0)
               rule.style.fill = '#f4eeee';
           });
@@ -96,6 +135,10 @@ export default {
           ss.cssRules.forEach(rule => {
             if(rule.selectorText && rule.selectorText.localeCompare('.node:hover') === 0)
               rule.style.stroke = '#41ba82';
+            else if(rule.selectorText && rule.selectorText.localeCompare('.node.selected') === 0)
+              rule.style.stroke = '#41ba82';
+            else if(rule.selectorText && rule.selectorText.localeCompare('.link.selected') === 0)
+              rule.style.setProperty('stroke','#41ba82', 'important');
             else if(rule.selectorText && rule.selectorText.localeCompare('.link-label, .node-label') === 0)
               rule.style.fill = '#272d2f';
           });
@@ -127,6 +170,13 @@ export default {
 
 .link:hover {
   stroke: #303131;
+}
+.node.selected {
+  stroke: #f5d782;
+  stroke-width: 3px !important;
+}
+.link.selected {
+  stroke: #f5d782 !important;
 }
 
 .node-label {

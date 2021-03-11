@@ -12,6 +12,13 @@
           <template #cell(0)="data">
             <span class="firstColumn">{{data.value}}</span>
           </template>
+          <template #cell()="data">
+            <span @mouseenter="hoverData({row:data.index + 1,
+              col:parseInt(data.field.key)})"
+              @mouseleave="leftField">
+              {{data.value}}
+            </span>
+          </template>
         </b-table>
     </b-card>
   </div>
@@ -76,6 +83,12 @@ export default {
     emitChange: function(mat) {
       this.$emit("newMatrix", mat);
     },
+    hoverData(e) {
+      this.$emit('hoverElement', e); 
+    },
+    leftField() {
+      this.$emit('hoverElement', {row: -1, col: -1}); 
+    }
   },
   watch: {
     value() {

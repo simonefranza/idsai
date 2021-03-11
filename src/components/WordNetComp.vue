@@ -35,7 +35,7 @@
           </span>
           <span v-else>
             <div class="cyclesDiv">
-              <span class="toggleBlock">Matrix size</span>
+              <span class="toggleBlock">Matrix size (min: 2, max: 10)</span>
               <b-form-input size="sm" v-model="adjMatSize"
                                       :class="{'shake' : invalidMatrixSize, 'darkInputForm' : darkTheme, 'mediumInput' : 'true'}"></b-form-input>
               <b-icon :class="['cyclesIconRight', 'iconEnabled', darkTheme ? 'iconDark' : 'iconLight']"
@@ -62,6 +62,7 @@
                      v-if="showWordNet" />
       <AdjacencyMat :darkTheme="darkTheme" 
                     :matrixSize="parsedAdjMatSize"
+                    @hoverElement="highlightNode"
                     v-model="adjMatrix"
                     v-else />
       </div>
@@ -74,6 +75,8 @@
                     v-if="showWordNet" />
         <AdjacencyGraph :darkTheme="darkTheme"
                         :matrix="adjMatrix"
+                        :selectedRow="selectedRow"
+                        :selectedCol="selectedCol"
                         v-else />
       </div>
     </div>
@@ -107,6 +110,8 @@ export default {
       adjMatrix : [],
       adjMatSize: 5,
       reloadingMatrix: false,
+      selectedRow: -1,
+      selectedCol: -1,
 
       //Word Net
       chosenGroup: -1,
@@ -122,7 +127,7 @@ export default {
       chosenAdv: {},
       loadedAdv: false,
       exploreDepth : 2,
-      showWordNet : true,
+      showWordNet : false,
       relevantSymbols : ['!', '@', '@i', '~', '~i', '#m', '#s', '#p', '%m', '%s', '%p'],
       choosingRandomWord: false,
       searched: '',
@@ -195,7 +200,7 @@ export default {
     },
     invalidMatrixSize: function() {
       return !this.adjMatSize || isNaN(this.adjMatSize) || ('' + this.adjMatSize).includes('.') ||
-        parseFloat(this.adjMatSize) < 2;
+        parseFloat(this.adjMatSize) < 2 || parseFloat(this.adjMatSize) > 10;
     },
     decreaseDepthDisabled: function() {
       return this.exploreDepth === 0;
@@ -409,6 +414,10 @@ export default {
     },
   },
   methods: {
+    highlightNode(e) {
+      this.selectedRow = e.row;
+      this.selectedCol = e.col;
+    },
     showNewGraph(e) {
       this.chosenGroup = e.group;
       this.chosenIndex = e.index;
