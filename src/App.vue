@@ -4,11 +4,12 @@
       <div v-bind:id="!darkTheme ? 'nav' : 'darkNav'" v-bind:class="!darkTheme ? 'light-theme' : 'dark-theme'">
         <div class="menuDiv"></div>
         <div id="menu" class="menuDiv">
-          <router-link to="/">Home</router-link> |
-          <router-link v-bind:dark-theme="darkTheme" to="/rules">Rules</router-link> | 
-          <router-link v-bind:dark-theme="darkTheme" to="/graphs">Graphs</router-link> |
-          <router-link v-bind:dark-theme="darkTheme" to="/info-ret">Information Retrieval</router-link> | 
-          <router-link v-bind:dark-theme="darkTheme" to="/rec-sys">Recommender System</router-link>
+          <router-link :darkTheme="darkTheme" to="/">Home</router-link> |
+          <router-link :dark-theme="darkTheme" to="/rules">Rules</router-link> | 
+          <router-link :dark-theme="darkTheme" to="/graphs">Graphs</router-link> |
+          <router-link :dark-theme="darkTheme" to="/info-ret">Information Retrieval</router-link> | 
+          <router-link :dark-theme="darkTheme" to="/rec-sys">Recommender System</router-link> | 
+          <router-link :dark-theme="darkTheme" to="/about">About</router-link>
         </div>
         <div class="dark-light-switch menuDiv">
           <b-icon icon="sun" aria-hidden="true" class="nav-icon">  </b-icon>
@@ -60,6 +61,37 @@ export default {
     Footer,
     ToggleSwitch
   },
+  methods: {
+    setStyle() {
+      if(this.darkTheme)
+      {
+        document.styleSheets.forEach(ss => {
+          ss.cssRules.forEach(rule => {
+            if(rule.selectorText && rule.selectorText.localeCompare('body') === 0)
+              rule.style.setProperty('background','#2f2f2f', 'important');
+          });
+        });
+      }
+      else
+      {
+        document.styleSheets.forEach(ss => {
+          ss.cssRules.forEach(rule => {
+            if(rule.selectorText && rule.selectorText.localeCompare('body') === 0)
+              rule.style.setProperty('background','#fafafa', 'important');
+          });
+        });
+      }
+
+    }
+  },
+  watch: {
+    darkTheme() {
+      this.setStyle();
+    }
+  },
+  created() {
+    this.setStyle();
+  }
 }
 </script>
 

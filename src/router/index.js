@@ -29,6 +29,11 @@ const routes = [
     path: '/graphs',
     name: 'Graphs',
     component: () => import(/* webpackChunkName: "word-net" */ '../views/Graph.vue')
+  },
+  {
+    path: '/about',
+    name: 'About',
+    component: () => import(/* webpackChunkName: "word-net" */ '../views/About.vue')
   }
 
 ]
