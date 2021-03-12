@@ -29,7 +29,7 @@ export default {
         nodeLabels: true,
         linkLabels: true,
         linkWidth:5,
-        strLinks: true,
+        strLinks: false,
       },
 
     }

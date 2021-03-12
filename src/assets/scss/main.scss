@@ -24,8 +24,27 @@ $text-secondary-light: #f8f9fa;
   }
 }
 //-------
+.miniInput {
+  width: 2em;
+}
 .smallInput {
   width: 50px;
+}
+.horizontallyCentered {
+  position:relative;
+  left:50%;
+  transform: translateX(-50%);
+}
+.verticallyCentered {
+  position:relative;
+  top:50%;
+  transform: translateY(-50%);
+}
+.centered {
+  position:relative;
+  left:50%;
+  top:50%;
+  transform: translate(-50%,-50%);
 }
 .mediumInput {
   width: 25%;
