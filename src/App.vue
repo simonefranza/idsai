@@ -54,8 +54,10 @@ export default {
         this.tempDarkTheme = newVal;
         var date = new Date();
         date.setTime(date.getTime()+(30*24*60*60*1000));
+        let expire = '; expires=' + date.toGMTString();
+        let secure = window.location.href.includes('localhost') ? '' : "; Secure";
 
-        document.cookie = "dark_theme=" + newVal + "; expires=" + date.toGMTString() + "; HttpOnly; Secure";
+        document.cookie = "dark_theme=" + newVal + expire + secure;
       }
     }
 
