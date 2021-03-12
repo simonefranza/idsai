@@ -37,7 +37,7 @@
             <div class="cyclesDiv">
               <span class="toggleBlock">Matrix size (min: 2, max: 10)</span>
               <b-form-input size="sm" v-model="adjMatSize"
-                                      :class="{'shake' : invalidMatrixSize, 'darkInputForm' : darkTheme, 'mediumInput' : 'true'}"></b-form-input>
+                                      :class="{'shake' : invalidMatrixSize, 'darkInputForm' : darkTheme, 'smallInput' : 'true'}"></b-form-input>
               <b-icon :class="['cyclesIconRight', 'iconEnabled', darkTheme ? 'iconDark' : 'iconLight']"
                                       icon="arrow-clockwise" aria-hidden="true" @click="reloadMatrix" :animation="reloadingMatrix ? 'spin' : ''"></b-icon>
             </div>

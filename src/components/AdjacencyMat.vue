@@ -20,7 +20,7 @@
               <b-icon icon="check-circle" 
                       aria-hidden="true" 
                       @click="saveNodeNames()" 
-                      :class="['cyclesIconLeft', 'iconEnabled', darkTheme ? 'iconDark' : 'iconLight', 'verticallyCentered']" 
+                      :class="['cyclesIconLeft', invalidNames ? 'iconDisabled' : 'iconEnabled', darkTheme ? 'iconDark' : 'iconLight', 'verticallyCentered']" 
                       v-else
                       ></b-icon>
            </template>
@@ -28,7 +28,7 @@
           <template #head()="data">
             <span v-if="!editNodeNames">{{savedNames[parseInt(data.column)-1]}}</span>
             <b-form-input v-else
-                          :class="{'darkInputForm' : darkTheme, 'horizontallyCentered' : 'true'}" 
+                          :class="{'darkInputForm' : darkTheme, 'horizontallyCentered' : 'true'}"
                           v-model="savedNames[parseInt(data.column) - 1]" 
                           placeholder="Type or cancel" 
                           @keyup.enter="saveNodeNames()"></b-form-input>
@@ -43,7 +43,7 @@
             <span @mouseenter="hoverData({row:data.index + 1,
               col:parseInt(data.field.key)})"
               @mouseleave="leftField"
-                      v-if="editMatrixRow !== data.index || !(savedNames.indexOf(data.field.key) > data.index)">
+                      v-if="editMatrixRow !== data.index || !(parseInt(data.field.key) - 1 > data.index)">
               {{data.value}}
             </span>
             <b-form-input v-else
@@ -155,6 +155,18 @@ export default {
       });
       return mat;
     },
+    invalidNames() {
+      if(!this.editNodeNames)
+        return false;
+
+      for(let [index, name] of this.savedNames.entries())
+      {
+        let currId = this.savedNames.indexOf(name.trim());
+        if((currId !== index && currId !== -1) || !name.trim())
+          return true;
+      }
+      return false;
+    },
     invalidNewRow() {
       if(this.editMatrixRow === -1)
         return false;
@@ -180,6 +192,9 @@ export default {
       this.editMatrixRow = row; 
     },
     saveNodeNames() {
+      if(this.invalidNames)
+        return;
+      this.savedNames = this.savedNames.map(el => el.trim());
       this.editNodeNames = false;
       this.$emit("newNodeNames", this.savedNames);
     },
@@ -234,12 +249,13 @@ export default {
         this.reload = Math.random();
     },
     matrix() {
-      this.savedNames = [];
-      for(let i = 1; i <= this.matrixSize; i++)
-        this.savedNames.push(i.toString());
+//      this.savedNames = [];
+//      for(let i = 1; i <= this.matrixSize; i++)
+//        this.savedNames.push(i.toString());
     },
     matrixSize() {
       this.regenTempMatrix();
+      this.savedNames = [];
       for(let i = 1; i <= this.matrix.length; i++)
         this.savedNames.push(i.toString());
       this.regenCopyMatrix();
