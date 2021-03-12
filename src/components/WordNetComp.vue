@@ -429,7 +429,8 @@ export default {
       this.chosenIndex = e.index;
     },
     reloadMatrix () {
-      this.reloadingMatrix= true;
+      this.reloadingMatrix = true;
+
       this.adjMatrix = [];
       setTimeout(() => {
         this.reloadingMatrix = false;}, 2000);

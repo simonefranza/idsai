@@ -124,6 +124,7 @@
 
 <script>
 import SwitchGroup from '@/components/SwitchGroup.vue'
+import * as tokenizer from 'simple-text-tokenizer'
 
 export default {
   props: {
@@ -210,11 +211,9 @@ export default {
 
     docInfo: function() {
       let map = new Map();
-      var natural = require('natural');
-      var tokenizer = new natural.WordTokenizer();
       for(let doc of this.documents)
       {
-        let uniqueTokens = this.getUniqueTokens(tokenizer.tokenize(doc['document']));
+        let uniqueTokens = this.getUniqueTokens(tokenizer.getWordTokens(doc.document));
         let docLen = 0;
         uniqueTokens.forEach((val, ) => docLen += val);
         map.set(doc, {uniqueTokens: uniqueTokens, docLen : docLen});
@@ -278,10 +277,8 @@ export default {
     },
 
     query_tf: function() {
-      var natural = require('natural');
-      var tokenizer = new natural.WordTokenizer();
       //words that are ignored in the documents are ignored here as well
-      let uniqueTokens = this.getUniqueTokens(tokenizer.tokenize(this.query));
+      let uniqueTokens = this.getUniqueTokens(tokenizer.getWordTokens(this.query));
       let docLen = 0;
       uniqueTokens.forEach((val, ) => docLen += val);
       let t_i = new Map();

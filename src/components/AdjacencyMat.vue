@@ -40,13 +40,14 @@
 
 
           <template #cell()="data">
-            <span @mouseenter="hoverData({row:data.index + 1,
-              col:parseInt(data.field.key)})"
+            <span @mouseenter="hoverData({row:data.index + 1, col:parseInt(data.field.key)})"
               @mouseleave="leftField"
                       v-if="editMatrixRow !== data.index || !(parseInt(data.field.key) - 1 > data.index)">
               {{data.value}}
             </span>
             <b-form-input v-else
+                          @mouseenter="hoverData({row:data.index + 1, col:parseInt(data.field.key)})"
+                          @mouseleave="leftField"
                           size="sm"
                           :class="{'darkInputForm' : darkTheme, 'miniInput' : 'true', 'horizontallyCentered' : 'true'}" 
                           v-model="copyMatrix[data.index][data.field.key]" 
@@ -108,6 +109,7 @@ export default {
     },
 
     matrix: function() {
+      this.reload; //do not remove is used to force reloading
       let mat = [];
       for(let row = 0; row < this.matrixSize; row++)
       {
@@ -222,7 +224,7 @@ export default {
       this.matrix.forEach(row => {
         let obj = {};
         row.forEach((el, index) => {
-          obj[this.savedNames[index]] = el;
+          obj[(index+1).toString()] = el;
         });
         this.copyMatrix.push(obj);
       });
@@ -242,29 +244,30 @@ export default {
       });
       this.editMatrixRow = -1;
     },
+    regenSavedNames() {
+      this.savedNames = [];
+      for(let i = 1; i <= this.matrix.length; i++)
+        this.savedNames.push(i.toString());
+    }
   },
   watch: {
     value() {
       if(!this.value.length)
+      {
+        this.regenTempMatrix();
         this.reload = Math.random();
-    },
-    matrix() {
-//      this.savedNames = [];
-//      for(let i = 1; i <= this.matrixSize; i++)
-//        this.savedNames.push(i.toString());
+        this.regenCopyMatrix();
+      }
     },
     matrixSize() {
       this.regenTempMatrix();
-      this.savedNames = [];
-      for(let i = 1; i <= this.matrix.length; i++)
-        this.savedNames.push(i.toString());
+      this.regenSavedNames();
       this.regenCopyMatrix();
     },
   },
   created() {
     this.regenTempMatrix();
-    for(let i = 1; i <= this.matrix.length; i++)
-      this.savedNames.push(i.toString());
+    this.regenSavedNames();
     this.regenCopyMatrix();
     this.$emit("newNodeNames", this.savedNames);
   }

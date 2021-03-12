@@ -12,7 +12,6 @@
     "@ssthouse/vue-tree-chart": "^0.4.3",
     "core-js": "^3.8.3",
     "cytoscape": "^3.18.1",
-    "natural": "^3.0.3",
     "vue": "^2.6.11",
     "vue-d3-network": "^0.1.28",
     "vue-router": "^3.2.0",
@@ -31,6 +30,7 @@
     "node-sass": "^5.0.0",
     "raw-loader": "^4.0.2",
     "sass-loader": "^10.1.1",
+    "simple-text-tokenizer": "^1.0.1",
     "vue-template-compiler": "^2.6.11"
   },
   "eslintConfig": {
