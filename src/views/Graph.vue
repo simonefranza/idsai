@@ -1,7 +1,6 @@
 <template>
   <div>
     <div class="wordNet">
-
       <WordNetComp :dark-theme="darkTheme"/>
     </div>
   </div>

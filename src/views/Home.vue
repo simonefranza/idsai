@@ -13,35 +13,55 @@
         <a href="https://github.com/simonefranza/idsai/issues">issue</a>!
         </p> 
       </span>
+      <!--  <input type="checkbox" v-model="graph" />-->
     </div>
+    <HomeGraph class="homeGraph" :mouseX="mouseX" :mouseY="mouseY" :darkTheme="darkTheme" v-if="graph"/>
+    <!--    <HomeNetwork class="homeGraph" :mouseX="mouseX" :mouseY="mouseY" :darkTheme="darkTheme" v-else />-->
   </div>
 </template>
 
 <script>
-export default {
+import HomeGraph from '@/components/HomeGraph.vue'
+//import HomeNetwork from '@/components/HomeNetwork.vue'
+
+export default { 
   data() {
     return {
-
+      graph: true,
     }
   },
   props: {
     darkTheme: { required: true },
+    mouseX: {required: true},
+    mouseY: {required: true},
+  },
+  components: {
+    HomeGraph,
+//    HomeNetwork,
+  },
 
-  }
 }
 </script>
 
-<style scoped lang="scss">
+<style lang="scss">
 .introText {
   width: 33%;
   height: 60%;
   position: absolute;
-  top: 50%;
+  top: 67%;
   left: 10%;
   transform: translate(0, -50%);
   display: flex;
   justify-content: center;
   align-items: center;
   text-align: left;
+  z-index: 1000;
+}
+
+.homeGraph {
+  position: fixed;
+  right: 13em;
+  z-index: 10;
+  top: 15em;
 }
 </style>

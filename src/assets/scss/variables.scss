@@ -1,0 +1,23 @@
+$secondary-dark: #f5d782;
+$secondary-light: #41ba82;
+$text-primary-dark: #f8f1f1;
+$text-secondary-dark: #303131;
+$primary-light: #111;
+$text-secondary-light: #f8f9fa;
+$slider-blue: #057bfe;
+$vue-primary: #2c3e50;
+$bg-body-dark: #2f2f2f;
+$bg-body-light: #fafafa;
+
+:export {
+  secondaryDark: $secondary-dark;
+  secondaryLight: $secondary-light;
+  textPrimaryDark: $text-primary-dark;
+  textSecondaryDark: $text-secondary-dark;
+  primaryLight: $primary-light;
+  textSecondaryLight: $text-secondary-light;
+  sliderBlue: $slider-blue;
+  vuePrimary: $vue-primary;
+  bgBodyDark: $bg-body-dark;
+  bgBodyLight: $bg-body-light;
+}

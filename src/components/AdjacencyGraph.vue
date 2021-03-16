@@ -1,11 +1,13 @@
 <template>
-  <div class="graphComp">
+  <div class="adjGraph">
     <d3-network :net-nodes="nodesAndLinks.nodes" :net-links="nodesAndLinks.links" :options="options" :selection="selection"/>
   </div>
 </template>
 
 <script>
 import D3Network from 'vue-d3-network'
+import scssData from '@/assets/scss/variables.scss'
+
 export default {
   props: {
     darkTheme: {
@@ -70,7 +72,7 @@ export default {
       }
 
       nodes.forEach(el => el._color = this.darkTheme ? '#6a6868' : '#2c3e4f');
-      links.forEach(el => el._color = this.darkTheme ? '#303131' : '#d0d0d0');
+      links.forEach(el => el._color = this.darkTheme ? scssData.textSecondaryDark : '#d0d0d0');
       this.setStyle();
 
       return {nodes: nodes, links: links};
@@ -111,15 +113,15 @@ export default {
       {
         let mEndEl = document.getElementById("m-end");
         if(mEndEl && mEndEl.childNodes && mEndEl.childNodes.length)
-          mEndEl.childNodes[0].style.fill = "#303131"; 
+          mEndEl.childNodes[0].style.fill = scssData.textSecondaryDark; 
         document.styleSheets.forEach(ss => {
           ss.cssRules.forEach(rule => {
             if(rule.selectorText && rule.selectorText.localeCompare('.node:hover') === 0)
-              rule.style.stroke = '#f5d782';
+              rule.style.stroke = scssData.secondaryDark;
             else if(rule.selectorText && rule.selectorText.localeCompare('.node.selected') === 0)
-              rule.style.stroke = '#f5d782';
+              rule.style.stroke = scssData.secondaryDark;
             else if(rule.selectorText && rule.selectorText.localeCompare('.link.selected') === 0)
-              rule.style.setProperty('stroke','#f5d782', 'important');
+              rule.style.setProperty('stroke',scssData.secondaryDark, 'important');
             else if(rule.selectorText && rule.selectorText.localeCompare('.link-label, .node-label') === 0)
               rule.style.fill = '#f4eeee';
           });
@@ -133,11 +135,11 @@ export default {
         document.styleSheets.forEach(ss => {
           ss.cssRules.forEach(rule => {
             if(rule.selectorText && rule.selectorText.localeCompare('.node:hover') === 0)
-              rule.style.stroke = '#41ba82';
+              rule.style.stroke = scssData.secondaryLight;
             else if(rule.selectorText && rule.selectorText.localeCompare('.node.selected') === 0)
-              rule.style.stroke = '#41ba82';
+              rule.style.stroke = scssData.secondaryLight;
             else if(rule.selectorText && rule.selectorText.localeCompare('.link.selected') === 0)
-              rule.style.setProperty('stroke','#41ba82', 'important');
+              rule.style.setProperty('stroke', scssData.secondaryLight, 'important');
             else if(rule.selectorText && rule.selectorText.localeCompare('.link-label, .node-label') === 0)
               rule.style.fill = '#272d2f';
           });
@@ -157,25 +159,25 @@ export default {
 
 <style src="vue-d3-network/dist/vue-d3-network.css"></style>
 
-<style >
+<style lang="scss">
 .link-label, .node-label {
   fill: #f4eeee;
 }
 
 .node:hover {
-  stroke: #f5d782 ;
+  stroke: $secondary-dark;
   stroke-width: 3px;
 }
 
 .link:hover {
-  stroke: #303131;
+  stroke: $text-secondary-dark; 
 }
 .node.selected {
-  stroke: #f5d782;
+  stroke: $secondary-dark;
   stroke-width: 3px !important;
 }
 .link.selected {
-  stroke: #f5d782 !important;
+  stroke: $secondary-dark !important;
 }
 
 .node-label {
@@ -198,7 +200,7 @@ export default {
 }
 
 .link {
-  stroke: #303131;
+  stroke: $text-secondary-dark;
 }
 
 .node {
@@ -206,14 +208,14 @@ export default {
 }
 
 #m-end path{
-  fill: #303131;
+  fill: $text-secondary-dark;
 }
 
 .net-svg {
   height: 100%;
 }
 
-.graphComp {
+.adjGraph{
   height: 100%;
 }
 </style>

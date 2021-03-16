@@ -154,7 +154,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 ul.recSymbol{
     list-style-type: none;
     padding-left: 1em;
@@ -168,9 +168,9 @@ ul.recSymbol{
     user-select: none;
 }
 .iconDark {
-  color: #f5d782;
+  color: $secondary-dark;
 }
 .iconLight {
-  color: #111;
+  color: $primary-light;
 }
 </style>

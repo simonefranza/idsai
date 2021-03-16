@@ -1,10 +1,10 @@
 <template>
-  <div v-bind:id="!darkTheme ? 'app' : 'darkApp'">
-    <div id="pageContainer" v-bind:class="!darkTheme ? 'page-light' : 'page-dark'">
-      <div v-bind:id="!darkTheme ? 'nav' : 'darkNav'" v-bind:class="!darkTheme ? 'light-theme' : 'dark-theme'">
+  <div :id="!darkTheme ? 'app' : 'darkApp'" @mousemove="mouseMoved">
+    <div id="pageContainer" :class="!darkTheme ? 'page-light' : 'page-dark'">
+      <div :id="!darkTheme ? 'nav' : 'darkNav'" :class="[!darkTheme ? 'light-theme' : 'dark-theme', 'navBar']">
         <div class="menuDiv"></div>
         <div id="menu" class="menuDiv">
-          <router-link :darkTheme="darkTheme" to="/">Home</router-link> |
+          <router-link :mouseX="mouseX" :mouseY="mouseY" :darkTheme="darkTheme" to="/">Home</router-link> |
           <router-link :dark-theme="darkTheme" to="/rules">Rules</router-link> | 
           <router-link :dark-theme="darkTheme" to="/graphs">Graphs</router-link> |
           <router-link :dark-theme="darkTheme" to="/info-ret">Information Retrieval</router-link> | 
@@ -18,9 +18,9 @@
         </div>
       </div>
       <transition name="slide-fade" mode="out-in">
-      <router-view class="router-view" v-bind:dark-theme="darkTheme" v-bind:class="!darkTheme ? 'rv-light' : 'rv-dark'" />
+      <router-view class="router-view" :mouseX="mouseX" :mouseY="mouseY" :dark-theme="darkTheme" :class="!darkTheme ? 'rv-light' : 'rv-dark'" />
       </transition>
-      <Footer v-bind:dark-theme="darkTheme" />
+      <Footer :dark-theme="darkTheme" />
     </div>
   </div>
 </template>
@@ -28,11 +28,14 @@
 <script>
 import Footer from '@/components/Footer.vue'
 import ToggleSwitch from '@/components/ToggleSwitch.vue'
+import scssData from '@/assets/scss/variables.scss'
 
 export default {
   data() {
     return {
-      tempDarkTheme: null
+      tempDarkTheme: null,
+      mouseX: -100,
+      mouseY: -100,
     }
   },
   computed: {
@@ -67,13 +70,17 @@ export default {
     ToggleSwitch
   },
   methods: {
+    mouseMoved(event) {
+      this.mouseX = event.x;
+      this.mouseY = event.y;
+    },
     setStyle() {
       if(this.darkTheme)
       {
         document.styleSheets.forEach(ss => {
           ss.cssRules.forEach(rule => {
             if(rule.selectorText && rule.selectorText.localeCompare('body') === 0)
-              rule.style.setProperty('background','#2f2f2f', 'important');
+              rule.style.setProperty('background', scssData.bgBodyDark, 'important');
           });
         });
       }
@@ -82,7 +89,7 @@ export default {
         document.styleSheets.forEach(ss => {
           ss.cssRules.forEach(rule => {
             if(rule.selectorText && rule.selectorText.localeCompare('body') === 0)
-              rule.style.setProperty('background','#fafafa', 'important');
+              rule.style.setProperty('background', scssData.bgBodyLight, 'important');
           });
         });
       }
@@ -100,7 +107,7 @@ export default {
 }
 </script>
 
-<style>
+<style lang="scss">
 .slide-fade-enter-active, .slide-fade-leave-active  {
  transition-duration: 0.3s;
   transition-property: height, opacity, transform;
@@ -111,7 +118,7 @@ export default {
 transform: translateY(100%);
 }
 .slide-fade-leave-to{
-opacity: 0;
+  opacity: 0;
   transform: translateY(100%);
 }
 
@@ -126,14 +133,14 @@ opacity: 0;
 
 #app
 {
-  background-color: #f8f1f1;
-  color: #2c3e50;
+  background-color: $text-primary-dark;
+  color: $vue-primary;
 
 }
 
 #darkApp {
   background-color: #222;
-  color: #f8f1f1;
+  color: $text-primary-dark;
 }
 
 #nav, #darkNav {
@@ -149,20 +156,20 @@ opacity: 0;
 }
 #nav a {
   font-weight: bold;
-  color: #2c3e50;
+  color: $vue-primary;
 }
 
 #darkNav a {
   font-weight: bold;
-  color: #f8f1f1;
+  color: $text-primary-dark;
 }
 
 #nav a.router-link-exact-active {
-  color: #42b983;
+  color: $secondary-light;
 }
 
 #darkNav a.router-link-exact-active {
-  color: #f5d782;
+  color: $secondary-dark;
 }
 
 #pageContainer{
@@ -170,16 +177,13 @@ opacity: 0;
 }
 
 .light-theme {
-  color: #2c3e50;
-  background-color: #fafafa;
-}
-.dark-theme {
-  background-color: #2f2f2f;
-  color: #f8f1f1;
+  color: $vue-primary;
+  background-color: $bg-body-light;
 }
 
-.dark-theme a.router-link-exact-active {
-  color: #19456b;
+.dark-theme {
+  color: $text-primary-dark;
+  background-color: $bg-body-dark;
 }
 
 .dark-light-switch {
@@ -198,16 +202,16 @@ opacity: 0;
 }
 
 .rv-light, .page-light {
-  background-color: #f8f1f1;
+  background-color: $text-primary-dark;
 }
 
 .rv-dark, .page-dark {
   background-color: #222;
 }
 
-
 #menu {
   display: block;
+  min-width: 50vw;
 }
 
 .inputGroup {
@@ -215,8 +219,11 @@ opacity: 0;
 }
 
 body {
-  background: #2f2f2f !important;
+  background: $bg-body-dark !important;
 }
 
-
+.navBar {
+  position: relative;
+  z-index: 1000;
+}
 </style>

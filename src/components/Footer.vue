@@ -17,21 +17,22 @@ export default {
 }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 #footer {
   position: absolute;
   bottom: 0;
   width: 100%;
-  height: 2.5rem;            /* Footer height */
+  height: 2.5rem;
+  z-index: 1000;
 }
 
 .light-theme {
-  color: #2c3e50;
+  color: $vue-primary;
   background-color: #d0d0d0;
 }
 .dark-theme {
   background-color: #1a1a1a;
-  color: #f8f1f1;
+  color: $text-primary-dark;
 }
 
 .footContent {

@@ -64,8 +64,8 @@
                     :matrixSize="parsedAdjMatSize"
                     @hoverElement="highlightNode"
                     @newNodeNames="updateNodeNames"
-                    v-model="adjMatrix"
-                    v-else />
+                     v-model="adjMatrix" 
+                     v-else />
       </div>
       <div class="col-7">
         <GraphComp :dark-theme="darkTheme" 
@@ -74,12 +74,12 @@
                     :depth="exploreDepth" 
                     v-model="hoveredWord"
                     v-if="showWordNet" />
-        <AdjacencyGraph :darkTheme="darkTheme"
+       <AdjacencyGraph :darkTheme="darkTheme"
                         :matrix="adjMatrix"
                         :selectedRow="selectedRow"
                         :selectedCol="selectedCol"
-                        :nodeNames="adjNodeNames"
-                        v-else />
+                    :nodeNames="adjNodeNames" 
+                    v-else />
       </div>
     </div>
   </div>
@@ -87,8 +87,8 @@
 
 <script>
 import WordNetResult from '@/components/WordNetResult.vue'
-import GraphComp from '@/components/GraphComp.vue'
 import AdjacencyMat from '@/components/AdjacencyMat.vue'
+import GraphComp from '@/components/GraphComp.vue'
 import AdjacencyGraph from '@/components/AdjacencyGraph.vue'
 import ToggleSwitch from '@/components/ToggleSwitch.vue'
 
@@ -101,8 +101,8 @@ export default {
   },
   components: {
     WordNetResult,
-    GraphComp,
     AdjacencyMat,
+    GraphComp,
     AdjacencyGraph,
     ToggleSwitch,
   },
@@ -848,7 +848,7 @@ footer {
 }
 #lightFooter a {
   font-weight: bold;
-  color: #2c3e50;
+  color: $vue-primary;
 }
 
 #darkFooter a {

@@ -2,7 +2,7 @@
 <template>
   <label :class="['switch']">
     <input :checked="currValue" type="checkbox" @click="toggle">
-    <span :class="['slider', 'round', darkTheme ? 'darkSlider' : 'lightSlider']"></span>
+    <span :class="['switchSlider', 'round', darkTheme ? 'darkSlider' : 'lightSlider']"></span>
   </label>
 </template>
 
@@ -43,7 +43,7 @@ export default {
 
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 /* The switch - the box around the slider */
 .switch {
   position: relative;
@@ -61,7 +61,7 @@ export default {
 }
 
 /* The slider */
-.slider {
+.switchSlider {
   position: absolute;
   cursor: pointer;
   top: 0;
@@ -76,11 +76,11 @@ export default {
   border: 1px solid #999;
 }
 .darkSlider{
-  background-color: #303131;
-  border: 1px solid #111;
+  background-color: $text-secondary-dark;
+  border: 1px solid $primary-light;
 }
 
-.slider:before {
+.switchSlider:before {
   position: absolute;
   content: "";
   height: 17px;
@@ -93,11 +93,11 @@ export default {
 }
 
 input:checked + .lightSlider{
-  background-color: #057bfe;
-  border: 1px solid #057bfe;
+  background-color: $slider-blue;
+  border: 1px solid $slider-blue;
 }
 input:checked + .darkSlider{
-  background-color: #f5d782;
+  background-color: $secondary-dark;
 }
 
 input:checked + .lightSlider:before {
@@ -108,24 +108,24 @@ input:checked + .darkSlider:before{
 }
 
 input:focus + .lightSlider{
-  box-shadow: 0 0 1px #057bfe;
+  box-shadow: 0 0 1px $slider-blue;
 }
 input:focus + .darkSlider{
-  box-shadow: 0 0 1px #111;
+  box-shadow: 0 0 1px $primary-light;
 }
 
-input:checked + .slider:before {
+input:checked + .switchSlider:before {
   -webkit-transform: translateX(15px);
   -ms-transform: translateX(15px);
   transform: translateX(15px);
 }
 
 /* Rounded sliders */
-.slider.round {
+.switchSlider.round {
   border-radius: 20px;
 }
 
-.slider.round:before {
+.switchSlider.round:before {
   border-radius: 50%;
 }
 </style>
