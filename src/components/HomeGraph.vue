@@ -90,7 +90,7 @@ export default {
         if(i === 0)
         {
           nodes.push({id: i, _color: this.firstNodeColor, _size: 125, pinned:true,
-            fx: this.relativeMouseX, fy: this.relativeMouseY});
+            fx: this.relativeMouseX, fy: this.relativeMouseY, _cssClass: 'firstNode'});
           continue;
         }
         let size = Math.floor(this.nodeSizeBase * (Math.random() * this.nodeSizeVar * 2 / 100 + 1 - this.nodeSizeVar / 100));
@@ -172,6 +172,13 @@ export default {
   stroke-width: 0px;
 }
 .node {
-  filter: drop-shadow(0 0 3px $vue-primary);
+  stroke: rgba($vue-primary,.2);
+//  stroke: rgba(#555,.2);
+  stroke-width: 2px;
+//  filter: drop-shadow(0 0 1px $vue-primary);
+//  -webkit-filter: drop-shadow(0 0 3px $vue-primary);
+}
+.firstNode {
+  stroke-width: 0;
 }
 </style>
