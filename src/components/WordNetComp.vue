@@ -1,34 +1,28 @@
 <template>
   <div>
-    <!--    <transition name="blur" mode="out-in">-->
-    <div id="helpBlock" :class="['helpContainer', 'blurScreen']"
-                                  @click="closeHelpMessage(true)"
-                                  v-if="showWordNetHelp">
-      <b-card title="WordNet" 
-              :bg-variant="darkTheme ? 'dark' : 'light'" 
-              :text-variant="darkTheme ? 'white' : ''"
-              :class="['helpCard', darkTheme ? 'helpCardShadowDark' : 'helpCardShadowLight']"
-              @click="closeHelpMessage(false)"
-              >
-              <b-card-body>
-                <b-card-text :class="[darkTheme ? 'darkText' : 'lightText']">
-                  <p>If you would like to fully explore WordNet,
-                  <a href="http://wordnetweb.princeton.edu/perl/webwn">here</a>
-                  you can find the original text-based interface of the WordNet project.
-                  </p>
-                </b-card-text>
-              </b-card-body>
-      </b-card>
-    </div>
+    <transition name="sliding" mode="out-in">
+    <WordNetLegend :darkTheme="darkTheme" @closeLegend="closeExternalCard" v-model="showWordNetLegend" v-if="showWordNet"/>
+    </transition>
+    <WordNetHelp :darkTheme="darkTheme" @closeHelp="closeExternalCard" v-if="showWordNetHelp" />
     <div class="wordNetComp row">
       <div class="col-5">
       <b-card title="Control Panel" v-bind:bg-variant="!darkTheme ? 'light' : 'dark'" v-bind:text-variant="!darkTheme ? '' : 'white'">
         <b-card-body>
           <b-card-text>
-            <b-icon id="helpIcon" icon="question-circle" 
-                    :class="['iconEnabled', 'cyclesIconRight', darkTheme ? 'iconDark' : 'iconLight', 'helpIcon']"
-                    @click="showHelp()"
-                    v-if="showWordNet"></b-icon>
+            <div class="helpIcon" v-if="showWordNet">
+              <b-button size="sm" 
+                        id="legendButton"
+                        class="showGraphButton"
+                        pill
+                        @click="showWordNetLegend = !showWordNetLegend"
+                        :variant="darkTheme ? 'outline-dark' : 'outline-light'" >
+                        <span v-if="!showWordNetLegend">Show legend</span>
+                        <span v-else>Hide legend</span>
+              </b-button>
+                <b-icon id="helpIcon" icon="question-circle" 
+                                      :class="['iconEnabled', 'cyclesIconRight', darkTheme ? 'iconDark' : 'iconLight']"
+                                      @click="showHelp()" ></b-icon>
+            </div>
           <div class="cyclesDiv">
             <span :class="{'disabledText' : showWordNet}">Adjacency Matrix</span>
             <ToggleSwitch :darkTheme="darkTheme" v-model="showWordNet" />
@@ -110,6 +104,8 @@
 </template>
 
 <script>
+import WordNetHelp from '@/components/WordNetHelp.vue'
+import WordNetLegend from '@/components/WordNetLegend.vue'
 import WordNetResult from '@/components/WordNetResult.vue'
 import AdjacencyMat from '@/components/AdjacencyMat.vue'
 import GraphComp from '@/components/GraphComp.vue'
@@ -130,6 +126,8 @@ export default {
     GraphComp,
     AdjacencyGraph,
     ToggleSwitch,
+    WordNetHelp,
+    WordNetLegend,
   },
   data() {
     return {
@@ -143,6 +141,7 @@ export default {
 
       //Word Net
       showWordNetHelp: false,
+      showWordNetLegend: false,
       showHelpAnimDuration: 3,
       preventHelpClosing: false,
       chosenGroup: -1,
@@ -457,7 +456,7 @@ export default {
         ramjet.show(b);
       });
     },
-    closeHelpMessage(isParent) {
+    closeExternalCard(isParent) {
       if(!isParent) {
         this.preventHelpClosing = true;
         return;
@@ -917,49 +916,32 @@ footer {
 
 .helpIcon {
   position: absolute;
-  top: 1.5em;
-  right: 2em;
-
-}
-.helpContainer {
-  position: fixed;
-  z-index: 2000;
-  top: 0;
-  left: 0;
-  height: 100vh;
-  width: 100vw;
+  top: 1.2rem;
+  right: 2rem;
   display: flex;
   align-items: center;
   justify-content: center;
-}
-.helpCard {
-  position:relative;
-  max-width: 35rem;
-  z-index: 2500;
-}
-.helpCardShadowDark{
-  box-shadow: 0 0 7px 1px rgba($text-primary-dark, .2),;
-}
-.helpCardShadowLight{
-  box-shadow: 0 0 7px 1px rgba($vue-primary, .2);
-}
-/* blur help message */
-$blur-speed : .3s;
-$blur-size: .2em;
-
-.blurScreen {
-  backdrop-filter: blur($blur-size);
+  font-size: 1.938rem;
 }
 
-.blur-enter-active, .blur-leave-active{
-  transition: all $blur-speed ease-in-out;
+.helpIcon > button{
+  margin-right: 1rem; 
 }
-.blur-enter-to, .blur-leave{
-  backdrop-filter: blur($blur-size);
+
+/* slide legend message */
+$slide-speed : 1s;
+
+.sliding-enter-active, .sliding-leave-active{
+  transition: all $slide-speed ease-in-out;
 }
-.blur-enter, .blur-leave-to{
-  opacity: 0;
-  transform: translate(0, -100%);
+
+.sliding-leave-to{
+  transform: translate(-107%, -50%) !important;
 }
-/* blur help message END*/
+.sliding-enter{
+  transform: translate(-107%, -50%) !important;
+}
+
+/* slide legend message END*/
+
 </style>
