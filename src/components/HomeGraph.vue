@@ -173,10 +173,7 @@ export default {
 }
 .node {
   stroke: rgba($vue-primary,.2);
-//  stroke: rgba(#555,.2);
   stroke-width: 2px;
-//  filter: drop-shadow(0 0 1px $vue-primary);
-//  -webkit-filter: drop-shadow(0 0 3px $vue-primary);
 }
 .firstNode {
   stroke-width: 0;

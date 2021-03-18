@@ -1,10 +1,34 @@
 <template>
   <div>
+    <!--    <transition name="blur" mode="out-in">-->
+    <div id="helpBlock" :class="['helpContainer', 'blurScreen']"
+                                  @click="closeHelpMessage(true)"
+                                  v-if="showWordNetHelp">
+      <b-card title="WordNet" 
+              :bg-variant="darkTheme ? 'dark' : 'light'" 
+              :text-variant="darkTheme ? 'white' : ''"
+              :class="['helpCard', darkTheme ? 'helpCardShadowDark' : 'helpCardShadowLight']"
+              @click="closeHelpMessage(false)"
+              >
+              <b-card-body>
+                <b-card-text :class="[darkTheme ? 'darkText' : 'lightText']">
+                  <p>If you would like to fully explore WordNet,
+                  <a href="http://wordnetweb.princeton.edu/perl/webwn">here</a>
+                  you can find the original text-based interface of the WordNet project.
+                  </p>
+                </b-card-text>
+              </b-card-body>
+      </b-card>
+    </div>
     <div class="wordNetComp row">
       <div class="col-5">
       <b-card title="Control Panel" v-bind:bg-variant="!darkTheme ? 'light' : 'dark'" v-bind:text-variant="!darkTheme ? '' : 'white'">
         <b-card-body>
           <b-card-text>
+            <b-icon id="helpIcon" icon="question-circle" 
+                    :class="['iconEnabled', 'cyclesIconRight', darkTheme ? 'iconDark' : 'iconLight', 'helpIcon']"
+                    @click="showHelp()"
+                    v-if="showWordNet"></b-icon>
           <div class="cyclesDiv">
             <span :class="{'disabledText' : showWordNet}">Adjacency Matrix</span>
             <ToggleSwitch :darkTheme="darkTheme" v-model="showWordNet" />
@@ -91,6 +115,7 @@ import AdjacencyMat from '@/components/AdjacencyMat.vue'
 import GraphComp from '@/components/GraphComp.vue'
 import AdjacencyGraph from '@/components/AdjacencyGraph.vue'
 import ToggleSwitch from '@/components/ToggleSwitch.vue'
+import ramjet from 'ramjet'
 
 export default {
   props: {
@@ -117,6 +142,9 @@ export default {
       adjNodeNames: {},
 
       //Word Net
+      showWordNetHelp: false,
+      showHelpAnimDuration: 3,
+      preventHelpClosing: false,
       chosenGroup: -1,
       chosenIndex: -1,
       hoveredWord: null,
@@ -417,6 +445,37 @@ export default {
     },
   },
   methods: {
+    showHelp() {
+      this.showWordNetHelp = true;
+      let animDuration = 200;
+      this.$nextTick(async function() {
+        let a = document.getElementById('helpIcon');
+        let b = document.getElementById('helpBlock');
+        ramjet.hide(b);
+        ramjet.transform(a,b, {duration: animDuration});
+        await new Promise(r => setTimeout(r, animDuration));
+        ramjet.show(b);
+      });
+    },
+    closeHelpMessage(isParent) {
+      if(!isParent) {
+        this.preventHelpClosing = true;
+        return;
+      }
+      if(this.preventHelpClosing)
+      {
+        this.preventHelpClosing = false;
+        return;
+      }
+      let animDuration = 200;
+      this.$nextTick(async function() {
+        let a = document.getElementById('helpIcon');
+        let b = document.getElementById('helpBlock');
+        ramjet.hide(b);
+        ramjet.transform(b,a, {duration: animDuration});
+      });
+      this.showWordNetHelp = false;
+    },
     updateNodeNames(e) {
       this.adjNodeNames = e;
     },
@@ -856,4 +915,51 @@ footer {
   color: $text-primary-dark;
 }
 
+.helpIcon {
+  position: absolute;
+  top: 1.5em;
+  right: 2em;
+
+}
+.helpContainer {
+  position: fixed;
+  z-index: 2000;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.helpCard {
+  position:relative;
+  max-width: 35rem;
+  z-index: 2500;
+}
+.helpCardShadowDark{
+  box-shadow: 0 0 7px 1px rgba($text-primary-dark, .2),;
+}
+.helpCardShadowLight{
+  box-shadow: 0 0 7px 1px rgba($vue-primary, .2);
+}
+/* blur help message */
+$blur-speed : .3s;
+$blur-size: .2em;
+
+.blurScreen {
+  backdrop-filter: blur($blur-size);
+}
+
+.blur-enter-active, .blur-leave-active{
+  transition: all $blur-speed ease-in-out;
+}
+.blur-enter-to, .blur-leave{
+  backdrop-filter: blur($blur-size);
+}
+.blur-enter, .blur-leave-to{
+  opacity: 0;
+  transform: translate(0, -100%);
+}
+/* blur help message END*/
 </style>
