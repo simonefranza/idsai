@@ -1,15 +1,5 @@
-$secondary-dark: #f5d782;
-$secondary-light: #41ba82;
-$text-primary-dark: #f8f1f1;
-$text-secondary-dark: #303131;
-$primary-light: #111;
-$text-secondary-light: #f8f9fa;
-$slider-blue: #057bfe;
-$vue-primary: #2c3e50;
-$bg-body-dark: #2f2f2f;
-$bg-body-light: #fafafa;
-$bootstrap-card-dark: #343a40;
-$bootstrap-card-light: #f8f9fa;
+@import 'variables';
+@import 'scrollbar';
 
 //Taken from https://stackoverflow.com/questions/59855732/vuelidate-shaking-the-incorrect-input-field
 .shake {
@@ -217,4 +207,18 @@ opacity: 0.5;
   font-weight: bold;
   color: $text-primary-dark;
 }
+
+.bodyScrollbar {
+  @include scrollbar(.38em, $node-dark, $secondary-dark);
+}
+//.bodyLightScrollbar {
+//  @include scrollbar(.5em, $vue-primary, $secondary-light, &);
+//}
+//
+//.darkScrollbar {
+//  @include scrollbar(.5em, #1a1a1a, $secondary-dark, #{&});
+//}
+//.lightScrollbar {
+//  @include scrollbar(.5em, $vue-primary, $secondary-light, #{&});
+//}
 

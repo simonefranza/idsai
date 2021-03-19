@@ -1,0 +1,27 @@
+@import 'variables';
+
+:export {
+  textPrimaryDark: $text-primary-dark;
+  textSecondaryDark: $text-secondary-dark;
+  secondaryDark: $secondary-dark;
+
+  vuePrimary: $vue-primary;
+  textSecondaryLight: $text-secondary-light;
+  primaryLight: $primary-light;
+  secondaryLight: $secondary-light;
+
+  sliderBlue: $slider-blue;
+
+  bgBodyDark: $bg-body-dark;
+  bgFooterDark: $bg-footer-dark;
+
+  bgBodyLight: $bg-body-light;
+  bgFooterLight: $bg-footer-light;
+
+  bootstrapCardDark: $bootstrap-card-dark;
+  bootstrapCardLight: $bootstrap-card-light;
+
+  switchButtonDark: $switch-button-dark;
+  
+  nodeDark: $node-dark;
+}

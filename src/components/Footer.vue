@@ -28,10 +28,10 @@ export default {
 
 .light-theme {
   color: $vue-primary;
-  background-color: #d0d0d0;
+  background-color: $bg-footer-light;
 }
 .dark-theme {
-  background-color: #1a1a1a;
+  background-color: $bg-footer-dark;
   color: $text-primary-dark;
 }
 

@@ -1,7 +1,8 @@
 <template>
   <div :id="!darkTheme ? 'app' : 'darkApp'" @mousemove="mouseMoved">
-    <div id="pageContainer" :class="!darkTheme ? 'page-light' : 'page-dark'">
+    <div id="pageContainer" :class="[!darkTheme ? 'page-light' : 'page-dark']">
       <div :id="!darkTheme ? 'nav' : 'darkNav'" :class="[!darkTheme ? 'light-theme' : 'dark-theme', 'navBar']">
+
         <div class="menuDiv"></div>
         <div id="menu" class="menuDiv">
           <router-link :mouseX="mouseX" :mouseY="mouseY" :darkTheme="darkTheme" to="/">Home</router-link> |
@@ -28,7 +29,7 @@
 <script>
 import Footer from '@/components/Footer.vue'
 import ToggleSwitch from '@/components/ToggleSwitch.vue'
-import scssData from '@/assets/scss/variables.scss'
+import scssData from '@/assets/scss/jsVariables.scss'
 
 export default {
   data() {
@@ -81,6 +82,11 @@ export default {
           ss.cssRules.forEach(rule => {
             if(rule.selectorText && rule.selectorText.localeCompare('body') === 0)
               rule.style.setProperty('background', scssData.bgBodyDark, 'important');
+            else if(rule.selectorText && rule.selectorText.includes('::-webkit-scrollbar-track:hover'))
+              rule.style.setProperty('background', scssData.nodeDark);
+            else if(rule.selectorText && rule.selectorText.includes('::-webkit-scrollbar-thumb'))
+              rule.style.setProperty('background', scssData.secondaryDark);
+
           });
         });
       }
@@ -90,6 +96,10 @@ export default {
           ss.cssRules.forEach(rule => {
             if(rule.selectorText && rule.selectorText.localeCompare('body') === 0)
               rule.style.setProperty('background', scssData.bgBodyLight, 'important');
+            else if(rule.selectorText && rule.selectorText.includes('::-webkit-scrollbar-track:hover'))
+              rule.style.setProperty('background', '#bababa');
+            else if(rule.selectorText && rule.selectorText.includes('::-webkit-scrollbar-thumb'))
+              rule.style.setProperty('background', scssData.vuePrimary);
           });
         });
       }
@@ -102,7 +112,9 @@ export default {
     }
   },
   created() {
+    document.body.classList.add('bodyScrollbar');
     this.setStyle();
+
   }
 }
 </script>
@@ -135,6 +147,7 @@ transform: translateY(100%);
 {
   background-color: $text-primary-dark;
   color: $vue-primary;
+  overflow-y: auto;
 
 }
 

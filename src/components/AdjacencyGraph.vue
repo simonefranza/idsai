@@ -6,7 +6,7 @@
 
 <script>
 import D3Network from 'vue-d3-network'
-import scssData from '@/assets/scss/variables.scss'
+import scssData from '@/assets/scss/jsVariables.scss'
 
 export default {
   props: {
@@ -71,8 +71,9 @@ export default {
         }
       }
 
-      nodes.forEach(el => el._color = this.darkTheme ? '#6a6868' : '#2c3e4f');
-      links.forEach(el => el._color = this.darkTheme ? scssData.textSecondaryDark : '#d0d0d0');
+      nodes.forEach(el => el._color = this.darkTheme ? scssData.nodeDark : scssData.vuePrimary);
+      links.forEach(el => el._color = this.darkTheme ? 
+        scssData.textSecondaryDark : scssData.bgFooterLight);
       this.setStyle();
 
       return {nodes: nodes, links: links};
@@ -131,7 +132,7 @@ export default {
       {
         let mEndEl = document.getElementById("m-end");
         if(mEndEl && mEndEl.childNodes && mEndEl.childNodes.length)
-          mEndEl.childNodes[0].style.fill = "#d0d0d0"; 
+          mEndEl.childNodes[0].style.fill = scssData.bgFooterLight; 
         document.styleSheets.forEach(ss => {
           ss.cssRules.forEach(rule => {
             if(rule.selectorText && rule.selectorText.localeCompare('.node:hover') === 0)

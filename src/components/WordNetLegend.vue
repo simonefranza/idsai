@@ -9,7 +9,7 @@
     <b-card title="WordNet Legend" 
             :bg-variant="darkTheme ? 'dark' : 'light'" 
             :text-variant="darkTheme ? 'white' : ''"
-            :class="['legendCard', showLegend ? (darkTheme ? 'legendCardShadowDark' : 'legendCardShadowLight') : 'noShadow']"
+            :class="['legendCard', darkTheme ? 'legendCardBorderDark' : 'legendCardBorderLight']"
             @click="closeLegendMessage(false)"
             >
             <b-card-body>
@@ -102,15 +102,12 @@ export default {
   transition: opacity 2s;
   border-top-right-radius: 0;
 }
-.legendCard.noShadow {
-  box-shadow: 0 0 0 0 ;
-}
 
-.legendCardShadowDark{
-  box-shadow: 0 0 1px 1px rgba($text-primary-dark, .2);
+.legendCardBorderDark{
+  border : 1px solid rgba($text-primary-dark, 0.125);
 }
-.legendCardShadowLight{
-  box-shadow: 0 0 1px 1px rgba($vue-primary, .2);
+.legendCardBorderLight{
+  border : 1px solid rgba(#000, 0.125);
 }
 
 .legend, .legendSubtitle{
@@ -131,7 +128,7 @@ $tip-size: 2em;
   height: $tip-size;
   width: $tip-size;
   z-index: 5000;
-  right: -99.9%;
+  right: -99.85%;
   top: $tip-size;
 }
 
@@ -140,11 +137,15 @@ $tip-size: 2em;
 }
 .darkTip {
   background: $bootstrap-card-dark;
-  box-shadow: 1px 0 1px 1px rgba($text-primary-dark, .2);
+  border-right: 1px solid rgba($text-primary-dark, 0.125);
+  border-top: 1px solid rgba($text-primary-dark, 0.125);
+  border-bottom: 1px solid rgba($text-primary-dark, 0.125);
 }
 .lightTip {
   background: $bootstrap-card-light;
-  box-shadow: 1px 0 1px 1px rgba($vue-primary, .2);
+  border-right: 1px solid rgba(#000, 0.125);
+  border-top: 1px solid rgba(#000, 0.125);
+  border-bottom: 1px solid rgba(#000, 0.125);
 }
 
 .pointLeft {

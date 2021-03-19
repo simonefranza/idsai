@@ -5,7 +5,7 @@
     <b-card title="Help" 
             :bg-variant="darkTheme ? 'dark' : 'light'" 
             :text-variant="darkTheme ? 'white' : ''"
-            :class="['helpCard', darkTheme ? 'helpCardShadowDark' : 'helpCardShadowLight']"
+            :class="['helpCard', darkTheme ? 'helpCardBorderDark' : 'helpCardBorderLight']"
             @click="closeHelpMessage(false)"
             >
             <b-card-body class="cardBody">
@@ -113,11 +113,12 @@ export default {
   z-index: 2500;
   overflow-y: scroll;
 }
-.helpCardShadowDark{
-  box-shadow: 0 0 7px 1px rgba($text-primary-dark, .2),;
+
+.helpCardBorderDark{
+  border : 1px solid rgba($text-primary-dark, 0.125);
 }
-.helpCardShadowLight{
-  box-shadow: 0 0 7px 1px rgba($vue-primary, .2);
+.helpCardBorderLight{
+  border : 1px solid rgba(#000, 0.125);
 }
 /* blur help message */
 $blur-speed : .3s;
@@ -149,5 +150,4 @@ $blur-size: .2em;
 .cardBody {
  text-align: left;
 }
-
 </style>
