@@ -140,7 +140,6 @@ export default {
 .slide-left-enter-active, .slide-left-leave-active  {
   transition-duration: .5s;
   transition-property: height, opacity, transform;
-  overflow: hidden;
 }
 
 .slide-left-enter-active, .slide-right-enter-active {
@@ -153,7 +152,6 @@ export default {
 
 .slide-left-enter, .slide-right-enter {
   opacity: 0;
-  overflow-x: hidden;
 }
 
 .slide-left-enter {
@@ -166,7 +164,6 @@ export default {
 
 .slide-left-leave-to, .slide-right-leave-to{
   opacity: 0;
-  overflow-x: hidden;
 }
 
 .slide-left-leave-to{
@@ -186,6 +183,7 @@ export default {
   position: relative;
   min-height: 100vh;
   overflow-y: auto;
+  overflow-x: hidden;
 }
 
 #lightApp

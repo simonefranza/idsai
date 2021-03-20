@@ -50,8 +50,8 @@ export default {
       firstNodeSize: 10,
       firstNodeColor: 'rgba(255,0,0,0)',
       breatheInterval: null,
-      relativeMouseX: -100,
-      relativeMouseY: -100,
+      relativeMouseX: -1000,
+      relativeMouseY: -1000,
       mouseX : 0,
       mouseY : 0,
     }

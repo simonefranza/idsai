@@ -47,6 +47,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: space-around;
+  overflow: hidden;
 }
 .introText {
   max-width: 33vw;
