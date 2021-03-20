@@ -1,0 +1,30 @@
+//scss/transitions
+
+/* FADE BEGIN*/
+
+.fade-enter-active, .fade-leave-active {
+  transition: opacity .3s ease-out;
+  opacity: 1;
+}
+.fade-enter, .fade-leave-to{
+  opacity: 0;
+}
+
+/* FADE END */
+
+/* RESIZE BEGIN */
+.resize-enter-active, .resize-leave-active {
+  overflow: hidden;
+  max-height: 10em; 
+}
+$resize-speed: .8s;
+.resize-enter-active {
+  transition: max-height $resize-speed ease-out;
+}
+.resize-leave-active {
+  transition: max-height $resize-speed/2 ease-out;
+}
+.resize-enter, .resize-leave-to{
+  max-height: 0;
+}
+/* RESIZE END*/

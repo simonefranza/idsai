@@ -12,7 +12,8 @@
       <div class="col-5">
       <b-card title="Control Panel" v-bind:bg-variant="!darkTheme ? 'light' : 'dark'" v-bind:text-variant="!darkTheme ? '' : 'white'">
         <b-card-body>
-          <b-card-text>
+          <b-card-text style="overflow: hidden">
+            <transition name="fade" mode="out-in">
             <div class="helpIcon" v-if="showWordNet">
               <b-button size="sm" 
                         id="legendButton"
@@ -23,16 +24,19 @@
                         <span v-if="!showWordNetLegend">Show legend</span>
                         <span v-else>Hide legend</span>
               </b-button>
-                <b-icon id="helpIcon" icon="question-circle" 
-                                      :class="['iconEnabled', 'cyclesIconRight', darkTheme ? 'iconDark' : 'iconLight']"
-                                      @click="showHelp()" ></b-icon>
+                <b-icon id="helpIcon" 
+                        icon="question-circle" 
+                        :class="['iconEnabled', 'cyclesIconRight', darkTheme ? 'iconDark' : 'iconLight']"
+                        @click="showHelp()" ></b-icon>
             </div>
+            </transition>
           <div class="cyclesDiv">
             <span :class="{'disabledText' : showWordNet}">Adjacency Matrix</span>
             <ToggleSwitch :darkTheme="darkTheme" v-model="showWordNet" />
             <span :class="{'disabledText' : !showWordNet}">WordNet</span>
           </div>
-          <span v-if="showWordNet">
+          <transition name="resize" mode="out-in">
+          <div v-if="showWordNet" key=1>
             <b-spinner type="grow" label="Loading..." v-if="!loaded" :variant="darkTheme ? 'light' : 'dark'"></b-spinner>
             <div v-else>
               <div class="cyclesDiv">
@@ -54,8 +58,8 @@
                 <b-form-input :class="{'darkInputForm' : darkTheme, 'inputForm' : 'true'}" v-model="searched" placeholder="Input something"></b-form-input>
               </div>
             </div>
-          </span>
-          <span v-else>
+          </div>
+          <div v-else key=2>
             <div class="cyclesDiv">
               <span class="toggleBlock">Matrix size (min: 2, max: 10)</span>
               <b-form-input size="sm" v-model="adjMatSize"
@@ -63,11 +67,13 @@
               <b-icon :class="['cyclesIconRight', 'iconEnabled', darkTheme ? 'iconDark' : 'iconLight']"
                                       icon="arrow-clockwise" aria-hidden="true" @click="reloadMatrix" :animation="reloadingMatrix ? 'spin' : ''"></b-icon>
             </div>
-          </span>
+          </div>
+          </transition>
           </b-card-text>
         </b-card-body>
       </b-card>
       <br/>
+      <transition name="fade">
       <WordNetResult :ptrSymbols="ptrSymbols" 
                      :darkTheme="darkTheme" 
                      :searched="searched"
@@ -81,13 +87,14 @@
                      :loaded="dataWasLoaded"
                      v-model="hoveredWord"
                      @graphChosen="showNewGraph"
-                     v-if="showWordNet" />
+                     v-if="showWordNet && searched.trim()" />
       <AdjacencyMat :darkTheme="darkTheme" 
                     :matrixSize="parsedAdjMatSize"
                     @hoverElement="highlightNode"
                     @newNodeNames="updateNodeNames"
                      v-model="adjMatrix" 
-                     v-else />
+                     v-else-if="!showWordNet" />
+      </transition>
       </div>
       <div class="col-7">
         <GraphComp :dark-theme="darkTheme" 
@@ -135,6 +142,7 @@ export default {
   },
   data() {
     return {
+      slideAnim : 'slide-left',
       //Adj Matrix
       adjMatrix : [],
       adjMatSize: 5,
@@ -773,6 +781,15 @@ export default {
     },
     exploreDepth: async function() {
       await this.regenData();
+    },
+    showWordNet() {
+      if(this.showWordNet)
+      {
+        this.slideAnim = 'slide-left';
+        this.adjMatrix = [];
+      }
+      else
+        this.slideAnim = 'slide-right';
     }
   },
   async created() {
@@ -976,5 +993,27 @@ $slide-speed : 1s;
 }
 
 /* slide legend message END*/
+
+/* slide from adj to wordnet */
+
+$slide-speed: .8s;
+
+.slide-left-enter-active, .slide-left-leave-active,
+.slide-right-enter-active, .slide-right-leave-active {
+}
+.slide-left-enter-active, .slide-right-enter-active {
+  transition: all $slide-speed ease;
+}
+.slide-left-leave-active, .slide-right-leave-active  {
+  transition: all $slide-speed/2 ease;
+}
+
+.slide-left-enter, .slide-right-leave-to {
+  transform: translateX(100%);
+}
+.slide-left-leave-to, .slide-right-enter {
+  transform: translateX(-100%);
+}
+/* slide from adj to wordnet END*/
 
 </style>
