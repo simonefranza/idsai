@@ -1,7 +1,11 @@
 <template>
   <div>
+  <transition name="blur" mode="out-in">
+    <div :class="['helpContainer', 'blurScreen']" 
+         @click="closeExternalCard(true)"  v-show="showWordNetHelp"/>
+      </transition>
     <transition name="sliding" mode="out-in">
-    <WordNetLegend :darkTheme="darkTheme" @closeLegend="closeExternalCard" v-model="showWordNetLegend" v-if="showWordNet"/>
+    <WordNetLegend :darkTheme="darkTheme" @closeLegend="closeExternalCard" v-model="showWordNetLegend" v-show="showWordNet"/>
     </transition>
     <WordNetHelp :darkTheme="darkTheme" @closeHelp="closeExternalCard" v-if="showWordNetHelp" />
     <div class="wordNetComp row">
@@ -467,13 +471,11 @@ export default {
         return;
       }
       let animDuration = 200;
-      this.$nextTick(async function() {
-        let a = document.getElementById('helpIcon');
-        let b = document.getElementById('helpBlock');
-        ramjet.hide(b);
-        ramjet.transform(b,a, {duration: animDuration});
-      });
-      this.showWordNetHelp = false;
+      let a = document.getElementById('helpIcon');
+      let b = document.getElementById('helpBlock');
+      ramjet.hide(b);
+      ramjet.transform(b,a, {duration: animDuration});
+      setTimeout(() => this.showWordNetHelp = false, animDuration);
     },
     updateNodeNames(e) {
       this.adjNodeNames = e;
@@ -901,6 +903,37 @@ export default {
 </script>
 
 <style scoped lang="scss">
+.helpContainer {
+  position: fixed;
+  z-index: 2000;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+/* blur help message */
+$blur-speed : .2s;
+$blur-size: .2em;
+
+.blurScreen {
+  backdrop-filter: blur($blur-size);
+}
+
+.blur-enter-active, .blur-leave-active{
+  transition: all $blur-speed cubic-bezier(.98,.02,.65,1.19);
+}
+.blur-enter-to, .blur-leave{
+  backdrop-filter: blur($blur-size);
+}
+.blur-enter, .blur-leave-to{
+  opacity: 0;
+  transform: translate(0, -100%);
+}
+/* blur help message END*/
+
 footer {
   padding: 10px;
 }

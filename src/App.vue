@@ -1,9 +1,9 @@
 <template>
-  <div :id="!darkTheme ? 'app' : 'darkApp'" @mousemove="mouseMoved">
+  <div :id="!darkTheme ? 'app' : 'darkApp'" @mousemove="mouseMoved" class="bodyScrollbar" >
     <div id="pageContainer" :class="[!darkTheme ? 'page-light' : 'page-dark']">
       <div :id="!darkTheme ? 'nav' : 'darkNav'" :class="[!darkTheme ? 'light-theme' : 'dark-theme', 'navBar']">
 
-        <div class="menuDiv"></div>
+        <div class="menuDiv" :key="reload"></div>
         <div id="menu" class="menuDiv">
           <router-link :mouseX="mouseX" :mouseY="mouseY" :darkTheme="darkTheme" to="/">Home</router-link> |
           <router-link :dark-theme="darkTheme" to="/rules">Rules</router-link> | 
@@ -12,7 +12,7 @@
           <router-link :dark-theme="darkTheme" to="/rec-sys">Recommender System</router-link> | 
           <router-link :dark-theme="darkTheme" to="/about">About</router-link>
         </div>
-        <div class="dark-light-switch menuDiv">
+        <div class="dark-light-switch menuDiv" >
           <b-icon icon="sun" aria-hidden="true" class="nav-icon">  </b-icon>
           <ToggleSwitch :darkTheme="darkTheme" v-model="darkTheme" />
           <b-icon icon="moon" aria-hidden="true" class="nav-icon"></b-icon>
@@ -35,8 +35,10 @@ export default {
   data() {
     return {
       tempDarkTheme: null,
+      lastTheme: 0,
       mouseX: -100,
       mouseY: -100,
+      reload: 0,
     }
   },
   computed: {
@@ -111,11 +113,12 @@ export default {
       this.setStyle();
     }
   },
-  created() {
-    document.body.classList.add('bodyScrollbar');
-    this.setStyle();
-
-  }
+  mounted() {
+    setTimeout(() => {
+      this.reload = Math.random();
+      this.setStyle();
+    }, 200);
+  },
 }
 </script>
 

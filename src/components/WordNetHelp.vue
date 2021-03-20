@@ -1,8 +1,7 @@
 <template>
-<!--    <transition name="blur" mode="out-in">-->
-  <div id="helpBlock" :class="['helpContainer', 'blurScreen']"
-       @click="closeHelpMessage(true)">
+<div>
     <b-card title="Help" 
+            id="helpBlock" 
             :bg-variant="darkTheme ? 'dark' : 'light'" 
             :text-variant="darkTheme ? 'white' : ''"
             :class="['helpCard', darkTheme ? 'helpCardBorderDark' : 'helpCardBorderLight']"
@@ -95,23 +94,15 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.helpContainer {
-  position: fixed;
-  z-index: 2000;
-  top: 0;
-  left: 0;
-  height: 100vh;
-  width: 100vw;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
 .helpCard {
-  position:relative;
+  position: fixed;
   max-width: 45rem;
-  max-height: 75%;
+  height: 75vh;
   z-index: 2500;
   overflow-y: scroll;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .helpCardBorderDark{
@@ -120,25 +111,6 @@ export default {
 .helpCardBorderLight{
   border : 1px solid rgba(#000, 0.125);
 }
-/* blur help message */
-$blur-speed : .3s;
-$blur-size: .2em;
-
-.blurScreen {
-  backdrop-filter: blur($blur-size);
-}
-
-.blur-enter-active, .blur-leave-active{
-  transition: all $blur-speed ease-in-out;
-}
-.blur-enter-to, .blur-leave{
-  backdrop-filter: blur($blur-size);
-}
-.blur-enter, .blur-leave-to{
-  opacity: 0;
-  transform: translate(0, -100%);
-}
-/* blur help message END*/
 
 .legend, .helpSubtitle{
   text-align: left;

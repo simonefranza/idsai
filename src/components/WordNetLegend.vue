@@ -1,10 +1,10 @@
 <template>
-  <div id="legendBlock" :class="['legendContainer', 'blurScreen', !showLegend ? 'hiddenCard' : '']" >
+  <div id="legendBlock" :class="['legendContainer', !showLegend ? 'hiddenCard' : '']" >
     <div>
       <div class="legendTip" 
            @click="showLegend = !showLegend"
            :class="[darkTheme ? 'darkTip' : 'lightTip']">
-        <b-icon icon="arrow-right-circle" :class="{'pointLeft' : showLegend, [darkTheme ? 'iconDark' : 'iconLight'] : true}"/>
+        <b-icon icon="arrow-right-circle" :class="[showLegend ? 'pointLeft' : '', darkTheme ? 'iconDark' : 'iconLight', 'iconEnabled']"/>
       </div>
     <b-card title="WordNet Legend" 
             :bg-variant="darkTheme ? 'dark' : 'light'" 
