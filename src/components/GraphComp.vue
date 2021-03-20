@@ -63,7 +63,7 @@ export default {
       return sel;
     },
     nodesAndLinks: function() {
-      if(!this.data || !this.data.ptrs)
+      if(!this.data || !this.data.ptrs || !Object.keys(this.data).length)
         return {nodes: [], links: []};
       let nodes = [];
       let links = [];

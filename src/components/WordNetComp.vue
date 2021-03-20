@@ -152,6 +152,7 @@ export default {
       adjNodeNames: {},
 
       //Word Net
+      hideData : false,
       showWordNetHelp: false,
       showWordNetLegend: false,
       showHelpAnimDuration: 3,
@@ -382,7 +383,7 @@ export default {
     },
     chosenData: function() {
       if(!this.dataWasLoaded || this.chosenIndex === -1 ||
-        this.chosenGroup === -1)
+        this.chosenGroup === -1 || this.hideData)
         return {};
       let data = [];
       switch(this.chosenGroup) {
@@ -787,9 +788,13 @@ export default {
       {
         this.slideAnim = 'slide-left';
         this.adjMatrix = [];
+        this.$nextTick(() => this.hideData = false);
       }
       else
+      {
         this.slideAnim = 'slide-right';
+        this.hideData = true;
+      }
     }
   },
   async created() {
@@ -998,9 +1003,6 @@ $slide-speed : 1s;
 
 $slide-speed: .8s;
 
-.slide-left-enter-active, .slide-left-leave-active,
-.slide-right-enter-active, .slide-right-leave-active {
-}
 .slide-left-enter-active, .slide-right-enter-active {
   transition: all $slide-speed ease;
 }
