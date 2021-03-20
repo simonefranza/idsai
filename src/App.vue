@@ -4,25 +4,25 @@
       <div :id="!darkTheme ? 'lightNav' : 'darkNav'" :class="[!darkTheme ? 'light-theme' : 'dark-theme', 'navBar']">
 
         <div class="menuDiv" :key="reload"></div>
+
         <div id="menu" class="menuDiv">
-          <div class="menuEl"><router-link to="/">Home</router-link></div> |
-          <div class="menuEl"><router-link to="/rules">Rules</router-link></div> | 
-          <div class="menuEl"><router-link to="/graphs">Graphs</router-link></div> |
-          <div class="menuEl"><router-link to="/info-ret">Information Retrieval</router-link></div> | 
-          <div class="menuEl"><router-link to="/rec-sys">Recommender System</router-link></div> | 
-          <div class="menuEl"><router-link to="/about">About</router-link></div>
+          <span v-for="(el, index) in titles" :key="el.name">
+            <span v-if="index !== 0"> | </span><div class="menuEl"><router-link :to="'/' +el.path">{{el.name}}</router-link></div>
+          </span>
         </div>
+
         <div class="dark-light-switch menuDiv" >
           <b-icon icon="sun" aria-hidden="true" class="nav-icon">  </b-icon>
           <ToggleSwitch :darkTheme="darkTheme" v-model="darkTheme" />
           <b-icon icon="moon" aria-hidden="true" class="nav-icon"></b-icon>
         </div>
+
       </div>
-      <transition name="slide-fade" mode="out-in">
+      <transition :name="myTransition" mode="out-in">
       <router-view class="router-view" :dark-theme="darkTheme" :class="!darkTheme ? 'rv-light' : 'rv-dark'" />
       </transition>
-      <Footer :dark-theme="darkTheme" />
     </div>
+    <Footer :dark-theme="darkTheme" />
   </div>
 </template>
 
@@ -37,9 +37,21 @@ export default {
       tempDarkTheme: null,
       lastTheme: 0,
       reload: 0,
+      slideLeft : 'slide-left',
+      slideRight : 'slide-right',
+      myTransition: 'slide-right',
+      componentsName: ['Home', 'Rules', 'Graphs', 'Information Retrieval', 'Recommender System', 'About'],
+      componentsPaths: ['', 'rules', 'graphs', 'info-ret', 'rec-sys', 'about'],
     }
   },
   computed: {
+    titles() {
+      let titles = [];
+      this.componentsName.forEach((name, index) => {
+        titles.push({name: name, path: this.componentsPaths[index]});
+      });
+      return titles;
+    },
     darkTheme:  {
       get: function() {
         if(this.tempDarkTheme != null)
@@ -112,25 +124,57 @@ export default {
       this.reload = Math.random();
       this.setStyle();
     }, 200);
+    this.$router.beforeEach((to, from, next) => {
+      this.myTransition = this.componentsPaths.indexOf(from.path.substring(1)) > 
+        this.componentsPaths.indexOf(to.path.substring(1)) ? this.slideRight :
+        this.slideLeft;
+      next()
+    });
   },
 }
 </script>
 
 <style lang="scss">
 /* router change animation */
-.slide-fade-enter-active, .slide-fade-leave-active  {
-  transition-duration: 0.3s;
+.slide-right-enter-active, .slide-right-leave-active,
+.slide-left-enter-active, .slide-left-leave-active  {
+  transition-duration: .5s;
   transition-property: height, opacity, transform;
   overflow: hidden;
 }
 
-.slide-fade-enter {
-  transform: translateY(100%);
+.slide-left-enter-active, .slide-right-enter-active {
+  transition-timing-function: $bounce-bezier;
 }
 
-.slide-fade-leave-to{
+.slide-left-leave-active, .slide-right-leave-active  {
+  transition-timing-function: $slow-in-bezier;
+}
+
+.slide-left-enter, .slide-right-enter {
   opacity: 0;
-  transform: translateY(100%);
+  overflow-x: hidden;
+}
+
+.slide-left-enter {
+  transform: translateX(100%);
+}
+
+.slide-right-enter {
+  transform: translateX(-100%);
+}
+
+.slide-left-leave-to, .slide-right-leave-to{
+  opacity: 0;
+  overflow-x: hidden;
+}
+
+.slide-left-leave-to{
+  transform: translateX(-100%);
+}
+
+.slide-right-leave-to{
+  transform: translateX(100%);
 }
 /* end */
 
@@ -198,7 +242,11 @@ export default {
 }
 
 #pageContainer{
+  display: flex;
+  flex-direction: column;
+  width: 100%;
   padding-bottom: 2.5rem;
+  min-height:100vh;
 }
 
 .light-theme {

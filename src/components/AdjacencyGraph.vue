@@ -118,7 +118,10 @@ export default {
         document.styleSheets.forEach(ss => {
           ss.cssRules.forEach(rule => {
             if(rule.selectorText && rule.selectorText.localeCompare('.node:hover') === 0)
+            {
               rule.style.stroke = scssData.secondaryDark;
+              rule.style['stroke-width'] = '3px';
+            }
             else if(rule.selectorText && rule.selectorText.localeCompare('.node.selected') === 0)
               rule.style.stroke = scssData.secondaryDark;
             else if(rule.selectorText && rule.selectorText.localeCompare('.link.selected') === 0)
@@ -136,7 +139,10 @@ export default {
         document.styleSheets.forEach(ss => {
           ss.cssRules.forEach(rule => {
             if(rule.selectorText && rule.selectorText.localeCompare('.node:hover') === 0)
+            {
               rule.style.stroke = scssData.secondaryLight;
+              rule.style['stroke-width'] = '3px';
+            }
             else if(rule.selectorText && rule.selectorText.localeCompare('.node.selected') === 0)
               rule.style.stroke = scssData.secondaryLight;
             else if(rule.selectorText && rule.selectorText.localeCompare('.link.selected') === 0)

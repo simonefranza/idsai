@@ -1,7 +1,7 @@
 <template>
-  <div>
+  <div style="display: flex; justify-content:center">
     <div class="mouseCatcher" @mousemove="mouseMoved"/>
-    <div id="homeGraph">
+    <div id="homeGraphEl">
       <div v-if="testing">
         {{force}}
         <input type="range" min="1" max="500" v-model="force" class="slider" id="myRange"><br/>
@@ -29,8 +29,8 @@ export default {
   data() {
     return { 
       numNodes: 400,
-      force: 200,
-      nodeSizeBase: 35,
+      force: ((document.documentElement.clientWidth/100) ** 2) * .5428,
+      nodeSizeBase: 1.8,
       nodeSizeVar: 70,
       hueBase: 203,
       hueVar: 15,
@@ -47,7 +47,8 @@ export default {
       savedNodes : [],
       rectX: 0,
       rectY: 0,
-      firstNodeColor: 'rgba(0,0,0,0)',
+      firstNodeSize: 10,
+      firstNodeColor: 'rgba(255,0,0,0)',
       breatheInterval: null,
       relativeMouseX: -100,
       relativeMouseY: -100,
@@ -65,7 +66,7 @@ export default {
     options() {
       let options = {
         force: this.force,
-        nodeSize: 20,
+//        nodeSize: 20,
         nodeLabels: false,
         linkLabels: false,
         linkWidth:5,
@@ -88,26 +89,34 @@ export default {
     }
   },
   methods: {
+    relToPixels(rel) {    
+      console.log(document.documentElement.clientWidth);
+      return (rel * document.documentElement.clientWidth)/100;
+    },
     mouseMoved(event) {
-      let mouseX = event.x;
-      let mouseY = event.y;
+      let rect = document.getElementById('homeGraphEl')?.getBoundingClientRect() || {x: -100, y: -100};
+      this.rectX = rect.x;
+      this.rectY = rect.y;
+      this.mouseX = event.x;
+      this.mouseY = event.y;
       if(this.savedNodes.length)
       {
-        this.savedNodes[0].fx = mouseX - this.rectX;
-        this.savedNodes[0].fy = mouseY - this.rectY;
+        this.savedNodes[0].fx = this.mouseX - this.rectX;
+        this.savedNodes[0].fy = this.mouseY - this.rectY;
       }
     },
     makeNodes() {
       let nodes =[];
+      let nodeBase = this.relToPixels(this.nodeSizeBase);
       for(let i = 0; i < this.numNodes; i++) 
       {
         if(i === 0)
         {
-          nodes.push({id: i, _color: this.firstNodeColor, _size: 125, pinned:true,
+          nodes.push({id: i, _color: this.firstNodeColor, _size: this.relToPixels(this.firstNodeSize), pinned:true,
             fx: this.relativeMouseX, fy: this.relativeMouseY, _cssClass: 'firstNode'});
           continue;
         }
-        let size = Math.floor(this.nodeSizeBase * (Math.random() * this.nodeSizeVar * 2 / 100 + 1 - this.nodeSizeVar / 100));
+        let size = Math.floor(nodeBase * (Math.random() * this.nodeSizeVar * 2 / 100 + 1 - this.nodeSizeVar / 100));
         let hue = Math.floor(this.hueBase* (Math.random() * this.hueVar* 2 / 100 + 1 - this.hueVar / 100));
         let saturation = Math.floor(this.saturationBase* (Math.random() * this.saturationVar* 2 / 100 + 1 - this.saturationVar / 100));
         let lightness = Math.floor(this.lightnessBase* (Math.random() * this.lightnessVar* 2 / 100 + 1 - this.lightnessVar / 100));
@@ -127,17 +136,14 @@ export default {
     },
   },
   mounted() {
-    let rect = document.getElementById('homeGraph')?.getBoundingClientRect() || {x: -100, y: -100};
-    this.rectX = rect.x;
-    this.rectY = rect.y;
   },
   created() {
     this.setStyle();
     this.makeNodes();
 
-    let increase = .3;
     let forceMax = this.force * 1.1;
     let forceMin = this.force;
+    let increase = (forceMax - forceMin) * 0.015;
     this.breatheInterval = window.setInterval( () => {
       if(this.upTrend && this.force < forceMax)
         this.force += increase;
@@ -168,6 +174,14 @@ export default {
   height: 100vh;
   top: 0;
   left: 0;
+  z-index: 700;
+}
+
+#homeGraphEl {
+  position: relative;
+  z-index: 500;
+  width: 100%;
+  height: 100%;
 }
 
 .link {

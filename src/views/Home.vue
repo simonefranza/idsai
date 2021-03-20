@@ -15,7 +15,7 @@
       </span>
       <!--  <input type="checkbox" v-model="graph" />-->
     </div>
-    <HomeGraph class="homeGraph" :darkTheme="darkTheme" v-if="graph"/>
+    <HomeGraph :darkTheme="darkTheme" v-if="graph"/>
     <!--    <HomeNetwork class="homeGraph" :mouseX="mouseX" :mouseY="mouseY" :darkTheme="darkTheme" v-else />-->
   </div>
 </template>
@@ -42,24 +42,22 @@ export default {
 </script>
 
 <style lang="scss">
+.home {
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
 .introText {
-  width: 33%;
+  max-width: 33vw;
   height: 60%;
-  position: absolute;
-  top: 67%;
-  left: 10%;
-  transform: translate(0, -50%);
+  position: relative;
+  top: 20%;
+  right: 4%;
   display: flex;
   justify-content: center;
   align-items: center;
   text-align: left;
   z-index: 1000;
-}
-
-.homeGraph {
-  position: fixed;
-  right: 13em;
-  z-index: 10;
-  top: 15em;
 }
 </style>

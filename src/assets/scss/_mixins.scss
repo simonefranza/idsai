@@ -6,6 +6,7 @@
 
   @at-root #{$parent}::-webkit-scrollbar {
     width: $width;
+    height: $width;
   }
 
   @at-root #{$parent}::-webkit-scrollbar-track:hover {
