@@ -1,5 +1,5 @@
 @import 'variables';
-@import 'scrollbar';
+@import 'mixins';
 
 //Taken from https://stackoverflow.com/questions/59855732/vuelidate-shaking-the-incorrect-input-field
 .shake {
@@ -209,16 +209,6 @@ opacity: 0.5;
 }
 
 .bodyScrollbar {
-  @include scrollbar(.38em, $node-dark, $secondary-dark);
+  @include mx-scrollbar(.38em, $node-dark, $secondary-dark);
 }
-//.bodyLightScrollbar {
-//  @include scrollbar(.5em, $vue-primary, $secondary-light, &);
-//}
-//
-//.darkScrollbar {
-//  @include scrollbar(.5em, #1a1a1a, $secondary-dark, #{&});
-//}
-//.lightScrollbar {
-//  @include scrollbar(.5em, $vue-primary, $secondary-light, #{&});
-//}
 

@@ -923,7 +923,7 @@ $blur-size: .2em;
 }
 
 .blur-enter-active, .blur-leave-active{
-  transition: all $blur-speed cubic-bezier(.98,.02,.65,1.19);
+  transition: all $blur-speed $slow-in-bezier;
 }
 .blur-enter-to, .blur-leave{
   backdrop-filter: blur($blur-size);

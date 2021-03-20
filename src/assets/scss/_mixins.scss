@@ -1,0 +1,48 @@
+// scss/mixins
+@mixin mx-scrollbar($width, 
+                $bg-track, 
+                $bg-thumb, 
+                $parent : null) {
+
+  @at-root #{$parent}::-webkit-scrollbar {
+    width: $width;
+  }
+
+  @at-root #{$parent}::-webkit-scrollbar-track:hover {
+    background: $bg-track;
+    background-clip: content-box;
+    border: 2px solid transparent;
+    border-radius: 100%;
+  }
+
+  @at-root #{$parent}::-webkit-scrollbar-thumb {
+    background: $bg-thumb;
+    border-radius: $width;
+  }
+}
+
+@mixin mx-link($color, 
+                $height : .15em, 
+                $top : 85%, 
+                $appear-transition : $bounce-bezier,
+                $disappear-transition : $slow-in-bezier,
+                $transition-duration : .7s) 
+{
+  &::before {
+    content: '';
+    background: $color;
+    position: absolute;
+    height: $height;
+    width: 0;
+    top: $top;
+    left: 50%;
+    transform: translateX(-50%);
+    transition: width $transition-duration/2 $disappear-transition;
+    border-radius: $height;
+  }
+  &:hover::before{
+    width: 100%;
+    transition: width $transition-duration $appear-transition;
+
+  }
+}

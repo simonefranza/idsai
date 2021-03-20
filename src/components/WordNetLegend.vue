@@ -80,7 +80,7 @@ export default {
 
 <style scoped lang="scss">
 .legendContainer {
-  transition: .7s cubic-bezier(.98,.02,.65,1.19);
+  transition: .7s $slow-in-bezier;
   position: fixed;
   z-index: 2000;
   left: 0;

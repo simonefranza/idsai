@@ -1,16 +1,16 @@
 <template>
-  <div :id="!darkTheme ? 'app' : 'darkApp'" @mousemove="mouseMoved" class="bodyScrollbar" >
+  <div :id="!darkTheme ? 'lightApp' : 'darkApp'" @mousemove="mouseMoved" class="bodyScrollbar" >
     <div id="pageContainer" :class="[!darkTheme ? 'page-light' : 'page-dark']">
-      <div :id="!darkTheme ? 'nav' : 'darkNav'" :class="[!darkTheme ? 'light-theme' : 'dark-theme', 'navBar']">
+      <div :id="!darkTheme ? 'lightNav' : 'darkNav'" :class="[!darkTheme ? 'light-theme' : 'dark-theme', 'navBar']">
 
         <div class="menuDiv" :key="reload"></div>
         <div id="menu" class="menuDiv">
-          <router-link :mouseX="mouseX" :mouseY="mouseY" :darkTheme="darkTheme" to="/">Home</router-link> |
-          <router-link :dark-theme="darkTheme" to="/rules">Rules</router-link> | 
-          <router-link :dark-theme="darkTheme" to="/graphs">Graphs</router-link> |
-          <router-link :dark-theme="darkTheme" to="/info-ret">Information Retrieval</router-link> | 
-          <router-link :dark-theme="darkTheme" to="/rec-sys">Recommender System</router-link> | 
-          <router-link :dark-theme="darkTheme" to="/about">About</router-link>
+          <div class="menuEl"><router-link :mouseX="mouseX" :mouseY="mouseY" :darkTheme="darkTheme" to="/">Home</router-link></div> |
+          <div class="menuEl"><router-link :dark-theme="darkTheme" to="/rules">Rules</router-link></div> | 
+          <div class="menuEl"><router-link :dark-theme="darkTheme" to="/graphs">Graphs</router-link></div> |
+          <div class="menuEl"><router-link :dark-theme="darkTheme" to="/info-ret">Information Retrieval</router-link></div> | 
+          <div class="menuEl"><router-link :dark-theme="darkTheme" to="/rec-sys">Recommender System</router-link></div> | 
+          <div class="menuEl"><router-link :dark-theme="darkTheme" to="/about">About</router-link></div>
         </div>
         <div class="dark-light-switch menuDiv" >
           <b-icon icon="sun" aria-hidden="true" class="nav-icon">  </b-icon>
@@ -123,35 +123,37 @@ export default {
 </script>
 
 <style lang="scss">
+/* router change animation */
 .slide-fade-enter-active, .slide-fade-leave-active  {
- transition-duration: 0.3s;
+  transition-duration: 0.3s;
   transition-property: height, opacity, transform;
   overflow: hidden;
 }
-.slide-fade-enter
-/* .slide-fade-leave-active below version 2.1.8 */ {
-transform: translateY(100%);
+
+.slide-fade-enter {
+  transform: translateY(100%);
 }
+
 .slide-fade-leave-to{
   opacity: 0;
   transform: translateY(100%);
 }
+/* end */
 
-#app, #darkApp {
+#lightApp, #darkApp {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   position: relative;
   min-height: 100vh;
+  overflow-y: auto;
 }
 
-#app
+#lightApp
 {
   background-color: $text-primary-dark;
   color: $vue-primary;
-  overflow-y: auto;
-
 }
 
 #darkApp {
@@ -159,33 +161,46 @@ transform: translateY(100%);
   color: $text-primary-dark;
 }
 
-#nav, #darkNav {
-  padding: 30px;
-  display: flex;
-  align-items:center;
-}
-
 .menuDiv{
   flex: 1;
   display: flex;
   align-items: center;
 }
-#nav a {
-  font-weight: bold;
+
+.menuEl {
+  display: inline;
+  position: relative;
+  margin-inline: .5em;
+}
+
+#lightNav, #darkNav {
+  padding: 30px;
+  display: flex;
+  align-items:center;
+  a {
+    font-weight: bold;
+    text-decoration: none;
+  }
+}
+
+#lightNav a {
   color: $vue-primary;
+  @include mx-link($color : $vue-primary);
+
+  &.router-link-exact-active {
+    color: $secondary-light;
+    @include mx-link($color : $secondary-light);
+  }
 }
 
 #darkNav a {
-  font-weight: bold;
   color: $text-primary-dark;
-}
+  @include mx-link($color : $text-primary-dark);
 
-#nav a.router-link-exact-active {
-  color: $secondary-light;
-}
-
-#darkNav a.router-link-exact-active {
-  color: $secondary-dark;
+  &.router-link-exact-active {
+    color: $secondary-dark;
+    @include mx-link($color : $secondary-dark);
+  }
 }
 
 #pageContainer{
