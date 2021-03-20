@@ -1,22 +1,25 @@
 <template>
-  <div id="homeGraph">
-    <div v-if="testing">
-    {{force}}
-    <input type="range" min="1" max="500" v-model="force" class="slider" id="myRange"><br/>
-    hue Base {{hueBase}}
-    <input type="range" min="0" max="360" v-model="hueBase" class="slider" id="myRange"><br/>
-    {{hueVar}}
-    <input type="range" min="0" max="100" v-model="hueVar" class="slider" id="myRange"><br/>
-    Sat {{saturationBase}}
-    <input type="range" min="0" max="100" v-model="saturationBase" class="slider" id="myRange"><br/>
-    {{saturationVar}}
-    <input type="range" min="0" max="100" v-model="saturationVar" class="slider" id="myRange"><br/>
-    light {{lightnessBase}}
-    <input type="range" min="1" max="100" v-model="lightnessBase" class="slider" id="myRange"><br/>
-    {{lightnessVar}}
-    <input type="range" min="1" max="100" v-model="lightnessVar" class="slider" id="myRange"><br/>
+  <div>
+    <div class="mouseCatcher" @mousemove="mouseMoved"/>
+    <div id="homeGraph">
+      <div v-if="testing">
+        {{force}}
+        <input type="range" min="1" max="500" v-model="force" class="slider" id="myRange"><br/>
+        hue Base {{hueBase}}
+        <input type="range" min="0" max="360" v-model="hueBase" class="slider" id="myRange"><br/>
+        {{hueVar}}
+        <input type="range" min="0" max="100" v-model="hueVar" class="slider" id="myRange"><br/>
+        Sat {{saturationBase}}
+        <input type="range" min="0" max="100" v-model="saturationBase" class="slider" id="myRange"><br/>
+        {{saturationVar}}
+        <input type="range" min="0" max="100" v-model="saturationVar" class="slider" id="myRange"><br/>
+        light {{lightnessBase}}
+        <input type="range" min="1" max="100" v-model="lightnessBase" class="slider" id="myRange"><br/>
+        {{lightnessVar}}
+        <input type="range" min="1" max="100" v-model="lightnessVar" class="slider" id="myRange"><br/>
+      </div>
+      <d3-network :net-nodes="savedNodes" :net-links="links" :options="options" :custom-forces="customForces"/>
     </div>
-    <d3-network :net-nodes="savedNodes" :net-links="[]" :options="options" :custom-forces="customForces"/>
   </div>
 </template>
 
@@ -46,15 +49,14 @@ export default {
       rectY: 0,
       firstNodeColor: 'rgba(0,0,0,0)',
       breatheInterval: null,
-      mousePositionInterval: null,
       relativeMouseX: -100,
       relativeMouseY: -100,
+      mouseX : 0,
+      mouseY : 0,
     }
   },
   props: {
     darkTheme: {required: true},
-    mouseX : {required:true},
-    mouseY : {required:true},
   },
   components: {
     D3Network,
@@ -76,6 +78,9 @@ export default {
     nodes() {
       return this.makeNodes();
     },
+    links() {
+      return [];
+    },
     customForces() {
       return {
         Collide: [(d) => {return !d._color.localeCompare(this.firstNodeColor) ? d._size / 2 + 1 : d._size / 2}],
@@ -83,6 +88,15 @@ export default {
     }
   },
   methods: {
+    mouseMoved(event) {
+      let mouseX = event.x;
+      let mouseY = event.y;
+      if(this.savedNodes.length)
+      {
+        this.savedNodes[0].fx = mouseX - this.rectX;
+        this.savedNodes[0].fy = mouseY - this.rectY;
+      }
+    },
     makeNodes() {
       let nodes =[];
       for(let i = 0; i < this.numNodes; i++) 
@@ -111,16 +125,11 @@ export default {
         });
       });
     },
-    updateMousePosition() {
-      let rect = document.getElementById('homeGraph')?.getBoundingClientRect() || {x: -100, y: -100};
-      this.rectX = rect.x;
-      this.rectY = rect.y;
-      if(this.savedNodes.length)
-      {
-        this.savedNodes[0].fx = this.mouseX - this.rectX;
-        this.savedNodes[0].fy = this.mouseY - this.rectY;
-      }
-    },
+  },
+  mounted() {
+    let rect = document.getElementById('homeGraph')?.getBoundingClientRect() || {x: -100, y: -100};
+    this.rectX = rect.x;
+    this.rectY = rect.y;
   },
   created() {
     this.setStyle();
@@ -143,25 +152,24 @@ export default {
         this.upTrend = true;
         this.force+= increase; 
       }
-    }, 20);
-  },
-  watch: {
-    mouseX() {
-      this.updateMousePosition();
-    },
-    mouseY() {
-      this.updateMousePosition();
-    },
+    }, 50);
   },
   beforeDestroy() {
     clearInterval(this.breatheInterval);
-    clearInterval(this.mousePositionInterval);
   }
   
 }
 </script>
 
 <style lang="scss">
+.mouseCatcher {
+  position: fixed;
+  width: 100vw;
+  height: 100vh;
+  top: 0;
+  left: 0;
+}
+
 .link {
   stroke: $text-secondary-dark;
 }

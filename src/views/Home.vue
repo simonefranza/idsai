@@ -15,7 +15,7 @@
       </span>
       <!--  <input type="checkbox" v-model="graph" />-->
     </div>
-    <HomeGraph class="homeGraph" :mouseX="mouseX" :mouseY="mouseY" :darkTheme="darkTheme" v-if="graph"/>
+    <HomeGraph class="homeGraph" :darkTheme="darkTheme" v-if="graph"/>
     <!--    <HomeNetwork class="homeGraph" :mouseX="mouseX" :mouseY="mouseY" :darkTheme="darkTheme" v-else />-->
   </div>
 </template>
@@ -32,8 +32,6 @@ export default {
   },
   props: {
     darkTheme: { required: true },
-    mouseX: {required: true},
-    mouseY: {required: true},
   },
   components: {
     HomeGraph,

@@ -1,16 +1,16 @@
 <template>
-  <div :id="!darkTheme ? 'lightApp' : 'darkApp'" @mousemove="mouseMoved" class="bodyScrollbar" >
+  <div :id="!darkTheme ? 'lightApp' : 'darkApp'" class="bodyScrollbar" >
     <div id="pageContainer" :class="[!darkTheme ? 'page-light' : 'page-dark']">
       <div :id="!darkTheme ? 'lightNav' : 'darkNav'" :class="[!darkTheme ? 'light-theme' : 'dark-theme', 'navBar']">
 
         <div class="menuDiv" :key="reload"></div>
         <div id="menu" class="menuDiv">
-          <div class="menuEl"><router-link :mouseX="mouseX" :mouseY="mouseY" :darkTheme="darkTheme" to="/">Home</router-link></div> |
-          <div class="menuEl"><router-link :dark-theme="darkTheme" to="/rules">Rules</router-link></div> | 
-          <div class="menuEl"><router-link :dark-theme="darkTheme" to="/graphs">Graphs</router-link></div> |
-          <div class="menuEl"><router-link :dark-theme="darkTheme" to="/info-ret">Information Retrieval</router-link></div> | 
-          <div class="menuEl"><router-link :dark-theme="darkTheme" to="/rec-sys">Recommender System</router-link></div> | 
-          <div class="menuEl"><router-link :dark-theme="darkTheme" to="/about">About</router-link></div>
+          <div class="menuEl"><router-link to="/">Home</router-link></div> |
+          <div class="menuEl"><router-link to="/rules">Rules</router-link></div> | 
+          <div class="menuEl"><router-link to="/graphs">Graphs</router-link></div> |
+          <div class="menuEl"><router-link to="/info-ret">Information Retrieval</router-link></div> | 
+          <div class="menuEl"><router-link to="/rec-sys">Recommender System</router-link></div> | 
+          <div class="menuEl"><router-link to="/about">About</router-link></div>
         </div>
         <div class="dark-light-switch menuDiv" >
           <b-icon icon="sun" aria-hidden="true" class="nav-icon">  </b-icon>
@@ -19,7 +19,7 @@
         </div>
       </div>
       <transition name="slide-fade" mode="out-in">
-      <router-view class="router-view" :mouseX="mouseX" :mouseY="mouseY" :dark-theme="darkTheme" :class="!darkTheme ? 'rv-light' : 'rv-dark'" />
+      <router-view class="router-view" :dark-theme="darkTheme" :class="!darkTheme ? 'rv-light' : 'rv-dark'" />
       </transition>
       <Footer :dark-theme="darkTheme" />
     </div>
@@ -36,8 +36,6 @@ export default {
     return {
       tempDarkTheme: null,
       lastTheme: 0,
-      mouseX: -100,
-      mouseY: -100,
       reload: 0,
     }
   },
@@ -73,10 +71,6 @@ export default {
     ToggleSwitch
   },
   methods: {
-    mouseMoved(event) {
-      this.mouseX = event.x;
-      this.mouseY = event.y;
-    },
     setStyle() {
       if(this.darkTheme)
       {
