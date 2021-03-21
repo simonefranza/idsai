@@ -17,7 +17,6 @@
             <div class="helpIcon" v-if="showWordNet">
               <b-button size="sm" 
                         id="legendButton"
-                        class="showGraphButton"
                         pill
                         @click="showWordNetLegend = !showWordNetLegend"
                         :variant="darkTheme ? 'outline-dark' : 'outline-light'" >
