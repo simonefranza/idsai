@@ -37,9 +37,10 @@ export default {
 <style scoped>
 .tree-node {
   display: inline-block;
-  text-align: left;
+  text-align: center;
   line-height: 28px;
   width: 300px;
+  border-radius: 5rem;
 }
 .greenNode {
   border: 3px solid #a0e7a0;
