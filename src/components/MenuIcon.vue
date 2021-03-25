@@ -273,6 +273,7 @@ export default {
         document.getElementById(`bot-rect-transl-${end}`).beginElement();
     },
     rotate() {
+      console.log("rotate");
       this.animate();
       this.isPressed = !this.isPressed;
       this.$store.dispatch('updateMenuOpen', this.isPressed);
@@ -280,6 +281,9 @@ export default {
   },
   watch: {
     isMenuOpen() {
+      if(this.isPressed === this.isMenuOpen)
+        return;
+    console.log("changed");
       this.animate();
       this.isPressed = this.isMenuOpen;
     }

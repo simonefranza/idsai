@@ -48,6 +48,8 @@ export default {
       componentsPaths: ['', 'rules', 'graphs', 'info-ret', 'rec-sys', 'about'],
       initialX: null,
       initialY: null,
+      lastDiffX: null,
+      startTimestamp: null,
     }
   },
   computed: {
@@ -87,7 +89,23 @@ export default {
     startTouch(e) {
       this.initialX = e.touches[0].clientX;
       this.initialY = e.touches[0].clientY;
-//      console.log("start", e);
+      this.startTimestamp = e.timeStamp;
+      console.log("start", e);
+    },
+    endTouch(e) {
+      if(!this.lastDiffX)
+        return;
+      let doc = document.getElementById('mainBody');
+      doc.style.transform = '';
+      let speed =  (this.initialX - this.lastDiffX) / (this.startTimestamp - e.timeStamp);
+      this.lastDiffX = null;
+      console.log({end: e, speed: speed});
+      if(Math.abs(speed) >= 1.2)
+      {
+        console.log("dispatc", this.isMenuOpen);
+        this.$store.dispatch('updateMenuOpen', !this.isMenuOpen);
+        console.log("new", this.isMenuOpen);
+      }
     },
     moveTouch(e) {
 //    console.log("move", e);
@@ -107,30 +125,31 @@ export default {
 
       if (Math.abs(diffX) > Math.abs(diffY)) {
         // sliding horizontally
-        if (diffX > 0 && this.isMenuOpen) {
-          // swiped left
-          let doc = document.getElementById('mainBody');
-          if(Math.abs(diffX) > 50)
-          {
-          console.log("dispatch left");
-            this.$store.dispatch('updateMenuOpen', false);
-            doc.style.transform = '';
-            return;
-          }
-          doc.style.transform = `translateX(${diffX}px)`;
-        } else if(diffX < 0 && !this.isMenuOpen){
-          // swiped right
-          let doc = document.getElementById('mainBody');
-          if(Math.abs(diffX) > 50)
-          {
-            console.log("dispatch right");
-            this.$store.dispatch('updateMenuOpen', true);
-            doc.style.transform = '';
-            return;
-          }
-          doc.style.transform = `translateX(${-diffX}px)`;
-
-        }  
+        this.lastDiffX = diffX;
+//        if (diffX > 0 && this.isMenuOpen) {
+//          // swiped left
+//          let doc = document.getElementById('mainBody');
+//          if(Math.abs(diffX) > 200)
+//          {
+//          console.log("dispatch left");
+//            this.$store.dispatch('updateMenuOpen', false);
+//            doc.style.transform = '';
+//            return;
+//          }
+//          doc.style.transform = `translateX(${diffX}px)`;
+//        } else if(diffX < 0 && !this.isMenuOpen){
+//          // swiped right
+//          let doc = document.getElementById('mainBody');
+//          if(Math.abs(diffX) > 200)
+//          {
+//            console.log("dispatch right");
+//            this.$store.dispatch('updateMenuOpen', true);
+//            doc.style.transform = '';
+//            return;
+//          }
+//          doc.style.transform = `translateX(${-diffX}px)`;
+//
+//        }  
       } else {
         // sliding vertically
         if (diffY > 0) {
@@ -188,6 +207,7 @@ export default {
   mounted() {
     window.addEventListener("touchstart", this.startTouch, false);
     window.addEventListener("touchmove", this.moveTouch, false);
+    window.addEventListener("touchend", this.endTouch, false);
     let cookies = document.cookie.split(";");
     let isDark = true;
     cookies.forEach(pair => {
