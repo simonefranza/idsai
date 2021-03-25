@@ -48,10 +48,10 @@
           <b-card-text>
           <div class="row">
             <div class="col-6 panelSwitches">
-              <SwitchGroup :darkTheme="darkTheme" :settings="settings" v-model="selectedSettings" />
+              <SwitchGroup :settings="settings" v-model="selectedSettings" />
             </div>
             <div class="col-6 panelSwitches">
-              <SwitchGroup :darkTheme="darkTheme" :settings="querySettings" v-model="selectedQuerySett" />
+              <SwitchGroup :settings="querySettings" v-model="selectedQuerySett" />
             </div>
           </div>
           <div>
@@ -127,12 +127,6 @@ import SwitchGroup from '@/components/SwitchGroup.vue'
 import * as tokenizer from 'simple-text-tokenizer'
 
 export default {
-  props: {
-    darkTheme: {
-      type: Boolean,
-      required: true
-    }
-  },
   components: {
     SwitchGroup
   },
@@ -176,6 +170,9 @@ export default {
   },
   computed : 
   {
+    darkTheme() {
+      return this.$store.state.darkTheme;
+    },
     ignoredTermsInput: {
       get: function()
       {

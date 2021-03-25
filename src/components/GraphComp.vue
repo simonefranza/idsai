@@ -20,10 +20,6 @@ import D3Network from 'vue-d3-network'
 import scssData from '@/assets/scss/jsVariables.scss'
 export default {
   props: {
-    darkTheme: {
-      type: Boolean,
-      required: true
-    },
     data : { required: true },
     ptrSymbols: {required: true},
     depth: {required: true},
@@ -38,6 +34,9 @@ export default {
     }
   },
   computed: {
+    darkTheme() {
+      return this.$store.state.darkTheme;
+    },
     options: function() {
       let options = {
         force: 5000,

@@ -5,7 +5,7 @@
         <b-icon icon="plus-circle" v-if="!el.show" @click="printable = index" class="iconNoHighlight" :class='darkTheme? "iconDark" : "iconLight"'/>
           <b-icon icon="dash-circle" v-else @click="printable = index" class="iconNoHighlight" :class='darkTheme? "iconDark" : "iconLight"'/>
             <span @click="printable = index"> {{el.label}}</span>
-            <SymbolList v-if="el.show" :data="el.array" :depth="depth" :ptrSymbols="ptrSymbols" :darkTheme="darkTheme"
+            <SymbolList v-if="el.show" :data="el.array" :depth="depth" :ptrSymbols="ptrSymbols" 
             v-model="hovered"/>
       </li>
     </span>
@@ -42,10 +42,12 @@ export default {
       required: true,
     },
     depth: {required: true},
-    darkTheme: {required:true},
     value: {required:true},
   },
   computed: {
+    darkTheme() {
+      return this.$store.state.darkTheme;
+    },
     printable: {
       set(index) {
         switch(index) {

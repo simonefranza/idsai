@@ -15,10 +15,6 @@ export default {
     }
   },
   props: {
-    darkTheme: {
-      required: true,
-      type: Boolean,
-    },
     value: {
       required: true,
     }
@@ -30,6 +26,11 @@ export default {
     toggle: function() {
       this.$emit("toggle", this.currValue = !this.currValue);
     }
+  },
+  computed: {
+    darkTheme() {
+      return this.$store.state.darkTheme;
+    },
   },
   watch: {
     value(newV) {

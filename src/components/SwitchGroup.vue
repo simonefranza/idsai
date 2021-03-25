@@ -2,7 +2,7 @@
   <div id="switchGroup">
     <div class="groupEl" v-for="(setting, index) in settings" :key="setting.value">
       <span class="switchSpan">
-        <ToggleSwitch :darkTheme="darkTheme" v-model="switchData[index]" />
+        <ToggleSwitch v-model="switchData[index]" />
       </span>
       <span class="switchText">{{setting.text}}</span>
     </div>
@@ -14,9 +14,6 @@ import ToggleSwitch from './ToggleSwitch.vue'
 export default {
   props: {
     settings: {
-      required: true,
-    },
-    darkTheme: {
       required: true,
     },
     value: {
@@ -31,6 +28,11 @@ export default {
       switchData : [],
       switchTemp : [],
     }
+  },
+  computed: {
+    darkTheme() {
+      return this.$store.state.darkTheme;
+    },
   },
   model: {
     event: "changed"

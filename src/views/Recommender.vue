@@ -1,7 +1,7 @@
 <template>
   <div class="RecSys">
 
-    <ReccSys v-bind:dark-theme="darkTheme"/>
+    <ReccSys />
   </div>
 </template>
 
@@ -11,12 +11,6 @@ import ReccSys from '@/components/ReccSys.vue'
 
 export default {
   name: 'RecSys',
-  props: {
-    darkTheme: {
-      type: Boolean,
-      required: true
-    }
-  },
   components: {
     ReccSys
   }

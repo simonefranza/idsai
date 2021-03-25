@@ -29,9 +29,6 @@
 <script>
 export default {
   props: {
-    darkTheme: {required: true,
-      type: Boolean,
-    },
     value : { required: true} 
   },
   data() {
@@ -41,6 +38,9 @@ export default {
 
   },
   computed: {
+    darkTheme() {
+      return this.$store.state.darkTheme;
+    },
     ptrLegend() {
       let arr = [];
       arr.push({symbol: 'Hyper',  meaning: 'Hypernym',          definition: 'a word that is more general than a given word'});

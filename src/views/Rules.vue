@@ -1,6 +1,6 @@
 <template>
   <div class="rules">
-    <RulesComp :darkTheme="darkTheme"/>
+    <RulesComp />
   </div>
 </template>
 
@@ -9,12 +9,6 @@ import RulesComp from '@/components/RulesComp.vue'
 
 export default {
   name: 'Rules',
-  props: {
-    darkTheme: {
-      required: true,
-      type:Boolean
-    }
-  },
   components: {
     RulesComp
   }

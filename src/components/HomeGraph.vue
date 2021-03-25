@@ -18,7 +18,7 @@
         {{lightnessVar}}
         <input type="range" min="1" max="100" v-model="lightnessVar" class="slider" id="myRange"><br/>
       </div>
-      <d3-network :net-nodes="savedNodes" :net-links="links" :options="options" :custom-forces="customForces"/>
+      <d3-network :net-nodes="nodes" :net-links="links" :options="options" :custom-forces="customForces"/>
     </div>
   </div>
 </template>
@@ -56,13 +56,13 @@ export default {
       mouseY : 0,
     }
   },
-  props: {
-    darkTheme: {required: true},
-  },
   components: {
     D3Network,
   },
   computed: {
+    windowWidth() {
+      return this.$store.state.windowWidth;
+    },
     options() {
       let options = {
         force: this.force,
@@ -77,7 +77,27 @@ export default {
       return options;
     },
     nodes() {
-      return this.makeNodes();
+      this.windowWidth;
+      let nodes =[];
+      let nodeBase = this.relToPixels(this.nodeSizeBase);
+      for(let i = 0; i < this.numNodes; i++) 
+      {
+        if(i === 0)
+        {
+          nodes.push({id: i, _color: this.firstNodeColor, _size: this.relToPixels(this.firstNodeSize), pinned:true,
+            fx: this.relativeMouseX, fy: this.relativeMouseY, _cssClass: 'firstNode'});
+          continue;
+        }
+        let size = Math.floor(nodeBase * (Math.random() * this.nodeSizeVar * 2 / 100 + 1 - this.nodeSizeVar / 100));
+        let hue = Math.floor(this.hueBase* (Math.random() * this.hueVar* 2 / 100 + 1 - this.hueVar / 100));
+        let saturation = Math.floor(this.saturationBase* (Math.random() * this.saturationVar* 2 / 100 + 1 - this.saturationVar / 100));
+        let lightness = Math.floor(this.lightnessBase* (Math.random() * this.lightnessVar* 2 / 100 + 1 - this.lightnessVar / 100));
+        nodes.push({id: i, _color: 'hsl(' + hue + ', ' + saturation.toString() + '%, ' +
+          lightness.toString() + '%)', _size: size});
+      }
+      return nodes;
+
+
     },
     links() {
       return [];
@@ -89,8 +109,10 @@ export default {
     }
   },
   methods: {
+    darkTheme() {
+      return this.$store.state.darkTheme;
+    },
     relToPixels(rel) {    
-      console.log(document.documentElement.clientWidth);
       return (rel * document.documentElement.clientWidth)/100;
     },
     mouseMoved(event) {
@@ -135,7 +157,30 @@ export default {
       });
     },
   },
-  mounted() {
+  watch: {
+    windowWidth() {
+      clearInterval(this.breatheInterval);
+      this.force = ((this.windowWidth/100) ** 2) * .5428;
+      let forceMax = this.force * 1.1;
+      let forceMin = this.force;
+      let increase = (forceMax - forceMin) * 0.015;
+      this.breatheInterval = window.setInterval( () => {
+        if(this.upTrend && this.force < forceMax)
+          this.force += increase;
+        else if(this.upTrend && this.force > forceMax)
+        {
+          this.upTrend = false;
+          this.force -= increase;
+        }
+        else if(!this.upTrend && this.force > forceMin)
+          this.force -= increase;
+        else {
+          this.upTrend = true;
+          this.force+= increase; 
+        }
+      }, 50);
+    }
+
   },
   created() {
     this.setStyle();

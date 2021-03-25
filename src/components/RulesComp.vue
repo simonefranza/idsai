@@ -125,7 +125,7 @@
 
       <!-- Rules table -->
       <div class="col-4" v-if="cycleNum >= 0">
-        <b-table striped hover :items="cycles[cycleNum]" v-bind:dark="darkTheme" @row-hovered="rowHovered" @row-unhovered="rowUnhovered">
+        <b-table striped hover :items="cycles[cycleNum]" :dark="darkTheme" @row-hovered="rowHovered" @row-unhovered="rowUnhovered">
           <template #cell(added_facts)="row">
             <span :class="{'dataTitle' : row.value.localeCompare(mapFrom.trim()) === 0}">{{row.value}}</span>
 
@@ -136,7 +136,7 @@
     </div>
     <div class="row">
     <div class="col-12" v-if="!invalidGoal">
-      <BackwardChaining :darkTheme="darkTheme" :facts="currentFacts" :rules="rules"
+      <BackwardChaining :facts="currentFacts" :rules="rules"
                      :variables="variables" :goal="currentGoal" :highlight="mapFrom.trim()"/>
     </div>
     </div>
@@ -148,12 +148,6 @@
 import BackwardChaining from '@/components/BackwardChaining.vue';
 
 export default {
-  props: {
-    darkTheme: {
-      type: Boolean,
-      required: true
-    }
-  },
   components: {
     BackwardChaining,
   },
@@ -186,6 +180,9 @@ export default {
     }
   },
   computed: {
+    darkTheme() {
+      return this.$store.state.darkTheme;
+    },
     currentGoal: function() {
       return this.searchedVariable.trim();
     },

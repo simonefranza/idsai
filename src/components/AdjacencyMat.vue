@@ -79,10 +79,6 @@
 <script>
 export default {
   props: {
-    darkTheme: {
-      required: true,
-      type: Boolean,
-    },
     matrixSize: {
       required: true,
       type: Number,
@@ -103,6 +99,9 @@ export default {
     }
   },
   computed: {
+    darkTheme() {
+      return this.$store.state.darkTheme;
+    },
     nodeNames() {
       let arr = {};
       return arr;

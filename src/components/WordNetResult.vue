@@ -14,7 +14,6 @@
                 :depth="depth" 
                 :entryType="entry.entryLabel" 
                 :array="entry.array" 
-                :darkTheme="darkTheme" 
                 :chosenIndex="index === chosenGroup ? chosenIndex : -1"
                 v-model="hovered"
                 @newGraph="chosenGraph($event, index)"
@@ -37,7 +36,6 @@
 import DictEntry from "./DictEntry";
 export default {
   props: {
-    darkTheme: {required: true},
     ptrSymbols: {required: true},
     searched: {required: true},
     depth: {required: true},
@@ -51,6 +49,9 @@ export default {
     value: {required: true},
   },
   computed: {
+    darkTheme() {
+      return this.$store.state.darkTheme;
+    },
     isNothingFound() {
       return !this.chosenNoun.length && !this.chosenVerb.length &&
         !this.chosenAdj.length && !this.chosenAdv.length;

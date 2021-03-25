@@ -5,9 +5,9 @@
          @click="closeExternalCard(true)"  v-show="showWordNetHelp"/>
       </transition>
     <transition name="sliding" mode="out-in">
-    <WordNetLegend :darkTheme="darkTheme" @closeLegend="closeExternalCard" v-model="showWordNetLegend" v-show="showWordNet"/>
+    <WordNetLegend @closeLegend="closeExternalCard" v-model="showWordNetLegend" v-show="showWordNet"/>
     </transition>
-    <WordNetHelp :darkTheme="darkTheme" @closeHelp="closeExternalCard" v-if="showWordNetHelp" />
+    <WordNetHelp @closeHelp="closeExternalCard" v-if="showWordNetHelp" />
     <div class="wordNetComp row">
       <div class="col-5">
       <b-card title="Control Panel" v-bind:bg-variant="!darkTheme ? 'light' : 'dark'" v-bind:text-variant="!darkTheme ? '' : 'white'">
@@ -31,7 +31,7 @@
             </transition>
           <div class="cyclesDiv">
             <span :class="{'disabledText' : showWordNet}">Adjacency Matrix</span>
-            <ToggleSwitch :darkTheme="darkTheme" v-model="showWordNet" />
+            <ToggleSwitch v-model="showWordNet" />
             <span :class="{'disabledText' : !showWordNet}">WordNet</span>
           </div>
           <transition name="resize" mode="out-in">
@@ -74,7 +74,6 @@
       <br/>
       <transition name="fade">
       <WordNetResult :ptrSymbols="ptrSymbols" 
-                     :darkTheme="darkTheme" 
                      :searched="searched"
                      :depth="exploreDepth"
                      :chosenNoun="chosenNoun"
@@ -87,8 +86,7 @@
                      v-model="hoveredWord"
                      @graphChosen="showNewGraph"
                      v-if="showWordNet && searched.trim()" />
-      <AdjacencyMat :darkTheme="darkTheme" 
-                    :matrixSize="parsedAdjMatSize"
+      <AdjacencyMat :matrixSize="parsedAdjMatSize"
                     @hoverElement="highlightNode"
                     @newNodeNames="updateNodeNames"
                      v-model="adjMatrix" 
@@ -96,14 +94,12 @@
       </transition>
       </div>
       <div class="col-7">
-        <GraphComp :dark-theme="darkTheme" 
-                    :data="chosenData" 
+        <GraphComp :data="chosenData" 
                     :ptrSymbols="ptrSymbols" 
                     :depth="exploreDepth" 
                     v-model="hoveredWord"
                     v-if="showWordNet" />
-       <AdjacencyGraph :darkTheme="darkTheme"
-                        :matrix="adjMatrix"
+       <AdjacencyGraph :matrix="adjMatrix"
                         :selectedRow="selectedRow"
                         :selectedCol="selectedCol"
                     :nodeNames="adjNodeNames" 
@@ -124,12 +120,6 @@ import ToggleSwitch from '@/components/ToggleSwitch.vue'
 import ramjet from 'ramjet'
 
 export default {
-  props: {
-    darkTheme: {
-      type: Boolean,
-      required: true
-    }
-  },
   components: {
     WordNetResult,
     AdjacencyMat,
@@ -237,6 +227,9 @@ export default {
     }
   },
   computed: {
+    darkTheme() {
+      return this.$store.state.darkTheme;
+    },
     parsedAdjMatSize: function() {
       return this.invalidMatrixSize ? 2 : parseInt(this.adjMatSize);
     },

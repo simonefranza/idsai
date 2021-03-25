@@ -22,15 +22,16 @@ export default {
   props:
   {
     data: { required: true },
-    darkTheme: {
-      type: Boolean,
-      required: true,
-    },
     collapsed: {required: false},
     facts: {required: true},
     variables: {required: true},
     highlight: { required : true},
   },
+  computed: {
+    darkTheme() {
+      return this.$store.state.darkTheme;
+    },
+  }
 }
 </script>
 

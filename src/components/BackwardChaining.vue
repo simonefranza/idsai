@@ -8,7 +8,7 @@
     v-if="Object.keys(backwardChain).length !== 0"
     >
     <template v-slot:node="{ node, collapsed }">
-      <TreeNode :darkTheme="darkTheme" :data="node" :collapsed="collapsed" :facts="facts" :variables="variables" :highlight="highlight"/>
+      <TreeNode :data="node" :collapsed="collapsed" :facts="facts" :variables="variables" :highlight="highlight"/>
     </template>
   </vue-tree>
   </div>
@@ -24,10 +24,6 @@ export default {
     rules: { required: true, },
     variables: {required: true},
     goal: {required: true },
-    darkTheme: {
-      type: Boolean,
-      required: true,
-    },
     highlight : {required: true},
   },
   components: {
@@ -42,6 +38,9 @@ export default {
     }
   },
   computed: {
+    darkTheme() {
+      return this.$store.state.darkTheme;
+    },
     //TODO check A->B B->A
     backwardChain: function() {
       if(!this.goal)

@@ -1,7 +1,7 @@
 <template>
   <div :id="!darkTheme ? 'lightApp' : 'darkApp'" class="bodyScrollbar" >
     <div id="pageContainer" :class="[!darkTheme ? 'page-light' : 'page-dark']">
-      <div :id="!darkTheme ? 'lightNav' : 'darkNav'" :class="[!darkTheme ? 'light-theme' : 'dark-theme', 'navBar']">
+      <div :id="!darkTheme ? 'lightNav' : 'darkNav'" :class="[!darkTheme ? 'light-theme' : 'dark-theme', 'navBar']" v-if="isWideDevice">
 
         <div class="menuDiv" :key="reload"></div>
 
@@ -13,13 +13,13 @@
 
         <div class="dark-light-switch menuDiv" >
           <b-icon icon="sun" aria-hidden="true" class="nav-icon">  </b-icon>
-          <ToggleSwitch :darkTheme="darkTheme" v-model="darkTheme" />
+          <ToggleSwitch v-model="darkTheme" />
           <b-icon icon="moon" aria-hidden="true" class="nav-icon"></b-icon>
         </div>
 
       </div>
       <transition :name="myTransition" mode="out-in">
-      <router-view class="router-view" :dark-theme="darkTheme" :class="!darkTheme ? 'rv-light' : 'rv-dark'" />
+      <router-view class="router-view" @clicked="openMenu" :class="!darkTheme ? 'rv-light' : 'rv-dark'" />
       </transition>
     </div>
     <Footer :dark-theme="darkTheme" />
@@ -34,7 +34,7 @@ import scssData from '@/assets/scss/jsVariables.scss'
 export default {
   data() {
     return {
-      tempDarkTheme: null,
+      tempDarkTheme: true,
       lastTheme: 0,
       reload: 0,
       slideLeft : 'slide-left',
@@ -45,6 +45,12 @@ export default {
     }
   },
   computed: {
+    isWideDevice() {
+      return this.$store.state.isWideDevice;
+    },
+    windowWidth() {
+      return this.$store.state.windowWidth;
+    },
     titles() {
       let titles = [];
       this.componentsName.forEach((name, index) => {
@@ -54,35 +60,22 @@ export default {
     },
     darkTheme:  {
       get: function() {
-        if(this.tempDarkTheme != null)
-        {
-          return this.tempDarkTheme;
-        }
-        let cookies = document.cookie.split(";");
-        let map = new Map();
-        cookies.forEach(pair => {
-          let splitty = pair.split("=");
-          map.set(splitty[0], splitty[1]);
-        });
-        return map.get('dark_theme') == "true";
+        return this.$store.state.darkTheme;
       },
       set: function(newVal) {
-        this.tempDarkTheme = newVal;
-        var date = new Date();
-        date.setTime(date.getTime()+(30*24*60*60*1000));
-        let expire = '; expires=' + date.toGMTString();
-        let secure = window.location.href.includes('localhost') || window.location.href.includes('127.0.0.1') ? '' : "; Secure";
-
-        document.cookie = "dark_theme=" + newVal + expire + secure;
+        this.$store.dispatch('updateDarkTheme', newVal);
       }
     }
 
   },
   components: {
     Footer,
-    ToggleSwitch
+    ToggleSwitch,
   },
   methods: {
+    openMenu() {
+      console.log("menu");
+    },
     setStyle() {
       if(this.darkTheme)
       {
@@ -112,14 +105,29 @@ export default {
         });
       }
 
-    }
+    },
+    resized(e) {
+      this.$store.dispatch('updateWindowWidth', e.currentTarget.outerWidth); 
+    },
   },
   watch: {
     darkTheme() {
       this.setStyle();
-    }
+    },
   },
   mounted() {
+    let cookies = document.cookie.split(";");
+    let isDark = true;
+    cookies.forEach(pair => {
+      let splitty = pair.split("=");
+      if(!splitty[0].localeCompare('dark_theme'))
+        isDark = splitty[1].localeCompare('true') == 0;
+    });
+    this.$store.dispatch('updateDarkTheme', isDark);
+
+    this.$store.dispatch('updateWindowWidth', window.outerWidth); 
+    window.addEventListener('resize', this.resized);
+
     setTimeout(() => {
       this.reload = Math.random();
       this.setStyle();
@@ -135,6 +143,9 @@ export default {
 </script>
 
 <style lang="scss">
+@import url('https://fonts.googleapis.com/css?family=Dancing+Script');
+
+
 /* router change animation */
 .slide-right-enter-active, .slide-right-leave-active,
 .slide-left-enter-active, .slide-left-leave-active  {
@@ -193,7 +204,7 @@ export default {
 }
 
 #darkApp {
-  background-color: #222;
+  background-color: #171313;
   color: $text-primary-dark;
 }
 
@@ -210,7 +221,7 @@ export default {
 }
 
 #lightNav, #darkNav {
-  padding: 30px;
+  padding: 1.9em 0.7em;
   display: flex;
   align-items:center;
   a {
@@ -277,12 +288,13 @@ export default {
 }
 
 .rv-dark, .page-dark {
-  background-color: #222;
+  background-color: #171313;
 }
 
 #menu {
   display: block;
   min-width: 50vw;
+  flex-grow: 10;
 }
 
 .inputGroup {

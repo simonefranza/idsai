@@ -21,7 +21,7 @@
               <span v-if="index === 0">~ {{ex}}</span>
               <span v-else>; {{ex}}</span>
             </span>
-            <RecSymbol :ptrSymbols="ptrSymbols" :data="data" :depth="depth" :darkTheme="darkTheme" v-model="hovered"/>
+            <RecSymbol :ptrSymbols="ptrSymbols" :data="data" :depth="depth" v-model="hovered"/>
           </div>
           <div class="col-3 test">
           <b-button size="sm" 
@@ -63,9 +63,6 @@ export default {
     ptrSymbols: {
       required:true,
     },
-    darkTheme: {
-      required: true,
-    },
     value: {
       required:true,
     },
@@ -86,6 +83,11 @@ export default {
     },
     hovered() {
       this.$emit("isHovered", this.hovered);
+    },
+  },
+  computed: {
+    darkTheme() {
+      return this.$store.state.darkTheme;
     },
   },
   methods: {

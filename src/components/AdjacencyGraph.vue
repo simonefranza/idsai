@@ -10,10 +10,6 @@ import scssData from '@/assets/scss/jsVariables.scss'
 
 export default {
   props: {
-    darkTheme: {
-      type: Boolean,
-      required: true
-    },
     matrix: { required: true },
     selectedRow: { required: true},
     selectedCol: { required: true },
@@ -37,6 +33,9 @@ export default {
     }
   },
   computed: {
+    darkTheme() {
+      return this.$store.state.darkTheme;
+    },
     selection: function() {
       let sel = {links:{}, nodes:{}};
       if(this.selectedRow === -1 || this.selectedCol === -1)

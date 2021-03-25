@@ -1,6 +1,6 @@
 <template>
   <div class="rules">
-    <InfoRetComp :darkTheme='darkTheme'/>
+    <InfoRetComp />
   </div>
 </template>
 
@@ -9,12 +9,6 @@ import InfoRetComp from '@/components/InfoRetComp.vue'
 
 export default {
   name: 'InfoRet',
-  props: {
-    darkTheme: {
-      required: true,
-      type:Boolean
-    }
-  },
   components: {
     InfoRetComp
   }

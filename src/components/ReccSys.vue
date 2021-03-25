@@ -21,7 +21,7 @@
               <input type="range" min="-1.0" max="1.0" value="0.5" step="0.01" 
                                                                    v-model="neighbour_precisionIB" :class="['slider', darkTheme? 'darkSlider' : 'lightSlider']" id="range-1" v-b-tooltip.hover :title="neighbour_precisionIB"/>
             </div>
-            <SwitchGroup :darkTheme="darkTheme" :settings="settings" v-model="selectedSettings"/>
+            <SwitchGroup :settings="settings" v-model="selectedSettings"/>
           </b-card-text>
         </b-card>
       </div>
@@ -41,12 +41,6 @@ import Book from '../data/book.js'
 import Person from '../data/person.js'
 import SwitchGroup from './SwitchGroup.vue'
 export default {
-  props: {
-    darkTheme: {
-      type: Boolean,
-      required: true
-    }
-  },
   components: {
     SwitchGroup
   },
@@ -69,6 +63,9 @@ export default {
     }
   },
   computed: {
+    darkTheme() {
+      return this.$store.state.darkTheme;
+    },
     book_missing_rating: function() {
       return this.bookNames[this.bookNames.length - 1];
     },
