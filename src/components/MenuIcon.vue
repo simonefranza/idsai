@@ -253,36 +253,37 @@ export default {
       isPressed: false,
     }
   },
+  computed: {
+    isMenuOpen() {
+      return this.$store.state.isMenuOpen;
+    }
+
+  },
   methods: {
+    animate() {
+      let end = this.isPressed ? 'bckw' : 'fwd';
+      document.getElementById(`circle-front-${end}`).beginElement();
+        document.getElementById(`circle-back-${end}`).beginElement();
+        document.getElementById(`top-rect-rot-${end}`).beginElement();
+        document.getElementById(`top-rect-transl-${end}`).beginElement();
+        document.getElementById(`mid-rect-${end}`).beginElement();
+        document.getElementById(`mid-rect-rot-${end}`).beginElement();
+        document.getElementById(`mid-rect-transl-${end}`).beginElement();
+        document.getElementById(`bot-rect-rot-${end}`).beginElement();
+        document.getElementById(`bot-rect-transl-${end}`).beginElement();
+    },
     rotate() {
-      if(!this.isPressed)
-      {
-        document.getElementById('circle-front-fwd').beginElement();
-        document.getElementById('circle-back-fwd').beginElement();
-        document.getElementById('top-rect-rot-fwd').beginElement();
-        document.getElementById('top-rect-transl-fwd').beginElement();
-        document.getElementById('mid-rect-fwd').beginElement();
-        document.getElementById('mid-rect-rot-fwd').beginElement();
-        document.getElementById('mid-rect-transl-fwd').beginElement();
-        document.getElementById('bot-rect-rot-fwd').beginElement();
-        document.getElementById('bot-rect-transl-fwd').beginElement();
-      }
-      else
-      {
-        document.getElementById('circle-front-bckw').beginElement();
-        document.getElementById('circle-back-bckw').beginElement();
-        document.getElementById('top-rect-transl-bckw').beginElement();
-        document.getElementById('top-rect-rot-bckw').beginElement();
-        document.getElementById('mid-rect-bckw').beginElement();
-        document.getElementById('mid-rect-rot-bckw').beginElement();
-        document.getElementById('mid-rect-transl-bckw').beginElement();
-        document.getElementById('bot-rect-rot-bckw').beginElement();
-        document.getElementById('bot-rect-transl-bckw').beginElement();
-      }
+      this.animate();
       this.isPressed = !this.isPressed;
-      this.$emit('clicked', true);
+      this.$store.dispatch('updateMenuOpen', this.isPressed);
     },
   },
+  watch: {
+    isMenuOpen() {
+      this.animate();
+      this.isPressed = this.isMenuOpen;
+    }
+  }
   
 }
 </script>

@@ -8,6 +8,7 @@ export default new Vuex.Store({
     darkTheme : true,
     windowWidth : 0,
     isWideDevice : true,
+    isMenuOpen: false,
   },
   mutations: {
     SET_DARK_THEME(state, theme) {
@@ -23,7 +24,10 @@ export default new Vuex.Store({
     },
     SET_IS_WIDE_DEVICE(state, isWide) {
       state.isWideDevice = isWide;
-    }
+    },
+    SET_MENU_OPEN(state, isOpen) {
+      state.isMenuOpen = isOpen;
+    },
   },
   actions: {
     updateDarkTheme(context, newValue) {
@@ -37,6 +41,11 @@ export default new Vuex.Store({
       context.commit('SET_WINDOW_WIDTH', newValue);
       context.commit('SET_IS_WIDE_DEVICE', newValue > 960);
     },
+    updateMenuOpen(context, newValue) {
+      if(typeof(newValue) !== 'boolean')
+        return;
+      context.commit('SET_MENU_OPEN', newValue);
+    }
   },
   modules: {
   }

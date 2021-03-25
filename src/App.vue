@@ -1,5 +1,6 @@
 <template>
   <div :id="!darkTheme ? 'lightApp' : 'darkApp'" class="bodyScrollbar" >
+    <span id="mainBody" :class="[isMenuOpen ? 'slideBody' : '']">
     <div id="pageContainer" :class="[!darkTheme ? 'page-light' : 'page-dark']">
       <div :id="!darkTheme ? 'lightNav' : 'darkNav'" :class="[!darkTheme ? 'light-theme' : 'dark-theme', 'navBar']" v-if="isWideDevice">
 
@@ -19,10 +20,12 @@
 
       </div>
       <transition :name="myTransition" mode="out-in">
-      <router-view class="router-view" @clicked="openMenu" :class="!darkTheme ? 'rv-light' : 'rv-dark'" />
+      <router-view class="router-view" :class="!darkTheme ? 'rv-light' : 'rv-dark'" />
       </transition>
     </div>
     <Footer :dark-theme="darkTheme" />
+  </span>
+
   </div>
 </template>
 
@@ -30,6 +33,7 @@
 import Footer from '@/components/Footer.vue'
 import ToggleSwitch from '@/components/ToggleSwitch.vue'
 import scssData from '@/assets/scss/jsVariables.scss'
+
 
 export default {
   data() {
@@ -42,6 +46,8 @@ export default {
       myTransition: 'slide-right',
       componentsName: ['Home', 'Rules', 'Graphs', 'Information Retrieval', 'Recommender System', 'About'],
       componentsPaths: ['', 'rules', 'graphs', 'info-ret', 'rec-sys', 'about'],
+      initialX: null,
+      initialY: null,
     }
   },
   computed: {
@@ -50,6 +56,10 @@ export default {
     },
     windowWidth() {
       return this.$store.state.windowWidth;
+    },
+    isMenuOpen() {
+      console.log(this.$store.state.isMenuOpen);
+      return this.$store.state.isMenuOpen;
     },
     titles() {
       let titles = [];
@@ -73,6 +83,66 @@ export default {
     ToggleSwitch,
   },
   methods: {
+    // from https://stackoverflow.com/questions/53192433/how-to-detect-swipe-in-javascript
+    startTouch(e) {
+      this.initialX = e.touches[0].clientX;
+      this.initialY = e.touches[0].clientY;
+//      console.log("start", e);
+    },
+    moveTouch(e) {
+//    console.log("move", e);
+      if (this.initialX === null) {
+        return;
+      }
+
+      if (this.initialY === null) {
+        return;
+      }
+
+      var currentX = e.touches[0].clientX;
+      var currentY = e.touches[0].clientY;
+
+      var diffX = this.initialX - currentX;
+      var diffY = this.initialY - currentY;
+
+      if (Math.abs(diffX) > Math.abs(diffY)) {
+        // sliding horizontally
+        if (diffX > 0 && this.isMenuOpen) {
+          // swiped left
+          let doc = document.getElementById('mainBody');
+          if(Math.abs(diffX) > 50)
+          {
+          console.log("dispatch left");
+            this.$store.dispatch('updateMenuOpen', false);
+            doc.style.transform = '';
+            return;
+          }
+          doc.style.transform = `translateX(${diffX}px)`;
+        } else if(diffX < 0 && !this.isMenuOpen){
+          // swiped right
+          let doc = document.getElementById('mainBody');
+          if(Math.abs(diffX) > 50)
+          {
+            console.log("dispatch right");
+            this.$store.dispatch('updateMenuOpen', true);
+            doc.style.transform = '';
+            return;
+          }
+          doc.style.transform = `translateX(${-diffX}px)`;
+
+        }  
+      } else {
+        // sliding vertically
+        if (diffY > 0) {
+          // swiped up
+          console.log("swiped up");
+        } else {
+          // swiped down
+          console.log("swiped down");
+        }  
+      }
+
+    },
     openMenu() {
       console.log("menu");
     },
@@ -116,6 +186,8 @@ export default {
     },
   },
   mounted() {
+    window.addEventListener("touchstart", this.startTouch, false);
+    window.addEventListener("touchmove", this.moveTouch, false);
     let cookies = document.cookie.split(";");
     let isDark = true;
     cookies.forEach(pair => {
@@ -204,7 +276,8 @@ export default {
 }
 
 #darkApp {
-  background-color: #171313;
+//  background-color: #171313;
+  background-color: #090808;
   color: $text-primary-dark;
 }
 
@@ -308,5 +381,18 @@ body {
 .navBar {
   position: relative;
   z-index: 1000;
+}
+#mainBody {
+  position:absolute;
+  box-shadow: -.5rem 0px 2em 4em #00000061;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  transition: transform .9s $bounce-bezier;
+}
+.slideBody {
+  transform: translateX(38%);
+
 }
 </style>
