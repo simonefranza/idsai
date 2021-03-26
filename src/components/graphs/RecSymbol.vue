@@ -13,7 +13,7 @@
 </template>
 
 <script>
-import SymbolList from '@/components/SymbolList.vue';
+import SymbolList from '@/components/graphs/SymbolList.vue';
 
 export default {
   name: 'RecSymbol',

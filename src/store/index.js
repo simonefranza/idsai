@@ -7,7 +7,9 @@ export default new Vuex.Store({
   state: {
     darkTheme : true,
     windowWidth : 0,
+    windowHeight : 0,
     isWideDevice : true,
+    isWiderThanHigher : true,
     isMenuOpen: false,
   },
   mutations: {
@@ -22,8 +24,14 @@ export default new Vuex.Store({
     SET_WINDOW_WIDTH(state, width) {
       state.windowWidth = width;
     },
+    SET_WINDOW_HEIGHT(state, height) {
+      state.windowHeight = height;
+    },
     SET_IS_WIDE_DEVICE(state, isWide) {
       state.isWideDevice = isWide;
+    },
+    SET_IS_WIDER_THAN_HIGHER(state, isWiderThanHigher) {
+      state.isWiderThanHigher = isWiderThanHigher;
     },
     SET_MENU_OPEN(state, isOpen) {
       state.isMenuOpen = isOpen;
@@ -40,6 +48,13 @@ export default new Vuex.Store({
         return;
       context.commit('SET_WINDOW_WIDTH', newValue);
       context.commit('SET_IS_WIDE_DEVICE', newValue > 960);
+      context.commit('SET_IS_WIDER_THAN_HIGHER', newValue > context.state.windowHeight);
+    },
+    updateWindowHeight(context, newValue) {
+      if(typeof(newValue) !== 'number')
+        return;
+      context.commit('SET_WINDOW_HEIGHT', newValue);
+      context.commit('SET_IS_WIDER_THAN_HIGHER', context.state.windowWidth > newValue);
     },
     updateMenuOpen(context, newValue) {
       if(typeof(newValue) !== 'boolean')

@@ -22,13 +22,15 @@
 
 export default {
   name: 'SymbolList',
-  components: {
+  computed: {
+    darkTheme() {
+      return this.$store.state.darkTheme;
+    }
   },
   props: {
     data: {required: true},
     ptrSymbols: {required: true},
     depth: {required: true},
-    darkTheme: {required: true},
     value: { required: true}, 
   },
   data() {
@@ -65,12 +67,12 @@ export default {
     }
   },
   beforeCreate() {
-    this.$options.components.RecSymbol = require("./RecSymbol.vue").default;
+    this.$options.components.RecSymbol = require("@/components/graphs/RecSymbol.vue").default;
   }
 
 }
 </script>
 
 <style scoped lang="scss">
-.boldElement{}
+.a{}
 </style>

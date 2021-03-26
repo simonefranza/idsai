@@ -46,8 +46,8 @@
 </template>
 
 <script>
-import Footer from '@/components/Footer.vue'
-import ToggleSwitch from '@/components/ToggleSwitch.vue'
+import Footer from '@/components/footer/Footer.vue'
+import ToggleSwitch from '@/components/extra/ToggleSwitch.vue'
 import scssData from '@/assets/scss/jsVariables.scss'
 
 
@@ -220,6 +220,7 @@ export default {
     },
     resized(e) {
       this.$store.dispatch('updateWindowWidth', e.currentTarget.innerWidth); 
+      this.$store.dispatch('updateWindowHeight', e.currentTarget.innerHeight); 
     },
   },
   watch: {
@@ -241,6 +242,7 @@ export default {
     this.$store.dispatch('updateDarkTheme', isDark);
 
     this.$store.dispatch('updateWindowWidth', window.innerWidth); 
+    this.$store.dispatch('updateWindowHeight', window.innerHeight); 
     window.addEventListener('resize', this.resized);
 
     setTimeout(() => {

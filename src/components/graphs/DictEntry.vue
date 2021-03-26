@@ -43,7 +43,7 @@
 </template>
 
 <script>
-import RecSymbol from '@/components/RecSymbol.vue';
+import RecSymbol from '@/components/graphs/RecSymbol.vue';
 export default {
   components: {
     RecSymbol,

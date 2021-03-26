@@ -16,7 +16,7 @@
 
 <script>
 import VueTree from '@ssthouse/vue-tree-chart';
-import TreeNode from '@/components/TreeNode.vue';
+import TreeNode from '@/components/rbs/TreeNode.vue';
 
 export default {
   props: {

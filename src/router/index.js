@@ -12,7 +12,7 @@ const routes = [
   {
     path: '/rules',
     name: 'Rules',
-    component: () => import(/* webpackChunkName: "rules" */ '../views/Rules.vue')
+    component: () => import(/* webpackChunkName: "rules" */ '../views/RBS.vue')
   },
   {
     path: '/info-ret',

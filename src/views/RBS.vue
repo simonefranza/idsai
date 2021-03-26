@@ -1,7 +1,7 @@
 <template>
   <div class="rulesComp">
-    <div class="row">
-      <div class="col-4">
+    <div class="row" :style="isWideDevice || isWiderThanHigher ? 'flex-direction: row' : 'flex-direction: column'">
+      <div class="col-4" v-if="isWideDevice">
         <RulesControlPanel :numRules="numRules" 
            :numFacts="numFacts" 
            :facts="facts"
@@ -20,10 +20,9 @@
            @increaseCyclesNum="increaseCyclesNum"
            @decreaseCyclesNum="decreaseCyclesNum"
            @reloadRules="reloadRules"
-           @reloadFacts="reloadFacts"
-           v-if="isWideDevice"/>
+           @reloadFacts="reloadFacts"/>
       </div>
-      <div class="col-4">
+      <div :class="isWideDevice ? 'col-4' : 'col'">
         <RulesDatabase :currentFacts="currentFacts"
            :rules="rules"
            :mapFrom="mapFrom"
@@ -32,7 +31,7 @@
            @deleteFact="deleteFact"
            @deleteRule="deleteRule"/>
       </div>
-      <div class="col-4" v-if="cycleNum >= 0">
+      <div :class="isWideDevice ? 'col-4' : 'col'" v-if="cycleNum >= 0">
         <ForwardChaining :cycles="cycles"
                          :cycleNum="cycleNum"
                          :mapFrom="mapFrom"
@@ -55,12 +54,13 @@
 
 <script>
 //TODO: implement writing own formulas
-import BackwardChaining from '@/components/BackwardChaining.vue';
-import ForwardChaining from '@/components/ForwardChaining.vue';
-import RulesControlPanel from '@/components/RulesControlPanel.vue';
-import RulesDatabase from '@/components/RulesDatabase.vue';
+import BackwardChaining from '@/components/rbs/BackwardChaining.vue';
+import ForwardChaining from '@/components/rbs/ForwardChaining.vue';
+import RulesControlPanel from '@/components/rbs/RulesControlPanel.vue';
+import RulesDatabase from '@/components/rbs/RulesDatabase.vue';
 
 export default {
+  name: 'Rules',
   components: {
     BackwardChaining,
     ForwardChaining,
@@ -74,7 +74,7 @@ export default {
       rules: [],
       facts: [],
       addedRules: [],
-      cycleNum : -1,
+      cycleNum : 4,
       bckwd_chain : false,
       num_facts_bool : false,
       num_rules_bool : false,
@@ -94,8 +94,17 @@ export default {
     darkTheme() {
       return this.$store.state.darkTheme;
     },
+    windowWidth() {
+      return this.$store.state.windowWidth;
+    },
+    windowHeight() {
+      return this.$store.state.windowHeight;
+    },
     isWideDevice() {
       return this.$store.state.isWideDevice;
+    },
+    isWiderThanHigher() {
+      return this.$store.state.isWiderThanHigher;
     },
     invalidGoal: function() {
       if(!this.currentGoal.trim())

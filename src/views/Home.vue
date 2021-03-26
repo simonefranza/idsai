@@ -23,9 +23,9 @@
 </template>
 
 <script>
-import MenuIcon from '@/components/MenuIcon.vue'
-import HomeGraph from '@/components/HomeGraph.vue'
-import HomeNetwork from '@/components/HomeNetwork.vue'
+import MenuIcon from '@/components/extra/MenuIcon.vue'
+import HomeGraph from '@/components/home/HomeGraph.vue'
+import HomeNetwork from '@/components/home/HomeNetwork.vue'
 
 export default { 
   data() {
