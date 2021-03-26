@@ -1,0 +1,18 @@
+.flexSpan{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1px 5px 1px 0;
+}
+.dataCard {
+  text-align: left;
+}
+.dataTitle {
+  font-weight: bold;
+}
+.highlightRowDark {
+  background: #1b1b1b;
+}
+.highlightRowLight{
+  background: #eae7e7;
+}
