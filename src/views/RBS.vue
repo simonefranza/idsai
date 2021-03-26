@@ -2,7 +2,7 @@
   <div class="rulesComp">
     <div class="row" :style="isWideDevice || isWiderThanHigher ? 'flex-direction: row' : 'flex-direction: column'">
       <div class="col-4" v-if="isWideDevice">
-        <RulesControlPanel :numRules="numRules" 
+        <RBSControlPanel :numRules="numRules" 
            :numFacts="numFacts" 
            :facts="facts"
            :rules="rules"
@@ -23,7 +23,7 @@
            @reloadFacts="reloadFacts"/>
       </div>
       <div :class="isWideDevice ? 'col-4' : 'col'">
-        <RulesDatabase :currentFacts="currentFacts"
+        <RBSDatabase :currentFacts="currentFacts"
            :rules="rules"
            :mapFrom="mapFrom"
            :mapTo="mapTo"
@@ -56,16 +56,16 @@
 //TODO: implement writing own formulas
 import BackwardChaining from '@/components/rbs/BackwardChaining.vue';
 import ForwardChaining from '@/components/rbs/ForwardChaining.vue';
-import RulesControlPanel from '@/components/rbs/RulesControlPanel.vue';
-import RulesDatabase from '@/components/rbs/RulesDatabase.vue';
+import RBSControlPanel from '@/components/rbs/RBSControlPanel.vue';
+import RBSDatabase from '@/components/rbs/RBSDatabase.vue';
 
 export default {
   name: 'Rules',
   components: {
     BackwardChaining,
     ForwardChaining,
-    RulesControlPanel,
-    RulesDatabase,
+    RBSControlPanel,
+    RBSDatabase,
   },
   data() {
     return {
