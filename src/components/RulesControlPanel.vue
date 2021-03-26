@@ -44,15 +44,20 @@
         </span>
         <div class="cyclesDiv">
           <span class="toggleBlock">Replace variable</span>
-          <b-form-input size="sm" ref="fromInputField" v-model="mapFrom" placeholder="A"
-                                                                         :class="{'shake' : invalidRulesNumber, 'darkInputForm' : darkTheme, 'mediumInput' : 'true'}"
-                                                                         @keyup.enter="addMapping()"></b-form-input>
+          <b-form-input size="sm" 
+                        ref="fromInputField"
+                        v-model="mapFrom" 
+                        placeholder="A"
+                        :class="{'shake' : invalidRulesNumber, 'darkInputForm' : darkTheme, 'mediumInput' : 'true'}"
+                        @keyup.enter="addMapping()"></b-form-input>
           <span>:</span>
-          <b-form-input size="sm" v-model="mapTo" placeholder="something"
-                                                  :class="{'shake' : invalidRulesNumber, 'darkInputForm' : darkTheme, 'mediumInput' : 'true'}"
-                                                  @keyup.enter="addMapping()"></b-form-input>
+          <b-form-input size="sm" 
+                        v-model="mapTo"
+                        placeholder="something"
+                        :class="{'shake' : invalidRulesNumber, 'darkInputForm' : darkTheme, 'mediumInput' : 'true'}"
+                        @keyup.enter="addMapping()"></b-form-input>
           <b-icon :class="['cyclesIconRight', isMapValid ? 'iconEnabled' : 'iconDisabled', darkTheme ? 'iconDark' : 'iconLight']"
-                                                  icon="check-circle" aria-hidden="true" @click="addMapping"></b-icon>
+                  icon="check-circle" aria-hidden="true" @click="addMapping"></b-icon>
         </div>
       </b-card-text>
       <b-card-sub-title :sub-title-text-variant="darkTheme ? 'light' : 'secondary'" class="mb-3 mt-4">Algorithms</b-card-sub-title>
@@ -187,6 +192,27 @@ export default {
     },
   },
   methods: {
+    isRuleAlreadyPresent(ants, cons, rules) {
+      for(let j = 0; j < rules.length; j++)
+      {
+        let currAnts = [...rules[j]['ant']].sort();
+        let haveSameAnts = true;
+        if(currAnts.length !== ants.length)
+          continue;
+
+        ants.sort().forEach((el, index) => {
+          if(currAnts[index].localeCompare(el))
+            haveSameAnts = false;
+        });
+
+        if((haveSameAnts && rules[j]['cons'].localeCompare(cons) === 0) ||
+          ants.includes(cons))
+        {
+          return true;
+        }
+      }
+      return false;
+    },
     increaseCyclesNum() {
       if(this.cycleNum === this.cycles.length - 1)
         return;
@@ -230,6 +256,8 @@ export default {
       let indexVar = this.variables.indexOf(fromVar);
       if(indexVar === -1)
         return;
+      if(this.searchedVariable.localeCompare(fromVar) === 0)
+        this.searchedVariable = toVar;
       this.$emit('addNewMapping', {fromVar: fromVar, toVar: toVar, indexVar: indexVar});
       this.mapTo = '';
       this.mapFrom = '';

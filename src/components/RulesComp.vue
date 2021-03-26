@@ -1,83 +1,54 @@
 <template>
   <div class="rulesComp">
     <div class="row">
-    <div class="col-4">
-      <RulesControlPanel :numRules="numRules" 
-                          :numFacts="numFacts" 
-                          :facts="facts"
-                          :rules="rules"
-                          :variables="variables"
-                          :cycles="cycles"
-                          :cycleNumber="cycleNum"
-                          @newFact="addNewFact"
-                          @newRule="addNewRule"
-                          @newMapFrom="updateMapFrom"
-                          @newMapTo="updateMapTo"
-                          @newGoal="updateCurrentGoal"
-                          @addNewMapping="addMapping"
-                          @updateNumRulesTemp="setNumRulesTemp"
-                          @updateNumFactsTemp="setNumFactsTemp"
-                          @increaseCyclesNum="increaseCyclesNum"
-                          @decreaseCyclesNum="decreaseCyclesNum"
-                          @reloadRules="reloadRules"
-                          @reloadFacts="reloadFacts"
-                          v-if="isWideDevice"/>
-    </div>
-
-      <!-- Facts and DB -->
       <div class="col-4">
-        <b-card class="dataCard" v-bind:bg-variant="!darkTheme ? 'light' : 'dark'" v-bind:text-variant="!darkTheme ? '' : 'white'">
-          <b-card-text>
-            <p class="dataTitle">Facts</p>
-            <span v-for="(fact, index) in currentFacts" :key="fact"  
-                  :class="{'highlightRowDark' : index === hoveredFact && darkTheme, 'highlightRowLight' : index  === hoveredFact && !darkTheme}"
-              @mouseover="hoveredFact = index" @mouseleave="hoveredFact = -1" class="flexSpan">
-              <span>
-              <span :class="{'dataTitle' : fact.localeCompare(mapFrom.trim()) ===0}">
-                {{fact}}</span>
-                </span>
-                <span>
-                <b-icon :class="['cyclesIconRight', 'iconEnabled', darkTheme ? 'iconDark' : 'iconLight']"
-                  icon="x-circle" aria-hidden="true" @click="deleteFact(index)" v-if="index === hoveredFact"></b-icon>
-                <br/>
-                </span>
-            </span>
-            <br/>
-            <p class="dataTitle">Rules</p>
-            <span v-for="(rule, index) in rules" :key ="rule.id" 
-                  :class="{'boldElement' : index+1 == ruleHovered, 'highlightRowDark' : index  === hoveredRule && darkTheme, 'highlightRowLight' : index === hoveredRule && !darkTheme}"
-              @mouseover="hoveredRule = index" @mouseleave="hoveredRule = -1" class="flexSpan">
-              <span>
-              <span>R{{rule.id}}: </span> 
-              <span v-for="(ant,index) in rule.ant" :key="ant"><span :class="{'dataTitle' : ant.localeCompare(mapFrom.trim()) ===0}">{{ant}}</span><span v-if="index !== rule.ant.length - 1"> & </span>
-              </span>
-              <span> → </span>
-              <span :class="{'dataTitle' : rule.cons.localeCompare(mapFrom.trim()) ===0}">{{rule.cons}}</span><br/>
-              </span><span>
-              <b-icon :class="['cyclesIconRight', 'iconEnabled', darkTheme ? 'iconDark' : 'iconLight']"
-                                                              icon="x-circle" aria-hidden="true" @click="deleteRule(index)" v-if="index === hoveredRule"></b-icon>
-              </span>
-            </span>
-          </b-card-text>
-        </b-card>
+        <RulesControlPanel :numRules="numRules" 
+           :numFacts="numFacts" 
+           :facts="facts"
+           :rules="rules"
+           :variables="variables"
+           :cycles="cycles"
+           :cycleNumber="cycleNum"
+           @newFact="addNewFact"
+           @newRule="addNewRule"
+           @newMapFrom="updateMapFrom"
+           @newMapTo="updateMapTo"
+           @newGoal="updateCurrentGoal"
+           @addNewMapping="addMapping"
+           @updateNumRulesTemp="setNumRulesTemp"
+           @updateNumFactsTemp="setNumFactsTemp"
+           @increaseCyclesNum="increaseCyclesNum"
+           @decreaseCyclesNum="decreaseCyclesNum"
+           @reloadRules="reloadRules"
+           @reloadFacts="reloadFacts"
+           v-if="isWideDevice"/>
       </div>
-
-      <!-- Rules table -->
+      <div class="col-4">
+        <RulesDatabase :currentFacts="currentFacts"
+           :rules="rules"
+           :mapFrom="mapFrom"
+           :mapTo="mapTo"
+           :ruleHovered="ruleHovered"
+           @deleteFact="deleteFact"
+           @deleteRule="deleteRule"/>
+      </div>
       <div class="col-4" v-if="cycleNum >= 0">
-        <b-table striped hover :items="cycles[cycleNum]" :dark="darkTheme" @row-hovered="rowHovered" @row-unhovered="rowUnhovered">
-          <template #cell(added_facts)="row">
-            <span :class="{'dataTitle' : row.value.localeCompare(mapFrom.trim()) === 0}">{{row.value}}</span>
-
-          </template>
-        </b-table>
+        <ForwardChaining :cycles="cycles"
+                         :cycleNum="cycleNum"
+                         :mapFrom="mapFrom"
+                         @rowUnhovered="rowUnhovered"
+                         @rowHovered="rowHovered"/>
       </div>
 
     </div>
     <div class="row">
-    <div class="col-12" v-if="!invalidGoal">
-      <BackwardChaining :facts="currentFacts" :rules="rules"
-                     :variables="variables" :goal="currentGoal" :highlight="mapFrom.trim()"/>
-    </div>
+      <div class="col-12" v-if="!invalidGoal">
+        <BackwardChaining :facts="currentFacts" 
+                          :rules="rules"
+                          :variables="variables" 
+                          :goal="currentGoal"
+                          :highlight="mapFrom.trim()"/>
+      </div>
     </div>
   </div>
 </template>
@@ -85,12 +56,16 @@
 <script>
 //TODO: implement writing own formulas
 import BackwardChaining from '@/components/BackwardChaining.vue';
+import ForwardChaining from '@/components/ForwardChaining.vue';
 import RulesControlPanel from '@/components/RulesControlPanel.vue';
+import RulesDatabase from '@/components/RulesDatabase.vue';
 
 export default {
   components: {
     BackwardChaining,
+    ForwardChaining,
     RulesControlPanel,
+    RulesDatabase,
   },
   data() {
     return {
@@ -100,21 +75,19 @@ export default {
       facts: [],
       addedRules: [],
       cycleNum : -1,
-      ruleHovered: -1,
       bckwd_chain : false,
       num_facts_bool : false,
       num_rules_bool : false,
       numRulesTemp : '5',
       numFacts : 5,
       numRules : 5,
-      hoveredRule : false,
-      hoveredFact : false,
       searchedVariable : '',
       mapFrom : '',
       mapTo : '',
       currentGoal : '',
       reloadRulesDisabled : false,
       reloadFactsDisabled : false,
+      ruleHovered : -1,
     }
   },
   computed: {
@@ -177,6 +150,12 @@ export default {
 
   },
   methods: {
+    rowHovered(item) {
+      this.ruleHovered = item.fired_rules.slice(1);
+    },
+    rowUnhovered() {
+      this.ruleHovered = -1;
+    },
     setNumRulesTemp(newVal) {
       if(!newVal.trim() || isNaN(newVal.trim()))
       {
@@ -194,7 +173,6 @@ export default {
       this.numFacts = parseInt(newVal.trim());
     },
     reloadFacts() {
-    console.log("ciaofaajl");
       this.facts.splice(0, this.facts.length, ...this.generatedFacts());
     },
     reloadRules () {
@@ -205,8 +183,6 @@ export default {
       let toVar = map.toVar;
       let fromVar = map.fromVar;
       this.variables.splice(indexVar, 1, toVar);
-      if(this.searchedVariable.localeCompare(fromVar) === 0)
-        this.searchedVariable = toVar;
       if((indexVar = this.facts.indexOf(fromVar)) !== -1)
         this.facts.splice(indexVar, 1, toVar);
       this.rules.forEach(ruleObj => {
@@ -308,7 +284,7 @@ export default {
         }
       }
       return false;
-      },
+    },
     validateAnt(ant, facts) {
       for(let i = 0; i < ant.length; i++)
       {
@@ -322,12 +298,6 @@ export default {
     },
     decreaseCyclesNum() {
       this.cycleNum--;
-    },
-    rowHovered(item) {
-      this.ruleHovered = item.fired_rules.slice(1);
-    },
-    rowUnhovered() {
-      this.ruleHovered = -1;
     },
     updateMapTo(newVal) {
       this.mapTo = newVal;
@@ -379,30 +349,4 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.dataCard {
-  text-align: left;
-}
-.dataTitle {
-  font-weight: bold;
-}
-
-.flexSpan{
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1px 5px 1px 0;
-}
-
-.switchPadding {
-  margin-right:10px;
-}
-.disabledInput {
-  opacity: 0.7;
-}
-.highlightRowDark {
-  background: #1b1b1b;
-}
-.highlightRowLight{
-  background: #eae7e7;
-}
 </style>
