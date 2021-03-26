@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="72.5" height="72.5" viewBox="0 0 72.5 72.5">
+  <defs>
+    <linearGradient id="linear-gradient" x2="1" y2="1" gradientUnits="objectBoundingBox">
+      <stop offset="0" stop-color="#242323"/>
+      <stop offset="1" stop-color="#141414"/>
+    </linearGradient>
+    <filter id="Ellisse_11" x="0" y="0" width="62" height="62" filterUnits="userSpaceOnUse">
+      <feOffset dx="-3" dy="-3" input="SourceAlpha"/>
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feFlood flood-opacity="0.584"/>
+      <feComposite operator="in" in2="blur"/>
+      <feComposite in="SourceGraphic"/>
+    </filter>
+    <filter id="Ellisse_13" x="1.5" y="1.5" width="71" height="71" filterUnits="userSpaceOnUse">
+      <feOffset dx="3" dy="3" input="SourceAlpha"/>
+      <feGaussianBlur stdDeviation="3.5" result="blur-2"/>
+      <feFlood flood-color="#fff" flood-opacity="0.043"/>
+      <feComposite operator="in" in2="blur-2"/>
+      <feComposite in="SourceGraphic"/>
+    </filter>
+  </defs>
+  <g id="Algo_icon_pressed" data-name="Algo icon pressed" transform="translate(9 9)">
+    <g id="Algo_Icon" data-name="Algo Icon">
+      <g transform="matrix(1, 0, 0, 1, -9, -9)" filter="url(#Ellisse_11)">
+        <circle id="Ellisse_11-2" data-name="Ellisse 11" cx="25" cy="25" r="25" transform="translate(9 9)" fill="url(#linear-gradient)"/>
+      </g>
+      <g transform="matrix(1, 0, 0, 1, -9, -9)" filter="url(#Ellisse_13)">
+        <circle id="Ellisse_13-2" data-name="Ellisse 13" cx="25" cy="25" r="25" transform="translate(9 9)" fill="url(#linear-gradient)"/>
+      </g>
+    </g>
+    <g id="AlgoiconNodes" transform="translate(15 13.774)">
+      <g id="Ellisse_12" data-name="Ellisse 12" fill="#f5d681" stroke="#f5d681" stroke-width="1">
+        <circle cx="1.935" cy="1.935" r="1.935" stroke="none"/>
+        <circle cx="1.935" cy="1.935" r="1.435" fill="none"/>
+      </g>
+      <g id="Ellisse_12-2" data-name="Ellisse 12" transform="translate(0 6.194)" fill="#f5d681" stroke="#f5d681" stroke-width="1">
+        <circle cx="1.935" cy="1.935" r="1.935" stroke="none"/>
+        <circle cx="1.935" cy="1.935" r="1.435" fill="none"/>
+      </g>
+      <g id="Ellisse_12-3" data-name="Ellisse 12" transform="translate(10.065 3.097)" fill="#f5d681" stroke="#f5d681" stroke-width="1">
+        <circle cx="1.935" cy="1.935" r="1.935" stroke="none"/>
+        <circle cx="1.935" cy="1.935" r="1.435" fill="none"/>
+      </g>
+      <g id="Ellisse_12-4" data-name="Ellisse 12" transform="translate(20.129 5.419)" fill="#f5d681" stroke="#f5d681" stroke-width="1">
+        <circle cx="1.935" cy="1.935" r="1.935" stroke="none"/>
+        <circle cx="1.935" cy="1.935" r="1.435" fill="none"/>
+      </g>
+      <g id="Ellisse_12-5" data-name="Ellisse 12" transform="translate(0 12.387)" fill="#f5d681" stroke="#f5d681" stroke-width="1">
+        <circle cx="1.935" cy="1.935" r="1.935" stroke="none"/>
+        <circle cx="1.935" cy="1.935" r="1.435" fill="none"/>
+      </g>
+      <g id="Ellisse_12-6" data-name="Ellisse 12" transform="translate(10.065 9.29)" fill="#f5d681" stroke="#f5d681" stroke-width="1">
+        <circle cx="1.935" cy="1.935" r="1.935" stroke="none"/>
+        <circle cx="1.935" cy="1.935" r="1.435" fill="none"/>
+      </g>
+      <g id="Ellisse_12-7" data-name="Ellisse 12" transform="translate(20.129 11.613)" fill="#f5d681" stroke="#f5d681" stroke-width="1">
+        <circle cx="1.935" cy="1.935" r="1.935" stroke="none"/>
+        <circle cx="1.935" cy="1.935" r="1.435" fill="none"/>
+      </g>
+      <g id="Ellisse_12-8" data-name="Ellisse 12" transform="translate(0 18.581)" fill="#f5d681" stroke="#f5d681" stroke-width="1">
+        <circle cx="1.935" cy="1.935" r="1.935" stroke="none"/>
+        <circle cx="1.935" cy="1.935" r="1.435" fill="none"/>
+      </g>
+      <g id="Ellisse_12-9" data-name="Ellisse 12" transform="translate(10.065 15.484)" fill="#f5d681" stroke="#f5d681" stroke-width="1">
+        <circle cx="1.935" cy="1.935" r="1.935" stroke="none"/>
+        <circle cx="1.935" cy="1.935" r="1.435" fill="none"/>
+      </g>
+      <line id="Linea_9" data-name="Linea 9" x2="10.065" y2="3.097" transform="translate(1.935 1.935)" fill="none" stroke="#f5d681" stroke-width="1"/>
+      <line id="Linea_10" data-name="Linea 10" y1="3.097" x2="10.065" transform="translate(1.935 5.032)" fill="none" stroke="#f5d681" stroke-width="1"/>
+      <line id="Linea_11" data-name="Linea 11" x2="10.065" y2="3.097" transform="translate(1.935 8.129)" fill="none" stroke="#f5d681" stroke-width="1"/>
+      <line id="Linea_12" data-name="Linea 12" x2="10.065" y2="9.29" transform="translate(1.935 1.935)" fill="none" stroke="#f5d681" stroke-width="1"/>
+      <line id="Linea_13" data-name="Linea 13" y1="3.097" x2="10.065" transform="translate(1.935 11.226)" fill="none" stroke="#f5d681" stroke-width="1"/>
+      <line id="Linea_14" data-name="Linea 14" x2="10.065" y2="3.097" transform="translate(1.935 14.323)" fill="none" stroke="#f5d681" stroke-width="1"/>
+      <line id="Linea_15" data-name="Linea 15" y1="3.097" x2="10.065" transform="translate(1.935 17.419)" fill="none" stroke="#f5d681" stroke-width="1"/>
+      <line id="Linea_16" data-name="Linea 16" y1="9.29" x2="10.065" transform="translate(1.935 11.226)" fill="none" stroke="#f5d681" stroke-width="1"/>
+      <line id="Linea_17" data-name="Linea 17" x1="10.065" y2="3.871" transform="translate(12 13.548)" fill="none" stroke="#f5d681" stroke-width="1"/>
+      <line id="Linea_18" data-name="Linea 18" x1="10.065" y1="2.323" transform="translate(12 11.226)" fill="none" stroke="#f5d681" stroke-width="1"/>
+      <line id="Linea_19" data-name="Linea 19" x1="10.065" y2="3.871" transform="translate(12 7.355)" fill="none" stroke="#f5d681" stroke-width="1"/>
+      <line id="Linea_20" data-name="Linea 20" x1="10.065" y1="2.323" transform="translate(12 5.032)" fill="none" stroke="#f5d681" stroke-width="1"/>
+      <line id="Linea_21" data-name="Linea 21" x1="10.065" y1="8.516" transform="translate(12 5.032)" fill="none" stroke="#f5d681" stroke-width="1"/>
+      <line id="Linea_22" data-name="Linea 22" x1="10.065" y2="10.065" transform="translate(12 7.355)" fill="none" stroke="#f5d681" stroke-width="1"/>
+    </g>
+  </g>
+</svg>

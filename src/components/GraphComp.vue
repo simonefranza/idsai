@@ -236,47 +236,22 @@ export default {
       return -1;
     },
     setStyle: function() {
-      if(this.darkTheme)
-      {
-        let mEndEl = document.getElementById("m-end");
-        if(mEndEl && mEndEl.childNodes && mEndEl.childNodes.length)
-          mEndEl.childNodes[0].style.fill = scssData.textSecondaryDark; 
-        document.styleSheets.forEach(ss => {
-          ss.cssRules.forEach(rule => {
-            if(rule.selectorText && rule.selectorText.localeCompare('.node:hover') === 0)
-            {
-              rule.style.stroke = scssData.secondaryDark;
-              rule.style['stroke-width'] = '3px';
-            }
-            else if(rule.selectorText && rule.selectorText.localeCompare('.node.selected') === 0)
-              rule.style.stroke = scssData.secondaryDark;
-            else if(rule.selectorText && rule.selectorText.localeCompare('.link-label, .node-label') === 0)
-              rule.style.fill = '#f4eeee';
-
-          });
+      let mEndEl = document.getElementById("m-end");
+      if(mEndEl && mEndEl.childNodes && mEndEl.childNodes.length)
+        mEndEl.childNodes[0].style.fill = this.darkTheme ? scssData.textSecondaryDark : scssData.bgFooterLight;
+      document.styleSheets.forEach(ss => {
+        ss.cssRules.forEach(rule => {
+          if(rule.selectorText && rule.selectorText.localeCompare('.node:hover') === 0)
+          {
+            rule.style.stroke = this.darkTheme ? scssData.secondaryDark : scssData.secondaryLight;
+            rule.style['stroke-width'] = '3px';
+          }
+          else if(rule.selectorText && rule.selectorText.localeCompare('.node.selected') === 0)
+            rule.style.stroke = this.darkTheme ? scssData.secondaryDark : scssData.secondaryLight;
+          else if(rule.selectorText && rule.selectorText.localeCompare('.link-label, .node-label') === 0)
+            rule.style.fill = this.darkTheme ? '#f4eeee' : '#272d2f';
         });
-      }
-      else
-      {
-        let mEndEl = document.getElementById("m-end");
-        if(mEndEl && mEndEl.childNodes && mEndEl.childNodes.length)
-          mEndEl.childNodes[0].style.fill = scssData.bgFooterLight; 
-        document.styleSheets.forEach(ss => {
-          ss.cssRules.forEach(rule => {
-            if(rule.selectorText && rule.selectorText.localeCompare('.node:hover') === 0)
-            {
-              rule.style.stroke = scssData.secondaryLight;
-              rule.style['stroke-width'] = '3px';
-            }
-            else if(rule.selectorText && rule.selectorText.localeCompare('.node.selected') === 0)
-              rule.style.stroke = scssData.secondaryLight;
-            else if(rule.selectorText && rule.selectorText.localeCompare('.link-label, .node-label') === 0)
-              rule.style.fill = '#272d2f';
-          });
-        });
-      }
-
-
+      });
     },
   },
   watch: {

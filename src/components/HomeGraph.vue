@@ -18,7 +18,7 @@
         {{lightnessVar}}
         <input type="range" min="1" max="100" v-model="lightnessVar" class="slider" id="myRange"><br/>
       </div>
-      <d3-network :net-nodes="nodes" :net-links="links" :options="options" :custom-forces="customForces"/>
+      <d3-network :net-nodes="savedNodes" :net-links="links" :options="options" :custom-forces="customForces" />
     </div>
   </div>
 </template>
@@ -77,27 +77,9 @@ export default {
       return options;
     },
     nodes() {
-      this.windowWidth;
-      let nodes =[];
-      let nodeBase = this.relToPixels(this.nodeSizeBase);
-      for(let i = 0; i < this.numNodes; i++) 
-      {
-        if(i === 0)
-        {
-          nodes.push({id: i, _color: this.firstNodeColor, _size: this.relToPixels(this.firstNodeSize), pinned:true,
-            fx: this.relativeMouseX, fy: this.relativeMouseY, _cssClass: 'firstNode'});
-          continue;
-        }
-        let size = Math.floor(nodeBase * (Math.random() * this.nodeSizeVar * 2 / 100 + 1 - this.nodeSizeVar / 100));
-        let hue = Math.floor(this.hueBase* (Math.random() * this.hueVar* 2 / 100 + 1 - this.hueVar / 100));
-        let saturation = Math.floor(this.saturationBase* (Math.random() * this.saturationVar* 2 / 100 + 1 - this.saturationVar / 100));
-        let lightness = Math.floor(this.lightnessBase* (Math.random() * this.lightnessVar* 2 / 100 + 1 - this.lightnessVar / 100));
-        nodes.push({id: i, _color: 'hsl(' + hue + ', ' + saturation.toString() + '%, ' +
-          lightness.toString() + '%)', _size: size});
-      }
-      return nodes;
-
-
+//      console.log("byu");
+//      this.windowWidth;
+      return this.makeNodes();
     },
     links() {
       return [];
@@ -146,7 +128,8 @@ export default {
           lightness.toString() + '%)', _size: size});
       }
 
-      this.savedNodes = [...nodes];
+      this.savedNodes = nodes;
+      return nodes;
     },
     setStyle() {
       document.styleSheets.forEach(ss => {
@@ -159,6 +142,10 @@ export default {
   },
   watch: {
     windowWidth() {
+      console.log("ch");
+      this.force = ((document.documentElement.clientWidth/100) ** 2) * .5428;
+      this.makeNodes();
+
       clearInterval(this.breatheInterval);
       this.force = ((this.windowWidth/100) ** 2) * .5428;
       let forceMax = this.force * 1.1;
