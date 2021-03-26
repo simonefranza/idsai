@@ -94,7 +94,7 @@
       </transition>
       </div>
       <div class="col-7">
-        <GraphComp :data="chosenData" 
+        <WordNetGraph :data="chosenData" 
                     :ptrSymbols="ptrSymbols" 
                     :depth="exploreDepth" 
                     v-model="hoveredWord"
@@ -114,7 +114,7 @@ import WordNetHelp from '@/components/graphs/WordNetHelp.vue'
 import WordNetLegend from '@/components/graphs/WordNetLegend.vue'
 import WordNetResult from '@/components/graphs/WordNetResult.vue'
 import AdjacencyMat from '@/components/graphs/AdjacencyMat.vue'
-import GraphComp from '@/components/graphs/GraphComp.vue'
+import WordNetGraph from '@/components/graphs/WordNetGraph.vue'
 import AdjacencyGraph from '@/components/graphs/AdjacencyGraph.vue'
 import ToggleSwitch from '@/components/extra/ToggleSwitch.vue'
 import ramjet from 'ramjet'
@@ -122,13 +122,13 @@ import ramjet from 'ramjet'
 export default {
   name: 'Graph',
   components: {
-    WordNetResult,
     AdjacencyMat,
-    GraphComp,
     AdjacencyGraph,
-    ToggleSwitch,
+    WordNetResult,
+    WordNetGraph,
     WordNetHelp,
     WordNetLegend,
+    ToggleSwitch,
   },
   data() {
     return {
