@@ -8,6 +8,9 @@ export default new Vuex.Store({
     darkTheme : true,
     windowWidth : 0,
     windowHeight : 0,
+    screenWidth : 0,
+    screenHeight : 0,
+    isRotated: 0,
     isWideDevice : true,
     isWiderThanHigher : true,
     isMenuOpen: false,
@@ -26,6 +29,9 @@ export default new Vuex.Store({
     },
     SET_WINDOW_HEIGHT(state, height) {
       state.windowHeight = height;
+    },
+    SET_IS_ROTATED(state, rotated) {
+      state.isRotated = rotated;
     },
     SET_IS_WIDE_DEVICE(state, isWide) {
       state.isWideDevice = isWide;
@@ -46,15 +52,39 @@ export default new Vuex.Store({
     updateWindowWidth(context, newValue) {
       if(typeof(newValue) !== 'number')
         return;
+
       context.commit('SET_WINDOW_WIDTH', newValue);
-      context.commit('SET_IS_WIDE_DEVICE', newValue > 960);
-      context.commit('SET_IS_WIDER_THAN_HIGHER', newValue > context.state.windowHeight);
+      if(context.state.isRotated)
+      {
+        context.commit('SET_IS_WIDER_THAN_HIGHER', newValue < context.state.windowHeight);
+      }
+      else {
+        context.commit('SET_IS_WIDE_DEVICE', newValue > 960);
+        context.commit('SET_IS_WIDER_THAN_HIGHER', newValue > context.state.windowHeight);
+      }
     },
     updateWindowHeight(context, newValue) {
       if(typeof(newValue) !== 'number')
         return;
       context.commit('SET_WINDOW_HEIGHT', newValue);
-      context.commit('SET_IS_WIDER_THAN_HIGHER', context.state.windowWidth > newValue);
+      if(context.state.isRotated)
+      {
+        context.commit('SET_IS_WIDE_DEVICE', newValue > 960);
+        context.commit('SET_IS_WIDER_THAN_HIGHER', context.state.windowWidth < newValue);
+      }
+      else {
+        context.commit('SET_IS_WIDER_THAN_HIGHER', context.state.windowWidth > newValue);
+      }
+    },
+    updateOrientation(context, newValue) {
+      if(typeof(newValue) !== 'number' || newValue === context.state.orientation)
+        return;
+      let isRotate = Math.cos(newValue * 2 * Math.PI / 360) < 0.0001;
+      context.commit('SET_IS_ROTATED', isRotate);
+      if(isRotate)
+        context.commit('SET_IS_WIDER_THAN_HIGHER', context.state.windowWidth < context.state.windowHeight);
+      else
+        context.commit('SET_IS_WIDER_THAN_HIGHER', context.state.windowWidth > context.state.windowHeight);
     },
     updateMenuOpen(context, newValue) {
       if(typeof(newValue) !== 'boolean')

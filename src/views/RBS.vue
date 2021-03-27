@@ -1,6 +1,12 @@
 <template>
-  <div class="rulesComp">
-    <div class="row" :style="isWideDevice || isWiderThanHigher ? 'flex-direction: row' : 'flex-direction: column'">
+  <span :class="{'home-small' : !isWideDevice}">
+  <div :class="['smallNav', darkTheme ? 'dark-theme' : 'light-theme']" v-if="!isWideDevice">
+    <MenuIcon  class="menuIcon" />
+    <h1 >.rules</h1>
+    <div/>
+  </div>
+  <div class="rules-comp">
+    <div class="row rules-comp-row" :style="isWideDevice || isWiderThanHigher ? 'flex-direction: row' : 'flex-direction: column'">
       <div class="col-4" v-if="isWideDevice">
         <RBSControlPanel :numRules="numRules" 
            :numFacts="numFacts" 
@@ -31,7 +37,9 @@
            @deleteFact="deleteFact"
            @deleteRule="deleteRule"/>
       </div>
-      <div :class="isWideDevice ? 'col-4' : 'col'" v-if="cycleNum >= 0">
+      <div :class="isWideDevice ? 'col-4' : 'col'" 
+           :style="!isWideDevice ? 'flex-grow:2' : ''"
+        v-if="cycleNum >= 0">
         <ForwardChaining :cycles="cycles"
                          :cycleNum="cycleNum"
                          :mapFrom="mapFrom"
@@ -50,10 +58,11 @@
       </div>
     </div>
   </div>
+  </span>
 </template>
 
 <script>
-//TODO: implement writing own formulas
+import MenuIcon from '@/components/extra/MenuIcon.vue'
 import BackwardChaining from '@/components/rbs/BackwardChaining.vue';
 import ForwardChaining from '@/components/rbs/ForwardChaining.vue';
 import RBSControlPanel from '@/components/rbs/RBSControlPanel.vue';
@@ -66,19 +75,18 @@ export default {
     ForwardChaining,
     RBSControlPanel,
     RBSDatabase,
+    MenuIcon,
   },
   data() {
     return {
+      event: null,
       variables : ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'],
       fields: ["from", "to", "remove"],
       rules: [],
       facts: [],
-      addedRules: [],
       cycleNum : 4,
-      bckwd_chain : false,
       num_facts_bool : false,
       num_rules_bool : false,
-      numRulesTemp : '5',
       numFacts : 5,
       numRules : 5,
       searchedVariable : '',
@@ -88,6 +96,8 @@ export default {
       reloadRulesDisabled : false,
       reloadFactsDisabled : false,
       ruleHovered : -1,
+      window: window,
+      screen: screen,
     }
   },
   computed: {
@@ -105,6 +115,9 @@ export default {
     },
     isWiderThanHigher() {
       return this.$store.state.isWiderThanHigher;
+    },
+    isRotated() {
+      return this.$store.state.isRotated;
     },
     invalidGoal: function() {
       if(!this.currentGoal.trim())
@@ -358,4 +371,45 @@ export default {
 </script>
 
 <style scoped lang="scss">
+.rules-comp {
+  display: flex;
+  flex-grow: 1;
+  width: 100%;
+  padding: 0 20px 20px 20px;
+  &-row {
+  flex-grow: 1;
+  }
+}
+.smallNav{
+  font-family: 'Dancing Script', handwriting;
+  padding: 1em;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  top: 0;
+  width: 100%;
+  height: 6em;
+  background: transparent;
+  z-index : 1000;
+}
+.menuIcon {
+  position: absolute;
+  z-index: 10000;
+  top: 50%;
+  transform: translateY(-50%);
+  left: 0;
+}
+.home-small {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-grow: 1;
+  flex-direction: column;
+  overflow: hidden;
+  margin: 0;
+  h1 {
+    font-size: 2.1em;
+  }
+}
 </style>

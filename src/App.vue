@@ -12,7 +12,7 @@
         </span>
       </div>
     </span>
-    <span id="mainBody" :class="[isMenuOpen ? 'slideBody' : '']">
+    <span id="mainBody" :class="{'slideBody' : isMenuOpen}">
     <div id="pageContainer" :class="[!darkTheme ? 'page-light' : 'page-dark']">
       <div :id="!darkTheme ? 'lightNav' : 'darkNav'" :class="[!darkTheme ? 'light-theme' : 'dark-theme', 'navBar']" v-if="isWideDevice">
 
@@ -62,8 +62,9 @@ export default {
       componentsPaths: ['', 'rules', 'graphs', 'info-ret', 'rec-sys', 'about'],
       initialX: null,
       initialY: null,
-      lastDiffX: null,
+      lastX: null,
       lastTimestamp: null,
+      touchMoveCounter: 0,
     }
   },
   computed: {
@@ -80,7 +81,6 @@ export default {
       return this.$store.state.windowWidth;
     },
     isMenuOpen() {
-      console.log(this.$store.state.isMenuOpen);
       return this.$store.state.isMenuOpen;
     },
     titles() {
@@ -116,22 +116,25 @@ export default {
     endTouch(e) {
       if(this.isWideDevice)
         return;
-      if(!this.lastDiffX)
+      if(!this.lastX)
         return;
       let doc = document.getElementById('mainBody');
       doc.style.transform = '';
-      let speed =  (this.lastDiffX - this.initialX) / (e.timeStamp - this.lastTimestamp);
-      this.lastDiffX = null;
-      if(speed <= -1.2)
-      {
+      let displacement = this.lastX - this.initialX;
+      this.lastX = null;
+      this.initialX = null;
+      this.initialY = null;
+      if(Math.abs(displacement) < this.windowWidth * 0.3)
+        return;
+      let speed =  displacement / (e.timeStamp - this.lastTimestamp);
+      if((speed >= 1.2 && !this.isMenuOpen) || (speed <= -1.2 && this.isMenuOpen))
         this.$store.dispatch('updateMenuOpen', !this.isMenuOpen);
-      }
     },
     moveTouch(e) {
       if(this.isWideDevice)
         return;
+
       this.lastTimestamp = e.timeStamp;
-//    console.log("move", e);
       if (this.initialX === null) {
         return;
       }
@@ -148,7 +151,7 @@ export default {
 
       if (Math.abs(diffX) > Math.abs(diffY)) {
         // sliding horizontally
-        this.lastDiffX = diffX;
+        this.lastX = currentX;
 //        if (diffX > 0 && this.isMenuOpen) {
 //          // swiped left
 //          let doc = document.getElementById('mainBody');
@@ -186,7 +189,6 @@ export default {
 
     },
     openMenu() {
-      console.log("menu");
     },
     setStyle() {
       if(this.darkTheme)
@@ -218,9 +220,11 @@ export default {
       }
 
     },
-    resized(e) {
-      this.$store.dispatch('updateWindowWidth', e.currentTarget.innerWidth); 
-      this.$store.dispatch('updateWindowHeight', e.currentTarget.innerHeight); 
+    resized() {
+      //TODO mute when developing
+      this.$store.dispatch('updateOrientation', window.orientation); 
+      this.$store.dispatch('updateWindowWidth', screen.width); 
+      this.$store.dispatch('updateWindowHeight', screen.height); 
     },
   },
   watch: {
@@ -241,9 +245,12 @@ export default {
     });
     this.$store.dispatch('updateDarkTheme', isDark);
 
-    this.$store.dispatch('updateWindowWidth', window.innerWidth); 
-    this.$store.dispatch('updateWindowHeight', window.innerHeight); 
+    this.$store.dispatch('updateOrientation', window.orientation); 
+//    this.$store.dispatch('updateOrientation', 0); 
+    this.$store.dispatch('updateWindowWidth', screen.width); 
+    this.$store.dispatch('updateWindowHeight', screen.height); 
     window.addEventListener('resize', this.resized);
+    window.addEventListener('orientationchange', this.resized);
 
     setTimeout(() => {
       this.reload = Math.random();
@@ -256,8 +263,6 @@ export default {
       next()
     });
     this.$router.afterEach(() => {
-      if(this.isMenuOpen)
-        console.log('hi');
       window.setTimeout(() => this.$store.dispatch('updateMenuOpen', false), 700);
     });
   },
