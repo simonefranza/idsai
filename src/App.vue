@@ -222,7 +222,7 @@ export default {
     },
     resized() {
       //TODO mute when developing
-      this.$store.dispatch('updateOrientation', window.orientation); 
+      //      this.$store.dispatch('updateOrientation', window.orientation); 
       this.$store.dispatch('updateWindowWidth', screen.width); 
       this.$store.dispatch('updateWindowHeight', screen.height); 
     },

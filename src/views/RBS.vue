@@ -28,7 +28,8 @@
            @reloadRules="reloadRules"
            @reloadFacts="reloadFacts"/>
       </div>
-      <div :class="isWideDevice ? 'col-4' : 'col'">
+      <div :class="[isWideDevice ? 'col-4' : 'col', 
+        !isWideDevice && isWiderThanHigher ? 'database-div' : '']">
         <RBSDatabase :currentFacts="currentFacts"
            :rules="rules"
            :mapFrom="mapFrom"
@@ -37,8 +38,9 @@
            @deleteFact="deleteFact"
            @deleteRule="deleteRule"/>
       </div>
-      <div :class="isWideDevice ? 'col-4' : 'col'" 
-           :style="!isWideDevice ? 'flex-grow:2' : ''"
+      <div :class="[isWideDevice ? 'col-4' : 'col',
+        !isWideDevice && isWiderThanHigher ? 'algorithm-div' : '']" 
+        :style="!isWideDevice ? 'flex-grow:2' : ''"
         v-if="cycleNum >= 0">
         <ForwardChaining :cycles="cycles"
                          :cycleNum="cycleNum"
@@ -411,5 +413,12 @@ export default {
   h1 {
     font-size: 2.1em;
   }
+}
+.database-div {
+  padding-right: 0;
+
+}
+.algorithm-div {
+  padding-left: 0; 
 }
 </style>

@@ -92,7 +92,7 @@
 }
 
 .db-list {
-  overflow: scroll;
+  overflow: auto;
   position:relative;
   &-wider {
     height:80%;

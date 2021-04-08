@@ -23,13 +23,20 @@
       <p class="dataTitle">Facts</p>
     </div>
     <hr :class="['solid', darkTheme ? 'hr-dark' : 'hr-light']" />
-    <div v-for="(el,outerIndex) in cycles[cycleNum]" :key="outerIndex">
-      <div class="fwd-chain-row">
-        <div class="fwd-chain-row-entry">{{el.cycle || ' '}}</div>
-        <div class="fwd-chain-row-entry">{{el.fired_rules || ' '}}</div>
-        <div class="fwd-chain-row-entry">{{el.added_facts || ' '}}</div>
+    <div class="table-rows">
+      <div v-for="(el, index) in cycles[cycleNum]" :key="index">
+        <br v-if="index && el.cycle"/>
+        <div class="fwd-chain-row">
+          <div class="fwd-chain-row-entry">{{el.cycle || ' '}}</div>
+          <div class="fwd-chain-row-entry">{{el.fired_rules || ' '}}</div>
+          <div class="fwd-chain-row-entry">{{el.added_facts || ' '}}</div>
+        </div>
       </div>
     </div>
+    <span class="button-container">
+      <div class="mobile-btn">Remove Cycle</div>
+      <div class="mobile-btn">Add Cycle</div>
+    </span>
     </div>
 </template>
 
@@ -78,5 +85,25 @@ export default {
   &-entry {
     width: 100%;
   }
+}
+.button-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.mobile-btn {
+  border-radius: 2em;
+  border: 1px solid $secondary-dark;
+  color: $secondary-dark;
+  width: calc(50% - .5em);
+  height: 2em;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.2em;
+}
+.table-rows {
+  height: 70%;
+  overflow-y: auto;
 }
 </style>
