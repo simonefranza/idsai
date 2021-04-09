@@ -51,10 +51,11 @@
 .iconEnabled{
   opacity: 1;
   cursor: pointer;
+  z-index: 1;
 }
 
 .iconDisabled{
-opacity: 0.5;
+  opacity: 0.5;
 }
 
 .iconDark {

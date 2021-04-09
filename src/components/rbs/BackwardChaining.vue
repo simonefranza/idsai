@@ -1,7 +1,12 @@
 <template>
-  <div>
+  <div 
+  @touchstart="startTouch"
+  @touchmove="moveTouch"
+  @touchend="endTouch">
   <vue-tree
-    style="width: 2000px; height: 2000px;"
+    :style="{width: '2000px', height: '2000px', transform: 'scale(' + scaleFactor + ') ' +
+    'translate(' + translateX + 'px,' + translateY + 'px)',
+    transformOrigin: origin}"
     :dataset="backwardChain"
     :config="treeConfig"
     :key="updateVar"
@@ -32,21 +37,47 @@ export default {
   },
   data() {
     return {
-    treeConfig: { nodeWidth: 325, nodeHeight: 200, levelHeight: 200},
-    treeNodes : 0,
-    updateVar: false,
+      treeConfig: { nodeWidth: 325, nodeHeight: 200, levelHeight: 200},
+      treeNodes : 0,
+      updateVar: false,
+      touchesNum: null,
+      initialX1: null,
+      initialY1: null,
+      initialX2: null,
+      initialY2: null,
+      currentDist: null,
+      scaleFactor: 1,
+      translateX: -800,
+      translateY: -120,
+      origin: 'top',
+      isScale: null,
     }
   },
   computed: {
     darkTheme() {
       return this.$store.state.darkTheme;
     },
+    windowWidth() {
+      return this.$store.state.windowWidth;
+    },
+    windowHeight() {
+      return this.$store.state.windowHeight;
+    },
+    isWideDevice() {
+      return this.$store.state.isWideDevice;
+    },
+    isWiderThanHigher() {
+      return this.$store.state.isWiderThanHigher;
+    },
+    isRotated() {
+      return this.$store.state.isRotated;
+    },
     //TODO check A->B B->A
     backwardChain: function() {
       if(!this.goal)
         return {};
       let res = this.checkGoal(this.goal, [...this.facts], [this.goal]);
-//      console.log(res);
+      //      console.log(res);
       if(res === true || res === false)
       {
         return {value: this.goal, nodeData: {goal: this.goal, 
@@ -55,18 +86,84 @@ export default {
       res.nodeData.isRoot = true;
       return res;
     },
-    testData: function() {
-      if(!this.goal)
-        return {};
-      let data = {};
-//      data.value = '4';
-//      data.test = [4,2,5,1,5];
-//      data.children = [{value: '5'}, {value: '6', children: [{value: '8'}]}];
-      data.value = this.goal;
-      return JSON.parse(JSON.stringify(data));
-    }
   },
   methods: {
+    startTouch(e) {
+      if(this.isWideDevice)
+        return;
+      this.touchesNum = e.touches.length;
+      if(this.touchesNum !== 2)
+        return;
+      this.initialX1 = e.touches[0].clientX;
+      this.initialY1 = e.touches[0].clientY;
+      this.initialX2 = e.touches[1].clientX;
+      this.initialY2 = e.touches[1].clientY;
+      this.initialDist = (this.initialX1 - this.initialX2)**2 + 
+        (this.initialY1 - this.initialY2)**2;
+    },
+    moveTouch(e) {
+      if(this.isWideDevice)
+        return;
+
+      if(this.initialX1 === null || this.initialY1 === null ||
+        this.initialX2 === null || this.initialY2 === null)
+        return;
+
+      let currentX1 = e.touches[0].clientX;
+      let currentY1 = e.touches[0].clientY;
+      let currentX2 = e.touches[1].clientX;
+      let currentY2 = e.touches[1].clientY;
+      let currentDist = (currentX1 - currentX2)**2 + 
+        (currentY1 - currentY2)**2;
+
+      let scale = currentDist / this.initialDist;
+      scale = scale > 1 ? (scale - 1) * 0.5 + 1 : 
+        1 - ((1 - scale) * 0.5);
+
+
+      let vec1 = [currentX1 - this.initialX1, currentY1 - this.initialY1];
+      let vec2 = [currentX2 - this.initialX2, currentY2 - this.initialY2];
+      let dotProduct = vec1[0] * vec2[0] + vec1[1] * vec2[1];
+      let vect1Len = Math.sqrt(vec1[0]**2 + vec1[1]**2);
+      let vect2Len = Math.sqrt(vec2[0]**2 + vec2[1]**2);
+      let cosine = dotProduct / (vect1Len * vect2Len); 
+      let resVec = [vec1[0] + vec2[0], vec1[1] + vec2[1]];
+      this.initialX1 = e.touches[0].clientX;
+      this.initialY1 = e.touches[0].clientY;
+      this.initialX2 = e.touches[1].clientX;
+      this.initialY2 = e.touches[1].clientY;
+
+      console.log(dotProduct, vect1Len, vect2Len, cosine, cosine > 1/Math.sqrt(2), currentDist - this.initialDist);
+      this.initialDist = currentDist;
+      this.isScale = !isNaN(cosine) && cosine <= 1 / Math.sqrt(2);
+
+      //translate
+      if(!this.isScale)
+      {
+        //        this.origin = 'center';
+        this.translateX += resVec[0]*0.5;
+        this.translateY += resVec[1]*0.5;
+      }
+      //scale
+      else
+      {
+        //        this.origin = `${(e.touches[0].clientX + e.touches[1].clientX)}px ${(e.touches[0].clientY + e.touches[1].clientY)}px`;
+        this.scaleFactor = this.scaleFactor * scale;
+      }
+
+      e.preventDefault();
+    },
+    endTouch(e) {
+      this.touchesNum = null;
+      this.initialX1 = null;
+      this.initialY1 = null;
+      this.initialX2 = null;
+      this.initialY2 = null;
+      this.initialDist = null;
+      //      this.origin = 'center';
+      this.isScale = null;
+      e.preventDefault();
+    },
     checkGoal(goal, facts, path)
     {
       let data = {};

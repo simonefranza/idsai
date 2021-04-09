@@ -1,5 +1,8 @@
 <template>
-  <div :id="!darkTheme ? 'lightApp' : 'darkApp'" class="bodyScrollbar" >
+  <div :id="!darkTheme ? 'lightApp' : 'darkApp'" class="bodyScrollbar" 
+   @touchstart="startTouch"
+   @touchmove="moveTouch"
+   @touchend="endTouch">
     <span class="mobileMenuContainer" v-if="!isWideDevice">
       <div :class="[darkTheme ? ['mobileMenuDark'] : ['mobileMenuLight']]">
         <span v-for="el in titles" :key="el.name">
@@ -107,16 +110,14 @@ export default {
   methods: {
     // from https://stackoverflow.com/questions/53192433/how-to-detect-swipe-in-javascript
     startTouch(e) {
-      if(this.isWideDevice)
+      if(this.isWideDevice || e.touches.length > 1)
         return;
       this.initialX = e.touches[0].clientX;
       this.initialY = e.touches[0].clientY;
       this.lastTimestamp = e.timeStamp;
     },
     endTouch(e) {
-      if(this.isWideDevice)
-        return;
-      if(!this.lastX)
+      if(this.isWideDevice || e.touches.length > 1 || !this.lastX)
         return;
       let doc = document.getElementById('mainBody');
       doc.style.transform = '';
@@ -127,21 +128,16 @@ export default {
       if(Math.abs(displacement) < this.windowWidth * 0.3)
         return;
       let speed =  displacement / (e.timeStamp - this.lastTimestamp);
+      if(e.path.map(el => el?.id).includes('rbs-algo-block'))
+        return;
       if((speed >= 1.2 && !this.isMenuOpen) || (speed <= -1.2 && this.isMenuOpen))
         this.$store.dispatch('updateMenuOpen', !this.isMenuOpen);
     },
     moveTouch(e) {
-      if(this.isWideDevice)
+      if(this.isWideDevice || e.touches.length > 1 || this.initialX === null || this.initialY === null)
         return;
 
       this.lastTimestamp = e.timeStamp;
-      if (this.initialX === null) {
-        return;
-      }
-
-      if (this.initialY === null) {
-        return;
-      }
 
       var currentX = e.touches[0].clientX;
       var currentY = e.touches[0].clientY;
@@ -233,9 +229,9 @@ export default {
     },
   },
   created() {
-    window.addEventListener("touchstart", this.startTouch, false);
-    window.addEventListener("touchmove", this.moveTouch, {passive: false});
-    window.addEventListener("touchend", this.endTouch, false);
+    //    window.addEventListener("touchstart", this.startTouch, false);
+    //    window.addEventListener("touchmove", this.moveTouch, {passive: false});
+    //    window.addEventListener("touchend", this.endTouch, false);
     let cookies = document.cookie.split(";");
     let isDark = true;
     cookies.forEach(pair => {
@@ -272,87 +268,6 @@ export default {
 <style lang="scss">
 @import url('https://fonts.googleapis.com/css?family=Dancing+Script');
 @import url('https://fonts.googleapis.com/css?family=Nunito');
-
-
-/* router desktop change animation */
-.slide-right-enter-active, .slide-right-leave-active,
-.slide-left-enter-active, .slide-left-leave-active  {
-  transition-duration: .5s;
-  transition-property: height, opacity, transform;
-}
-
-.slide-left-enter-active, .slide-right-enter-active {
-  transition-timing-function: $bounce-bezier;
-}
-
-.slide-left-leave-active, .slide-right-leave-active  {
-  transition-timing-function: $slow-in-bezier;
-}
-
-.slide-left-enter, .slide-right-enter {
-  opacity: 0;
-}
-
-.slide-left-enter {
-  transform: translateX(100%);
-}
-
-.slide-right-enter {
-  transform: translateX(-100%);
-}
-
-.slide-left-leave-to, .slide-right-leave-to{
-  opacity: 0;
-}
-
-.slide-left-leave-to{
-  transform: translateX(-100%);
-}
-
-.slide-right-leave-to{
-  transform: translateX(100%);
-}
-/* end */
-/* router mobile change animation */
-.slide-down-enter-active, .slide-down-leave-active,
-.slide-up-enter-active, .slide-up-leave-active  {
-  transition-duration: .5s;
-  transition-property: height, opacity, transform;
-}
-
-.slide-up-enter-active, .slide-down-enter-active {
-  transition-timing-function: $bounce-bezier;
-}
-
-.slide-up-leave-active, .slide-down-leave-active  {
-  transition-timing-function: $slow-in-bezier;
-}
-
-.slide-up-enter, .slide-down-enter {
-  opacity: 0;
-}
-
-.slide-up-enter {
-  transform: translateY(100%);
-}
-
-.slide-down-enter {
-  transform: translateY(-100%);
-}
-
-.slide-up-leave-to, .slide-down-leave-to{
-  opacity: 0;
-}
-
-.slide-up-leave-to{
-  transform: translateY(-100%);
-}
-
-.slide-down-leave-to{
-  transform: translateY(100%);
-}
-/* end */
-
 #lightApp, #darkApp {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;

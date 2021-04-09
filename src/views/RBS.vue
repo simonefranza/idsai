@@ -39,18 +39,38 @@
            @deleteRule="deleteRule"/>
       </div>
       <div :class="[isWideDevice ? 'col-4' : 'col',
-        !isWideDevice && isWiderThanHigher ? 'algorithm-div' : '']" 
-        :style="!isWideDevice ? 'flex-grow:2' : ''"
-        v-if="cycleNum >= 0">
+        !isWideDevice && isWiderThanHigher ? 'algorithm-div-wider' : '',
+        !isWideDevice && !isWiderThanHigher ? 'algorithm-div-higher' : '']" 
+        :style="!isWideDevice ? 'flex-grow:2; ' : ''"
+        @touchstart="startTouch"
+        @touchmove="moveTouch"
+        @touchend="endTouch">
+        <div id="rbs-algo-block"
+          :class="{'db-block' : !isWideDevice ,
+          'db-block-dark' : darkTheme,
+          'db-block-light' : !darkTheme}">
+        <transition :name="!showFwdCh ? 'slide-left' : 'slide-right'" mode="out-in">
         <ForwardChaining :cycles="cycles"
                          :cycleNum="cycleNum"
                          :mapFrom="mapFrom"
                          @rowUnhovered="rowUnhovered"
-                         @rowHovered="rowHovered"/>
+                         @rowHovered="rowHovered"
+                         @decreaseCyclesNum="decreaseCyclesNum"
+                         @increaseCyclesNum="increaseCyclesNum" 
+                       v-if="showFwdCh"/>
+        <BackwardChaining :facts="currentFacts" 
+          class="moved-bwd-ch"
+          :rules="rules"
+          :variables="variables" 
+          :goal="currentGoal"
+          :highlight="mapFrom.trim()"
+          v-if="!showFwdCh && !isWideDevice"/>
+        </transition>
+      </div>
       </div>
 
     </div>
-    <div class="row">
+    <div class="row" v-if="isWideDevice">
       <div class="col-12" v-if="!invalidGoal">
         <BackwardChaining :facts="currentFacts" 
                           :rules="rules"
@@ -94,12 +114,17 @@ export default {
       searchedVariable : '',
       mapFrom : '',
       mapTo : '',
-      currentGoal : '',
+      currentGoal : 'Z',
       reloadRulesDisabled : false,
       reloadFactsDisabled : false,
       ruleHovered : -1,
       window: window,
       screen: screen,
+      showFwdCh: true,
+      touchesNum: 0,
+      initialX: null,
+      initialY: null,
+      lastDiffX: null,
     }
   },
   computed: {
@@ -174,6 +199,42 @@ export default {
 
   },
   methods: {
+    startTouch(e) {
+      if(this.isWideDevice)
+        return;
+      this.touchesNum = e.touches.length;
+      if(this.touchesNum > 1)
+        return;
+      this.initialX = e.touches[0].clientX;
+      this.initialY = e.touches[0].clientY;
+    },
+    moveTouch(e) {
+      if(e.touches.length > this.touchesNum)
+        this.touchesNum = e.touches.length;
+      if(this.isWideDevice || this.touchesNum > 1 || !this.initialX || !this.initialY)
+        return;
+
+      var currentX = e.touches[0].clientX;
+      this.lastDiffX = this.initialX - currentX;
+    },
+    endTouch() {
+      if(this.touchesNum > 1 || !this.initialX || !this.initialY || this.isWideDevice)
+      {
+        this.touchesNum = 0;
+        return;
+      }
+      this.touchesNum = 0;
+
+      //swiped left 
+      if(this.showFwdCh && this.lastDiffX > this.windowWidth * 0.33)
+        this.showFwdCh = false;
+      else if(!this.showFwdCh && this.lastDiffX < - this.windowWidth * 0.33)
+        this.showFwdCh = true;
+
+      this.initialX = null;
+      this.initialY = null;
+      this.lastDiffX = null;
+    },
     rowHovered(item) {
       this.ruleHovered = item.fired_rules.slice(1);
     },
@@ -373,6 +434,7 @@ export default {
 </script>
 
 <style scoped lang="scss">
+@import '@/assets/scss/_rbs_db_shared.scss';
 .rules-comp {
   display: flex;
   flex-grow: 1;
@@ -418,7 +480,15 @@ export default {
   padding-right: 0;
 
 }
-.algorithm-div {
+.algorithm-div-wider {
   padding-left: 0; 
+  max-height: calc(100vh - 8.5em);
+}
+.algorithm-div-higher{
+  height: calc(100vh - 50vw - 11em);
+  max-width: 100vw;
+}
+.moved-bwd-ch {
+  overflow: hidden;
 }
 </style>
