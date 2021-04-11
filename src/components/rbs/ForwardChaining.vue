@@ -136,6 +136,6 @@ export default {
 .table-rows {
   height: calc(100% - 8.4em);
   overflow-y: auto;
-  z-index: 0;
+  position: relative;
 }
 </style>

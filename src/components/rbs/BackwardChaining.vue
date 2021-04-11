@@ -3,9 +3,11 @@
   @touchstart="startTouch"
   @touchmove="moveTouch"
   @touchend="endTouch">
+  <h4 style="text-align: center; position: relative; z-index: 100"
+    v-if="!isWideDevice">Backward Chaining</h4>
   <vue-tree
-    :style="{width: '2000px', height: '2000px', transform: 'scale(' + scaleFactor + ') ' +
-    'translate(' + translateX + 'px,' + translateY + 'px)',
+    :style="{width: '2000px', height: '2000px', transform: 'scale(' + (isWideDevice ? 1 : scaleFactor) + ') ' +
+    'translate(' + (isWideDevice ? 0 : translateX) + 'px,' + (isWideDevice ? 0 : translateY) + 'px)',
     transformOrigin: origin}"
     :dataset="backwardChain"
     :config="treeConfig"
@@ -50,10 +52,17 @@ export default {
       translateX: -800,
       translateY: -120,
       origin: 'top',
+      lastCenter: null,
       isScale: null,
     }
   },
   computed: {
+    nodeWidth() {
+      return 325*this.scaleFactor;
+    },
+    nodeHeight() {
+      return 200 * this.scaleFactor;
+    },
     darkTheme() {
       return this.$store.state.darkTheme;
     },
@@ -100,6 +109,11 @@ export default {
       this.initialY2 = e.touches[1].clientY;
       this.initialDist = (this.initialX1 - this.initialX2)**2 + 
         (this.initialY1 - this.initialY2)**2;
+      let currCenter = [(e.touches[0].clientX + e.touches[1].clientX)/2, 
+        (e.touches[0].clientY + e.touches[1].clientY)/2 + this.translateY];
+      this.translateX += currCenter[0] - this.lastCenter[0];
+      this.translateY += currCenter[1] - this.lastCenter[1];
+      this.lastCenter = currCenter;
     },
     moveTouch(e) {
       if(this.isWideDevice)
@@ -133,23 +147,23 @@ export default {
       this.initialX2 = e.touches[1].clientX;
       this.initialY2 = e.touches[1].clientY;
 
-      console.log(dotProduct, vect1Len, vect2Len, cosine, cosine > 1/Math.sqrt(2), currentDist - this.initialDist);
       this.initialDist = currentDist;
       this.isScale = !isNaN(cosine) && cosine <= 1 / Math.sqrt(2);
-
+      let currCenter = [(e.touches[0].clientX + e.touches[1].clientX)/2, 
+        (e.touches[0].clientY + e.touches[1].clientY)/2 + this.translateY];
+      this.origin = `${currCenter[0]}px ${currCenter[1]}px`;
       //translate
-      if(!this.isScale)
-      {
+      //      if(!this.isScale)
+      //      {
         //        this.origin = 'center';
-        this.translateX += resVec[0]*0.5;
-        this.translateY += resVec[1]*0.5;
-      }
+        this.translateX += (resVec[0])*0.5;
+        this.translateY += (resVec[1])*0.5;
+      //      }
       //scale
-      else
-      {
-        //        this.origin = `${(e.touches[0].clientX + e.touches[1].clientX)}px ${(e.touches[0].clientY + e.touches[1].clientY)}px`;
+    //      else
+    //      {
         this.scaleFactor = this.scaleFactor * scale;
-      }
+    //      }
 
       e.preventDefault();
     },

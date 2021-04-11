@@ -436,8 +436,8 @@ export default {
 <style scoped lang="scss">
 @import '@/assets/scss/_rbs_db_shared.scss';
 .rules-comp {
-  display: flex;
-  flex-grow: 1;
+  //  display: flex;
+  //  flex-grow: 1;
   width: 100%;
   padding: 0 20px 20px 20px;
   &-row {
