@@ -127,14 +127,14 @@ export default {
       if(!this.newAntecedents.trim())
         return true;
       let splitty = this.newAntecedents.trim().split(' ').filter(el => el);
+      console.log(splitty, this.variables);
 
-      if(splitty.length === 1 && !this.variables.includes(splitty[0]))
-        return true;
       if(splitty.length % 2 === 0)
         return true;
       let isInvalid = false;
       let alreadyUsed = [];
       splitty.forEach((el, index) => {
+        console.log(el, index)
         if(index % 2 && el.localeCompare("&"))
           isInvalid = true;
         else if(index % 2 === 0 && (el.localeCompare('&') === 0 || 
@@ -158,6 +158,7 @@ export default {
     isNewRuleValid: function() {
       if(this.invalidNewAntecedents || this.invalidNewConsequent)
         return false;
+      console.log('bub')
       return !this.isRuleAlreadyPresent([...this.antecedentsToAdd], this.newConsequent.trim(), this.rules);
     },
     isMapValid: function() {
