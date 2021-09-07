@@ -134,17 +134,11 @@ export default {
     invalidNewAntecedents: function() {
       if(!this.newAntecedents.trim())
         return true;
-      let splitty = this.newAntecedents.trim().split(' ').filter(el => el);
-      console.log(splitty, this.variables);
-
       let parseTree = this.antParseTree;
-      console.log('finalTree', parseTree);
       if(parseTree === -1 || parseTree === true || parseTree === false)
         return true;
       let leaves = this.antLeaves;
-      console.log('leaves', leaves);
       for(let leaf of leaves){
-        console.log(leaf, this.newConsequent);
         if(leaf.localeCompare(this.newConsequent.trim()) === 0)
           return true;
       }
@@ -163,7 +157,6 @@ export default {
     isNewRuleValid: function() {
       if(this.invalidNewAntecedents || this.invalidNewConsequent)
         return false;
-      console.log('bub');
       //return !this.isRuleAlreadyPresent([...this.antecedentsToAdd], this.newConsequent.trim(), this.rules);
       return true;
     },
@@ -211,15 +204,11 @@ export default {
       return [parseTree['node']];
     },
     createParseTree(ant) {
-      console.log(ant);
       let splitty = ant.replace(/\s/g, '').split(/(?=[&|()])|(?<=[&|()])/g);
-      console.log('split', splitty);
       let parCheck = this.checkParentheses(splitty);
-      console.log('parcheck', parCheck);
       if(parCheck === false)
         return false;
       let orderCheck = this.checkOrder(splitty);
-      console.log('orderCheck', orderCheck);
       if(!orderCheck)
         return false;
       return this.recTree(splitty, parCheck);
@@ -360,7 +349,6 @@ export default {
           return {'node' : '&', 'left' : leftChild, 'right' : rightChild}; 
         return false;
       }
-      console.log("smth went wrong", splitty);
       return false;
     },
     trimParentheses(splitty, parIndexes) {
