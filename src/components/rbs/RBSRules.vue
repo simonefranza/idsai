@@ -17,13 +17,15 @@
             class="flexSpan">
         <span>
           <span>R{{rule.id}}: </span> 
-          <span v-for="(ant,index) in rule.ant"
+          <!--<span v-for="(ant,index) in rule.ant"
                 :key="ant">
             <span :class="{'dataTitle' : ant.localeCompare(mapFrom.trim()) ===0}">
               {{ant}}
             </span>
             <span v-if="index !== rule.ant.length - 1">&</span>
           </span>
+            -->
+          <span v-html=recursivePrint(rule.ant)></span>
           <span> → </span>
           <span :class="{'dataTitle' : rule.cons.localeCompare(mapFrom.trim()) ===0}">{{rule.cons}}</span>
           <br/>
@@ -69,6 +71,21 @@ export default {
   methods: {
     deleteRule(index) {
       this.$emit('deleteRule', index);
+    },
+    recursivePrint(tree) {
+      if(!tree['left'])
+      {
+        if(tree['node'].localeCompare(this.mapFrom.trim()) === 0)
+          return '<b>' + tree['node'] + '</b>';
+        return tree['node'];
+      }
+      let leftSide = this.recursivePrint(tree['left']);
+      let rightSide = this.recursivePrint(tree['right']);
+      if(tree['left']['node'].localeCompare('|') === 0 && tree['node'].localeCompare('&') === 0)
+        leftSide = '( ' + leftSide + ' )';
+      if(tree['right']['node'].localeCompare('|') === 0 && tree['node'].localeCompare('&') === 0)
+        rightSide = '( ' + rightSide + ' )';
+      return  leftSide + ' ' + tree['node'] + ' ' + rightSide;
     }
   },
 }

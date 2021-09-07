@@ -3,13 +3,24 @@
        :class="['tree-node', data.nodeData.isTrue ? 'greenNode' : 'redNode', darkTheme ? '' : 'lightNode']" 
      v-bind:bg-variant="!darkTheme ? 'light' : 'dark'" v-bind:text-variant="!darkTheme ? '' : 'white'">
     <b-card-text>
-      <span><span v-if="data.nodeData.isRoot">Goal:</span>
+      <span v-if="data.nodeData.goal.localeCompare('|') === 0">
+        OR<br/>
+      </span> 
+      <span v-else-if="data.nodeData.goal.localeCompare('&') === 0">
+        AND<br/>
+      </span>
+      <span v-else>
+        <span><span v-if="data.nodeData.isRoot">Goal:</span>
         <span v-else>Subgoal:</span> <span :class="{'newFact' : highlight.localeCompare(data.nodeData.goal) === 0}">{{data.nodeData.goal}}</span></span><br/>
       <span>Database: 
+        <span v-if="data.nodeData.facts.length">
         <span v-for="(fact, index) in data.nodeData.facts" :key="fact">
           <span :class="{newFact : !facts.includes(fact) || highlight.localeCompare(fact) === 0}">{{fact}}</span><span v-if="index !== data.nodeData.facts.length - 1">, </span>
         </span>
+        </span>
+        <span v-else><i>no facts available</i></span>
       </span><br/>
+        </span>
       <span v-if="collapsed">[{{data.nodeData.children}} 
         <span v-if="data.nodeData.children === 1">child</span>
         <span v-else>children</span> collapsed]</span>

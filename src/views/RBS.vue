@@ -114,7 +114,8 @@ export default {
       searchedVariable : '',
       mapFrom : '',
       mapTo : '',
-      currentGoal : 'Z',
+      currentGoal : {'node': 'Z'},
+      //currentGoal : {'node': 'N'},
       reloadRulesDisabled : false,
       reloadFactsDisabled : false,
       ruleHovered : -1,
@@ -147,9 +148,9 @@ export default {
       return this.$store.state.isRotated;
     },
     invalidGoal: function() {
-      if(!this.currentGoal.trim())
+      if(!this.currentGoal['node'].trim())
         return false;
-      return !this.variables.includes(this.currentGoal);
+      return !this.variables.includes(this.currentGoal['node']);
     },
     currentFacts: function() {
       return this.facts;
@@ -271,24 +272,32 @@ export default {
       if((indexVar = this.facts.indexOf(fromVar)) !== -1)
         this.facts.splice(indexVar, 1, toVar);
       this.rules.forEach(ruleObj => {
-        let idx = -1;
-        if((idx = ruleObj['ant'].indexOf(fromVar)) !== -1)
-          ruleObj['ant'].splice(idx, 1, toVar);
+        this.replaceAntMapping(ruleObj['ant'], fromVar, toVar);
         if(ruleObj['cons'].localeCompare(fromVar) === 0)
           ruleObj['cons'] = toVar;
       });
       if((indexVar = this.facts.indexOf(fromVar)) !== -1)
         this.facts.splice(indexVar, 1, toVar);
     },
+    replaceAntMapping(ant, fromVar, toVar) {
+      if(!ant['left'] )
+      {
+        if(ant['node'].localeCompare(fromVar) === 0)
+          ant['node'] = toVar;
+        return;
+      }
+      this.replaceAntMapping(ant['left'], fromVar, toVar);
+      this.replaceAntMapping(ant['right'], fromVar, toVar);
+    },
     removeMapping(index) {
       this.addedMapping.splice(index,1);
     },
     addNewRule(newRule) {
-      this.rules.push({id: this.rules.length + 1, ant: newRule.ant, 
+      this.rules.push({id: this.rules.length + 1, ant: newRule.ant,
                         cons: newRule.cons});
       if(!this.variables.includes(newRule.cons))
         this.variables.push(newRule.cons);
-      newRule.ant.forEach(ant => {
+      newRule.leaves.forEach(ant => {
         if(!this.variables.includes(ant))
           this.variables.push(ant);
       });
@@ -329,23 +338,47 @@ export default {
       if(this.invalidRulesNumber)
         return [];
       let rules = [];
+      let availableOp = ['&', '|'];
       for(let i = 0; i < parseInt(this.numRules); i++)
       {
-        let numAnts = Math.floor(Math.random() * 3) + 1;
+        let numAnts = Math.floor(Math.random() * 5) + 1;
         let ants = [];
+        let operations = [];
         while(ants.length != numAnts)
         {
           let ant = this.variables[Math.floor(Math.random() * this.variables.length)];
           if(!ants.includes(ant))
             ants.push(ant);
         }
+        while(operations.length != numAnts - 1)
+          operations.push(availableOp[Math.floor(Math.random() * availableOp.length)]);
         let cons = this.variables[Math.floor(Math.random() * this.variables.length)];
-        if(this.isRuleAlreadyPresent(ants, cons, rules))
+        while(ants.includes(cons))
+          cons = this.variables[Math.floor(Math.random() * this.variables.length)];
+        
+        rules.push({id: i + 1, ant: {}, cons: cons});
+        let antObj = {};
+        if(numAnts === 1)
         {
-          i--;
+          antObj = {'node' : ants[0]};
+          rules[rules.length - 1].ant = antObj;
           continue;
         }
-        rules.push({id: i + 1, ant: ants, cons: cons});
+        antObj['left'] = {'node': ants[0]};
+        antObj['node'] = operations[0];
+        let prevObj = antObj;
+        for(let i = 1; i < numAnts; i++)
+        {
+          let subObj = {};
+          if(i !== numAnts - 1)
+            subObj = {'node' : operations[i], 'left' : {'node' : ants[i]}};
+          else
+            subObj = {'node' : ants[i]};
+
+          prevObj['right'] = subObj;
+          prevObj = subObj;
+        }
+        rules[rules.length - 1].ant = antObj;
       }
       return rules;
     },
@@ -371,12 +404,25 @@ export default {
       return false;
     },
     validateAnt(ant, facts) {
-      for(let i = 0; i < ant.length; i++)
+      let res = this.recValidation(ant, facts);
+      return res;
+    },
+    recValidation(ant, facts) {
+      if(!ant['left'])
       {
-        if(!facts.includes(ant[i]))
-          return false;
+        //console.log('no children returning', facts, ant['node'],facts.includes(ant['node']));
+        return facts.includes(ant['node']);
       }
-      return true;
+      if(ant['node'].localeCompare('&') === 0)
+      {
+        //console.log('anding', ant['left'],ant['right']);
+        return this.recValidation(ant['left'], facts) && this.recValidation(ant['right'], facts);
+      }
+      if(ant['node'].localeCompare('|') === 0)
+      {
+        //console.log('oring', ant['left'],ant['right']);
+        return this.recValidation(ant['left'], facts) || this.recValidation(ant['right'], facts);
+      }
     },
     increaseCyclesNum() {
       this.cycleNum++;
@@ -391,7 +437,7 @@ export default {
       this.mapFrom = newVal;
     },
     updateCurrentGoal(newVal) {
-      this.currentGoal = newVal;
+      this.currentGoal = {'node' : newVal};
     }
   },
   watch: {
@@ -424,11 +470,16 @@ export default {
   },
   created() {
     this.facts = this.variables.slice(0, this.numFacts);
-    this.rules.push({id: 1, ant: [this.variables[24], this.variables[3]], cons: this.variables[25]});
-    this.rules.push({id: 2, ant: [this.variables[23], this.variables[1], this.variables[4]], cons: this.variables[24]});
-    this.rules.push({id: 3, ant: [this.variables[0]], cons: this.variables[23]});
-    this.rules.push({id: 4, ant: [this.variables[2]], cons: this.variables[11]});
-    this.rules.push({id: 5, ant: [this.variables[11], this.variables[12]], cons: this.variables[13]});
+    this.rules.push({id: 1, ant: {'node' : '&', 'left' : {'node': this.variables[24]}, 'right' : {'node' : this.variables[3]}}, cons: this.variables[25]});
+    this.rules.push({id: 2, ant: {'node' : '&', 'left' : {'node' : this.variables[23]}, 
+                                                'right' : {'node' : '&', 'left' : {'node' : this.variables[1]},
+                                                                          'right' : {'node' : this.variables[4]}}}, cons: this.variables[24]});
+    this.rules.push({id: 3, ant: {'node' : this.variables[0]}, cons: this.variables[23]});
+    this.rules.push({id: 4, ant: {'node' : this.variables[2]}, cons: this.variables[11]});
+    this.rules.push({id: 5, ant: {'node' : '&', 'left' : {'node': this.variables[11]}, 'right' : {'node' : this.variables[12]}}, cons: this.variables[13]});
+    //this.rules.push({id: 1, ant: {'node' : '&', 'left' : {'node': '|', 'left' : {'node' : this.variables[0]}, 'right' : {'node' : this.variables[1]}}, 
+    //                                            'right' : {'node' : '|', 'left' : {'node' : this.variables[2]}, 'right' : {'node' : this.variables[6]}}},
+    //                                             cons: this.variables[13]});
   },
 }
 </script>

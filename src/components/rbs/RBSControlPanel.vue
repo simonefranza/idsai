@@ -87,6 +87,7 @@
 </template>
 
 <script>
+import { PassThrough } from 'stream';
 export default {
   data() {
     return {
@@ -94,6 +95,7 @@ export default {
       reloadingRules : false,
       newFact: '',
       newAntecedents: '',
+      newAntParseTree: 0,
       newConsequent: '',
       numFactsTemp : this.numFacts.toString(),
       numRulesTemp : this.numRules.toString(),
@@ -123,27 +125,30 @@ export default {
     invalidRulesNumber: function() {
       return !this.numRules || isNaN(this.numRules) || ('' + this.numRules).includes('.');
     },
+    antParseTree: function() {
+      return this.createParseTree(this.newAntecedents.trim());
+    },
+    antLeaves: function() {
+      return this.findLeaves(this.antParseTree);
+    },
     invalidNewAntecedents: function() {
       if(!this.newAntecedents.trim())
         return true;
       let splitty = this.newAntecedents.trim().split(' ').filter(el => el);
       console.log(splitty, this.variables);
 
-      if(splitty.length % 2 === 0)
+      let parseTree = this.antParseTree;
+      console.log('finalTree', parseTree);
+      if(parseTree === -1 || parseTree === true || parseTree === false)
         return true;
-      let isInvalid = false;
-      let alreadyUsed = [];
-      splitty.forEach((el, index) => {
-        console.log(el, index)
-        if(index % 2 && el.localeCompare("&"))
-          isInvalid = true;
-        else if(index % 2 === 0 && (el.localeCompare('&') === 0 || 
-          el.localeCompare(this.newConsequent.trim()) === 0 || alreadyUsed.includes(el)))
-          isInvalid = true;
-        else
-          alreadyUsed.push(el);
-      });
-      return isInvalid;
+      let leaves = this.antLeaves;
+      console.log('leaves', leaves);
+      for(let leaf of leaves){
+        console.log(leaf, this.newConsequent);
+        if(leaf.localeCompare(this.newConsequent.trim()) === 0)
+          return true;
+      }
+      return false;
     },
     invalidNewConsequent: function() {
       if(!this.newConsequent.trim() || this.newConsequent.trim().includes(' '))
@@ -158,8 +163,9 @@ export default {
     isNewRuleValid: function() {
       if(this.invalidNewAntecedents || this.invalidNewConsequent)
         return false;
-      console.log('bub')
-      return !this.isRuleAlreadyPresent([...this.antecedentsToAdd], this.newConsequent.trim(), this.rules);
+      console.log('bub');
+      //return !this.isRuleAlreadyPresent([...this.antecedentsToAdd], this.newConsequent.trim(), this.rules);
+      return true;
     },
     isMapValid: function() {
       if(!this.mapTo.trim() || !this.mapFrom.trim() || 
@@ -193,6 +199,212 @@ export default {
     },
   },
   methods: {
+    findLeaves(parseTree) {
+      let leaves = [];
+      if(parseTree['left'] && parseTree['right'])
+      {
+        let leftLeaves = this.findLeaves(parseTree['left']);
+        let rightLeaves = this.findLeaves(parseTree['right']);
+        leaves.push(...leftLeaves, ...rightLeaves);
+        return leaves;
+      }
+      return [parseTree['node']];
+    },
+    createParseTree(ant) {
+      console.log(ant);
+      let splitty = ant.replace(/\s/g, '').split(/(?=[&|()])|(?<=[&|()])/g);
+      console.log('split', splitty);
+      let parCheck = this.checkParentheses(splitty);
+      console.log('parcheck', parCheck);
+      if(parCheck === false)
+        return false;
+      let orderCheck = this.checkOrder(splitty);
+      console.log('orderCheck', orderCheck);
+      if(!orderCheck)
+        return false;
+      return this.recTree(splitty, parCheck);
+    },
+    checkOrder(splitty) {
+      if(splitty.length < 2)
+        return true;
+      if(splitty.length === 2 && (splitty[0].localeCompare('(') || splitty[1].localeCompare(')')))
+        return false;
+      if(splitty[0].localeCompare('&') === 0 || splitty[0].localeCompare('|') === 0 ||
+          splitty[splitty.length - 1].localeCompare('&') === 0 || splitty[splitty.length -1].localeCompare('|') === 0)
+        return false;
+      let isLastVar = false;
+      let isLastOpenedPar = false;
+      let isLastClosedPar = false;
+      if(splitty[0].localeCompare('(') === 0)
+        isLastOpenedPar = true;
+      else
+        isLastVar = true;
+      //Check if sequence is symbol operation symbol ...
+      for(let [idx,el] of splitty.slice(1,splitty.length).entries()) {
+        //after a var there needs to be an & or |
+        if(isLastVar && el.localeCompare(')') === 0)
+        {
+          isLastVar = false;
+          isLastClosedPar = true;
+        }
+        else if(isLastVar && el.localeCompare('&') && el.localeCompare('|'))
+          return false;
+        else if(isLastVar)
+          isLastVar = false;
+        else if(isLastOpenedPar && (el.localeCompare('&') === 0 || el.localeCompare('|') === 0))
+          return false;
+        else if(isLastOpenedPar && el.localeCompare('(') === 0)
+          isLastOpenedPar = true;
+        else if(isLastOpenedPar && el.localeCompare(')') === 0)
+        {
+          isLastClosedPar = true;
+          isLastOpenedPar = false;
+        }
+        else if(isLastOpenedPar)
+        {
+          isLastOpenedPar = false;
+          isLastVar = true;
+        }
+        else if(isLastClosedPar && el.localeCompare(')') === 0)
+          isLastClosedPar = true;
+        else if(isLastClosedPar && el.localeCompare('(') === 0)
+          return false;
+        else if(isLastClosedPar && (el.localeCompare('&') === 0 || el.localeCompare('|') === 0))
+        {
+          isLastClosedPar = false;
+        }
+        else if(isLastClosedPar)
+          return false;
+        else if(el.localeCompare('&') === 0 || el.localeCompare('|') === 0)
+          return false;
+        else if(el.localeCompare('(') === 0)
+          isLastOpenedPar = true;
+        else if(el.localeCompare(')') === 0)
+          isLastClosedPar =true;
+        else if(el.localeCompare('&') && el.localeCompare('|'))
+          isLastVar = true;
+      }
+      return true;
+    },
+    checkParentheses(splitty) {
+      let stack = [];
+      let valid = true;
+      let correspondences = [];
+      for(let [index, el] of splitty.entries()) {
+        if(el.localeCompare('(') === 0)
+          stack.push({'(' : index, 'high_level' : stack.length === 0});
+        else if(el.localeCompare(')') === 0 && stack.length)
+        {
+          let popped = stack.pop();
+          correspondences.push([popped['('], index, popped['high_level']]);
+        }
+        else if(el.localeCompare(')') === 0)
+        {
+          valid = false;
+          break;
+        }
+      }
+      if(!valid || stack.length !== 0)
+        return false;
+      else 
+        return correspondences;
+    },
+    recTree(splitty, parIndexes) {
+      [splitty, parIndexes] = this.trimParentheses(splitty, parIndexes);
+      if(splitty.length === 1 && !splitty.includes('&') && !splitty.includes('|') && !splitty.includes('(') && 
+        !splitty.includes(')'))
+        return {'node' : splitty[0]};
+      else if(splitty.length === 1)
+        return -1;
+      else if(splitty.length === 0)
+        return true;
+      let newOrIdx = splitty.indexOf('|');
+      while(newOrIdx !== -1) {
+        let [leftSide, rightSide] = this.splitLeftRightSide(splitty, parIndexes, newOrIdx);
+        if(!leftSide && !rightSide)
+        {
+          newOrIdx = splitty.indexOf('|', newOrIdx + 1);
+          continue;
+        }
+        let leftChild = this.recTree(leftSide, this.checkParentheses(leftSide));
+        let rightChild = this.recTree(rightSide, this.checkParentheses(rightSide));
+        if(leftChild === -1 || rightChild === -1)
+          return -1;
+        if(leftChild === true)
+          return rightChild;
+        if(rightChild === true)
+          return leftChild;
+        if(leftChild !== false && rightChild !== false)
+          return {'node' : '|', 'left' : leftChild, 'right' : rightChild}; 
+        return false;
+      }
+
+
+      let newAndIdx = splitty.indexOf('&');
+      while(newAndIdx !== -1) {
+        let [leftSide, rightSide] = this.splitLeftRightSide(splitty, parIndexes, newAndIdx);
+        if(!leftSide && !rightSide)
+        {
+          newAndIdx = splitty.indexOf('&', newAndIdx + 1);
+          continue;
+        }
+        let leftChild = this.recTree(leftSide, this.checkParentheses(leftSide));
+        let rightChild = this.recTree(rightSide, this.checkParentheses(rightSide));
+        if(leftChild === -1 || rightChild === -1)
+          return -1;
+        if(leftChild === true)
+          return rightChild;
+        if(rightChild === true)
+          return leftChild;
+        if(leftChild !== false && rightChild !== false)
+          return {'node' : '&', 'left' : leftChild, 'right' : rightChild}; 
+        return false;
+      }
+      console.log("smth went wrong", splitty);
+      return false;
+    },
+    trimParentheses(splitty, parIndexes) {
+      for(let par of parIndexes) {
+        if(par[0] === 0 && par[1] === splitty.length - 1)
+        {
+          splitty = splitty.slice(1, splitty.length - 1);
+          parIndexes = this.checkParentheses(splitty);
+          return this.trimParentheses(splitty, parIndexes);
+        }
+      }
+      return [splitty, parIndexes];
+    },
+    splitLeftRightSide(splitty, parIndexes, newIdx){
+      let isContained = false;
+      for(let par of parIndexes) {
+        if(par[2] && newIdx > par[0] && newIdx < par[1])
+        {
+          isContained = true;
+          break;
+        }
+      }
+      if(isContained)
+      {
+        return [false, false];
+      }
+      let leftSide = splitty.slice(0, newIdx); 
+      for(let par of parIndexes) {
+        if(par[0] === 0 && par[1] === newIdx - 1)
+        {
+          leftSide = leftSide.slice(1, newIdx - 1);
+          break;
+        }
+      }
+      let rightSide = splitty.slice(newIdx + 1, splitty.length); 
+      for(let par of parIndexes) {
+        if(par[0] === newIdx + 1 && par[1] === splitty.length - 1)
+        {
+          rightSide = rightSide.slice(1, rightSide.length - 1);
+          break;
+        }
+      }
+      return [leftSide, rightSide];
+    },
     isRuleAlreadyPresent(ants, cons, rules) {
       for(let j = 0; j < rules.length; j++)
       {
@@ -245,7 +457,7 @@ export default {
     addNewRule() {
       if(!this.isNewRuleValid)
         return;
-      this.$emit('newRule', {ant: this.antecedentsToAdd, cons: this.newConsequent.trim()})
+      this.$emit('newRule', {ant: this.antParseTree, leaves: this.antLeaves, cons: this.newConsequent.trim()})
       this.newConsequent = '';
       this.newAntecedents = '';
     },

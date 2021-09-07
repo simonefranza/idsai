@@ -5,6 +5,25 @@
   @touchend="endTouch">
   <h4 style="text-align: center; position: relative; z-index: 100"
     v-if="!isWideDevice">Backward Chaining</h4>
+  <span :class="{'floating-zoom' : true,
+                 'zoom-block' : true,
+                 'zoom-block-dark' : darkTheme,
+                 'zoom-block-light' : !darkTheme}"
+        v-if="Object.keys(backwardChain).length !== 0">
+    <span class="h5 zoom-text">Zoom</span>
+    <span class="zoom-icons"><b-icon :class="['cyclesIconLeft', 
+                     'iconEnabled', 
+                     darkTheme ? 'iconDark' : 'iconLight']"
+            icon="dash-circle"
+            aria-hidden="true"
+            @click="zoomOut"></b-icon>
+    <b-icon :class="['cyclesIconRight', 
+                     'iconEnabled', 
+                     darkTheme ? 'iconDark' : 'iconLight']"
+            icon="plus-circle"
+            aria-hidden="true"
+            @click="zoomIn"></b-icon></span>
+  </span>
   <vue-tree
     :style="{width: '2000px', height: '2000px', transform: 'scale(' + (isWideDevice ? 1 : scaleFactor) + ') ' +
     'translate(' + (isWideDevice ? 0 : translateX) + 'px,' + (isWideDevice ? 0 : translateY) + 'px)',
@@ -13,6 +32,7 @@
     :config="treeConfig"
     :key="updateVar"
     v-if="Object.keys(backwardChain).length !== 0"
+    ref="tree"
     >
     <template v-slot:node="{ node, collapsed }">
       <TreeNode :data="node" :collapsed="collapsed" :facts="facts" :variables="variables" :highlight="highlight"/>
@@ -83,13 +103,12 @@ export default {
     },
     //TODO check A->B B->A
     backwardChain: function() {
-      if(!this.goal)
+      if(!this.goal['node'])
         return {};
-      let res = this.checkGoal(this.goal, [...this.facts], [this.goal]);
-      //      console.log(res);
+      let res = this.checkGoal(this.goal, [...this.facts], [this.goal['node']]);
       if(res === true || res === false)
       {
-        return {value: this.goal, nodeData: {goal: this.goal, 
+        return {value: this.goal['node'], nodeData: {goal: this.goal['node'], 
           facts: [...this.facts], isRoot: true, isTrue: res}};
       }
       res.nodeData.isRoot = true;
@@ -97,6 +116,12 @@ export default {
     },
   },
   methods: {
+    zoomIn() {
+      this.$refs.tree.zoomIn();
+    },
+    zoomOut() {
+      this.$refs.tree.zoomOut();
+    },
     startTouch(e) {
       if(this.isWideDevice)
         return;
@@ -178,92 +203,157 @@ export default {
       this.isScale = null;
       e.preventDefault();
     },
+    createGoalObject(goal, facts, childrenCount, isRoot, isTrue) {
+      return {'goal' : goal,
+              'facts': [...facts],
+              'children' : childrenCount,
+              'isRoot' : isRoot,
+              'isTrue' : isTrue};
+    },
+    checkTreeBranches(tree, facts, path)
+    {
+      let branchesRes = [];
+      let subgoals = [tree['left'], tree['right']];
+      //let cnt = 0;
+      for(let subgoal of subgoals) {
+        if(path.includes(subgoal['node']))
+        {
+          //isDeadlock
+          //console.log('breaking because of deadlock');
+          let newObj = this.createGoalObject(subgoal['node'], facts, 0, false, false);
+          branchesRes.push({nodeData: newObj, value: subgoal['node']});
+          continue;
+        }
+        let res = this.checkGoal(subgoal, facts, [...path]);
+        //console.log('got res in branch', cnt++ === 0 ? 'left' : 'right', res);
+        if(typeof res === 'boolean')
+        {
+          let newObj = this.createGoalObject(subgoal['node'], facts, 0, false, res);
+          branchesRes.push({nodeData: newObj, facts: facts, value: subgoal['node']});
+        }
+        else if(Array.isArray(res))
+          branchesRes.push(...res);
+        else
+          branchesRes.push(res);
+      }
+      let finalRes = false;
+      if(tree['node'].localeCompare('|') === 0)
+        finalRes = branchesRes[0].nodeData.isTrue || branchesRes[1].nodeData.isTrue;
+      else if(tree['node'].localeCompare('&') === 0)
+        finalRes = branchesRes[0].nodeData.isTrue && branchesRes[1].nodeData.isTrue;
+
+      let nodeData = this.createGoalObject(tree['node'], facts, branchesRes.length, false, finalRes);
+      let newFacts = [...facts];
+      for(let branch of branchesRes)
+      {
+        branch.nodeData.facts.forEach((fact) => {
+          if(!newFacts.includes(fact))
+            newFacts.push(fact);
+        })
+      }
+      let mainGroup = {'children' : branchesRes, 'nodeData' : nodeData, 'value' : tree['node'], 'facts': [...newFacts]};
+      //console.log('res of subroutine to find', tree['left']['node'], tree['right']['node'], finalRes);
+      //console.log('retourning from branch', mainGroup);
+      return mainGroup;
+    },
     checkGoal(goal, facts, path)
     {
-      let data = {};
-      if(facts.includes(goal))
+      //console.log('goal', goal, 'facts', facts)
+
+      //Not a tree and included in facts
+      if(!goal['left'] && facts.includes(goal['node']))
       {
-//        console.log(`the goal ${goal} is true`);
+        //console.log(`the goal ${goal['node']} is true since it's in the facts`);
         return true;
       }
+
+      // It's not single element but a tree
+      if(goal['left'])
+      {
+        return this.checkTreeBranches(goal, facts, path);
+      }
+
       let ants = this.findAnts(goal);
+      //console.log({goal: goal, ants: ants});
       if(!ants.length)
       {
-//        console.log(`the goal ${goal} is false`);
+        //console.log(`no ants the goal ${goal['node']} is false since there are no rule for it`);
         return false;
       }
-      data.nodeData = {goal: goal};
-//      console.log({goal: goal, ants: ants});
+
+      let counter = 0;
+      let groupData = [];
       for(let j = 0; j < ants.length; j++)
       {
-        let counter = 0;
-        let antGroup = ants[j];
-        let groupData = [];
-        let foundValidGroup = true;
-        for(let i = 0; i < antGroup.length; i++)
+        let antTree = ants[j];
+        //console.log('antTree', antTree);
+
+        //Antecedent is a tree and not single value
+        if(antTree['left'])
         {
-          let ant = antGroup[i];
-          let newObj = {};
-          if(path.includes(ant))
+          let newData = this.checkTreeBranches(antTree, facts, path);
+          if(Array.isArray(newData))
+            groupData.push(...newData);
+          else
+            groupData.push(newData);
+          //console.log('newData', newData);
+          
+          if((Array.isArray(newData) && newData[0].nodeData.isTrue) || 
+              (newData.nodeData && newData.nodeData.isTrue))
+          {
+            break;
+          }
+        }
+        else {
+          if(path.includes(antTree['node']))
           {
             //isDeadlock
-            foundValidGroup = false;
-            break;
-          }
-          let res = this.checkGoal(ant, facts, [...path, ant]);
-//          console.log({res:res});
-          if(res === true || res === false)
-          {
-            newObj.goal = ant;
-            newObj.facts = [];
-            newObj.children = 0;
-            newObj.isRoot = false;
-            facts.forEach(fact => {
-              newObj.facts.push(fact);
-            });
-            newObj.isTrue = res;
-            if(!res)
-              foundValidGroup = false;
-            groupData.push({nodeData: newObj, value: ant});
+            //console.log('breaking because of deadlock');
+            let newObj = this.createGoalObject(antTree['node'], facts, 0, false, false);
+            groupData.push({nodeData: newObj, value: antTree['node']});
             continue;
           }
-          groupData.push(res);
-          if(counter++ > 10)
+          let res = this.checkGoal(antTree, facts, [...path, antTree['node']]);
+          //console.log({res:res});
+          if(typeof res === 'boolean')
+          {
+            let newObj = this.createGoalObject(antTree['node'], facts, 0, false, res);
+            groupData.push({nodeData: newObj, facts: facts, value : antTree['node']});
+          }
+          else if(Array.isArray(res))
+            groupData.push(...res);
+          else
+            groupData.push(res);
+          if(res)
             break;
         }
-//        console.log({groupD: groupData});
-        if(foundValidGroup || j === ants.length - 1)
+        //console.log({groupD: groupData});
+        if(counter++ > 10)
         {
-          data.children = [...groupData];
+          //console.log('failsafe');
           break;
         }
       }
+
       let tempFacts = [...facts];
-//      console.log({children: data.children});
-      let areAllNeededTrue = true;
-      data.children.forEach(childrenFact => {
-//        console.log({child: childrenFact});
-
-        if(!childrenFact.nodeData.isTrue)
-          areAllNeededTrue = false;
-
-        childrenFact.nodeData.facts.forEach(fact => {
-          if(!tempFacts.includes(fact))
-            tempFacts.push(fact);
-        });
+      let isDataTrue = false;
+      groupData.forEach((child) => {
+        if(child.nodeData.isTrue)
+        {
+          for(let fact of child.facts)
+          {
+            if(!tempFacts.includes(fact))
+              tempFacts.push(fact);
+          }
+          //console.log(`added ${goal['node']} to local facts`);
+          if(!tempFacts.includes(goal['node']))
+            tempFacts.push(goal['node']);
+          isDataTrue = true;
+        }
       });
-
-      if(areAllNeededTrue)
-      {
-//        console.log(`added ${goal} to local facts`);
-        tempFacts.push(goal);
-      }
-      data.nodeData.facts = [...tempFacts];
-      data.nodeData.children = data.children.length;
-      data.nodeData.isRoot = false;
-      data.nodeData.isTrue = areAllNeededTrue;
-      data.value = goal; 
-//      console.log({returningData: data});
+      let nodeData = this.createGoalObject(goal['node'], tempFacts, groupData.length, false, isDataTrue);
+      let data = {children: [...groupData], nodeData: nodeData, value: goal['node'], facts: [...tempFacts]};
+      //console.log({returningData: data});
       return data;
     },
     findAnts(goal)
@@ -272,9 +362,9 @@ export default {
       for(let i = 0; i < this.rules.length; i++)
       {
         let rule = this.rules[i];
-        if(rule.cons.localeCompare(goal) === 0)
+        if(rule.cons.localeCompare(goal['node']) === 0)
         {
-          ants.push([...rule.ant]);
+          ants.push(rule.ant);
         }
       }
       return ants;
@@ -288,5 +378,82 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang='scss' scoped>
+.floating-zoom{
+  float:right;
+  position: -webkit-sticky;
+  position: -moz-sticky;
+  position: -ms-sticky;
+  position: -o-sticky;
+  position: sticky;
+  top: 3em;
+  //right: 5em;
+  z-index: 1;
+}
+.zoom-block {
+  $margin: .2em;
+//  box-shadow: 0 0 5px 0px #ffffff3e;
+//  border: 1px solid #ffffff0a;
+  border-radius: .7em;
+  padding: 1em 1.6em;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  &-dark {
+    background: linear-gradient(-117deg, #262626e6, #1a1818e6);
+    box-shadow: -5px -5px 15px 0 #ffffff1a;
+  }
+  &-light {
+    background: linear-gradient(312deg, #faf8f8, #f9e9e9e6);
+    box-shadow: -5px -5px 15px 0 #c5c5c57d;
+  }
+  &-dark:before {
+    box-shadow: 5px 5px 10px 0 #000000;
+  }
+  &-light:before {
+    box-shadow: 5px 5px 10px 0 #00000042;
+  }
+  &:before{
+    content: '';
+    border-radius: .7em;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top:0;
+    bottom:0;
+    left: 0;
+    right: 0;
+    z-index: -1;
+  }
+  & p {
+    margin-bottom: $margin;
+  }
+  & h4 {
+    text-align: center;
+  }
+  & hr {
+    width:100%;
+  }
+  & hr.hr-dark {
+    border-top: 1px solid $text-primary-dark; 
+    margin-top: .4rem;
+  }
+  & hr.hr-light{
+    border-top: 1px solid $vue-primary; 
+    margin-top: .4rem;
+  }
+  & b-icon {
+    z-index:10;
+    position: relative;
+  }
+}
+.zoom-icons {
+  font-size: 1.25rem;
+  margin-left: .6em;
+}
+.zoom-text{
+  margin: 0;
+  padding: 0;
+}
 </style>
