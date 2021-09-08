@@ -28,7 +28,7 @@
           <span>New rule</span> 
           <b-form-input size="sm" 
                         v-model="newAntecedents" 
-                        placeholder="Ants & separated"
+                        placeholder="Ants &,|,(,) separated"
                         :class="{'newRule' : 'true', 'darkInputForm' : darkTheme}"
                         @keyup.enter="addNewRule()">
           </b-form-input>
