@@ -87,7 +87,7 @@
 </template>
 
 <script>
-import { PassThrough } from 'stream';
+//import { PassThrough } from 'stream';
 export default {
   data() {
     return {
@@ -229,7 +229,7 @@ export default {
       else
         isLastVar = true;
       //Check if sequence is symbol operation symbol ...
-      for(let [idx,el] of splitty.slice(1,splitty.length).entries()) {
+      for(let [,el] of splitty.slice(1,splitty.length).entries()) {
         //after a var there needs to be an & or |
         if(isLastVar && el.localeCompare(')') === 0)
         {

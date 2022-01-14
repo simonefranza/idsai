@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@ssthouse/vue-tree-chart": "^0.4.3",
+    "bootstrap-vue": "^2.21.2",
     "core-js": "^3.8.3",
     "cytoscape": "^3.18.1",
     "node": "14.16.1",
